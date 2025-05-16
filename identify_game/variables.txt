@@ -1,0 +1,18 @@
+# Variables for the identify_game project
+
+# Path to the games JSON file
+GAMES_JSON_FILE="../../games.json"
+
+# List of prefixes and suffixes for cleaning executable names
+PREFIXES=("Launcher_" "Game_" "Steam_" "Uplay_" "Epic_" "GOG_" "Retail_" "Demo_")
+SUFFIXES=("_Launcher.exe" "_Game.exe" "_Win.exe" "_64.exe" "_x64.exe" "_32.exe" "_x86.exe" "_Main.exe" "_Shipping.exe" "_Final.exe" "_Beta.exe" "_Test.exe" "_Trial.exe" "_DX11.exe" "_DX12.exe" "_VR.exe")
+
+# Temporary directory for storing intermediate results
+TEMP_DIR="/tmp/identify_game"
+
+# Log file for debugging purposes
+LOG_FILE="./identify_game.log"
+
+# Define the path to the JSON file
+SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
+GAMES_JSON_FILE="$SCRIPT_DIR/../../games.json"

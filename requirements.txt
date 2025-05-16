@@ -1,0 +1,6 @@
+requests==2.31.0
+vdf==3.4 
+py7zr==0.20.5
+pefile==2023.2.7
+lxml==4.9.3
+PyYAML==6.0

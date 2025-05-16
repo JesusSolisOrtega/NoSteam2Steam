@@ -1,0 +1,139 @@
+Detectando juego para el ejecutable: /home/deck/Desktop/Darkest.Dungeon.II.v1.06.66951.ALL.DLC/Darkest.Dungeon.II.v1.06.66951.ALL.DLC/Darkest Dungeon II.exe
+Slug generado (extract_slug): darkest-dungeon-ii
+Slug generado (extract_slug_without_hyphens): darkest-dungeon-ii
+Iniciando búsqueda para AppId: , Config Name: , Slug: darkest-dungeon-ii
+No results found with config name, trying slug: darkest-dungeon-ii
+Iniciando búsqueda para AppId: , Config Name: , Slug: darkest-dungeon-ii
+No results found with config name, trying slug: darkest-dungeon-ii
+Slug sin número (extract_slug): darkest-dungeon
+Iniciando búsqueda para AppId: , Config Name: , Slug: darkest-dungeon
+No results found with config name, trying slug: darkest-dungeon
+Slug sin número (extract_slug_without_hyphens): darkest-dungeon
+Iniciando búsqueda para AppId: , Config Name: , Slug: darkest-dungeon
+No results found with config name, trying slug: darkest-dungeon
+No se encontraron coincidencias para los slugs generados.
+Detectando juego para el ejecutable: /home/deck/Desktop/Darkest.Dungeon.II.v1.06.66951.ALL.DLC/Darkest.Dungeon.II.v1.06.66951.ALL.DLC/Darkest Dungeon II.exe
+Slug generado (extract_slug): darkest-dungeon-ii
+Slug generado (extract_slug_without_hyphens): darkest-dungeon-ii
+Iniciando búsqueda para AppId: , Config Name: , Slug: darkest-dungeon-ii
+Juego detectado: Darkest Dungeon II
+Detectando juego para el ejecutable: /home/deck/Desktop/Stoneshard-SteamRIP.com/Stoneshard/StoneShard.exe
+Slug generado (extract_slug): stone-shard
+Slug generado (extract_slug_without_hyphens): stoneshard
+Iniciando búsqueda para AppId: , Config Name: , Slug: stone-shard
+No results found with config name, trying slug: stone-shard
+Iniciando búsqueda para AppId: , Config Name: , Slug: stoneshard
+Juego detectado: Stoneshard
+Detectando juego para el ejecutable: /home/deck/Desktop/Halls-of-Torment/Halls of Torment/HallsOfTorment.exe
+AppId encontrado: 2218750
+Slug generado (extract_slug): halls-of-torment
+Slug generado (extract_slug_without_hyphens): hallsoftorment
+Iniciando búsqueda para AppId: , Config Name: , Slug: halls-of-torment
+Juego detectado: Halls of Torment
+Detectando juego para el ejecutable: /home/deck/Desktop/Dead-Cells/Dead Cells/deadcells.exe
+Nombre del juego encontrado en archivo /home/deck/Desktop/Dead-Cells/Dead Cells/steam_api.ini: Dead Cells The End Is Near
+Nombre del juego encontrado en archivos: Dead Cells The End Is Near
+AppId encontrado: 588650
+Slug generado (extract_slug): deadcells
+Slug generado (extract_slug_without_hyphens): deadcells
+Iniciando búsqueda para AppId: , Config Name: , Slug: deadcells
+No results found with config name, trying slug: deadcells
+Iniciando búsqueda para AppId: , Config Name: , Slug: deadcells
+No results found with config name, trying slug: deadcells
+No se encontraron coincidencias para los slugs generados.
+Detectando juego para el ejecutable: /home/deck/Desktop/Dead-Cells/Dead Cells/deadcells.exe
+Nombre del juego encontrado en archivo /home/deck/Desktop/Dead-Cells/Dead Cells/steam_api.ini: Dead Cells The End Is Near
+Nombre del juego encontrado en archivos: Dead Cells The End Is Near
+AppId encontrado: 588650
+Iniciando búsqueda para AppId: 588650, Config Name: Dead Cells The End Is Near, Slug: deadcells
+No results found with AppId, trying config name: Dead Cells The End Is Near
+No results found with config name, trying slug: deadcells
+Juego no encontrado en ninguna fuente.
+Detectando juego para el ejecutable: /home/deck/Desktop/Darkest.Dungeon.II.v1.06.66951.ALL.DLC/Darkest.Dungeon.II.v1.06.66951.ALL.DLC/Darkest Dungeon II.exe
+Iniciando búsqueda para AppId: , Config Name: , Slug: Darkest Dungeon II
+Juego detectado: Darkest Dungeon II
+Detectando juego para el ejecutable: /home/deck/Desktop/Darkest.Dungeon.II.v1.06.66951.ALL.DLC/Darkest.Dungeon.II.v1.06.66951.ALL.DLC/Darkest Dungeon II.exe
+Iniciando búsqueda para AppId: , Config Name: , Slug: Darkest Dungeon II
+Juego no encontrado en ninguna fuente.
+Detectando juego para el ejecutable: /home/deck/Desktop/Darkest.Dungeon.II.v1.06.66951.ALL.DLC/Darkest.Dungeon.II.v1.06.66951.ALL.DLC/Darkest Dungeon II.exe
+Iniciando búsqueda para AppId: , Config Name: , Slug: Darkest Dungeon II
+Juego no encontrado en ninguna fuente.
+Detectando juego para el ejecutable: /home/deck/Desktop/Darkest.Dungeon.II.v1.06.66951.ALL.DLC/Darkest.Dungeon.II.v1.06.66951.ALL.DLC/Darkest Dungeon II.exe
+Iniciando búsqueda para AppId: , Config Name: , Slug: Darkest Dungeon II
+Juego detectado: Darkest Dungeon II
+Detectando juego para el ejecutable: /home/deck/Desktop/Stoneshard-SteamRIP.com/Stoneshard/StoneShard.exe
+Iniciando búsqueda para AppId: , Config Name: , Slug: StoneShard
+Juego detectado: Stoneshard
+Detectando juego para el ejecutable: /home/deck/Desktop/Darkest-Dungeon-Steamrip.com/Darkest Dungeon - Ancestral Edition/_windowsnosteam/Darkest.exe
+Iniciando búsqueda para AppId: , Config Name: , Slug: Darkest
+Juego detectado: Darkest Dungeon
+Detectando juego para el ejecutable: /home/deck/Desktop/Halls-of-Torment/Halls of Torment/HallsOfTorment.exe
+AppId encontrado: 2218750
+Iniciando búsqueda para AppId: 2218750, Config Name: , Slug: HallsOfTorment
+No results found with config name, trying slug: HallsOfTorment
+Juego no encontrado en ninguna fuente.
+Detectando juego para el ejecutable: /home/deck/Desktop/Dead-Cells/Dead Cells/deadcells.exe
+Nombre del juego encontrado en archivo /home/deck/Desktop/Dead-Cells/Dead Cells/steam_api.ini: Dead Cells The End Is Near
+Nombre del juego encontrado en archivos: Dead Cells The End Is Near
+AppId encontrado: 588650
+Iniciando búsqueda para AppId: 588650, Config Name: Dead Cells The End Is Near, Slug: deadcells
+Juego no encontrado en ninguna fuente.
+Detectando juego para el ejecutable: /home/deck/Desktop/Halls-of-Torment/Halls of Torment/HallsOfTorment.exe
+AppId encontrado: 2218750
+Iniciando búsqueda para AppId: 2218750, Config Name: , Slug: HallsOfTorment
+No results found with config name, trying slug: HallsOfTorment
+Juego no encontrado en ninguna fuente.
+Detectando juego para el ejecutable: /home/deck/Desktop/Dead-Cells/Dead Cells/deadcells.exe
+Nombre del juego encontrado en archivo /home/deck/Desktop/Dead-Cells/Dead Cells/steam_api.ini: Dead Cells The End Is Near
+Nombre del juego encontrado en archivos: Dead Cells The End Is Near
+AppId encontrado: 588650
+Iniciando búsqueda para AppId: 588650, Config Name: Dead Cells The End Is Near, Slug: deadcells
+Slug generado a partir del nombre de configuración: deadcellstheendisnear
+No results found with AppId, trying config name: Dead Cells The End Is Near
+No results found with config name, trying slug: deadcells
+Juego no encontrado en ninguna fuente.
+Detectando juego para el ejecutable: /home/deck/Desktop/Halls-of-Torment/Halls of Torment/HallsOfTorment.exe
+AppId encontrado: 2218750
+Iniciando búsqueda para AppId: 2218750, Config Name: , Slug: HallsOfTorment
+No results found with config name, trying slug: HallsOfTorment
+Juego no encontrado en ninguna fuente.
+Detectando juego para el ejecutable: /home/deck/Desktop/Halls-of-Torment/Halls of Torment/HallsOfTorment.exe
+AppId encontrado: 2218750
+Iniciando búsqueda para AppId: 2218750, Config Name: HallsOfTorment, Slug: halls-of-torment
+Iniciando búsqueda para AppId: 2218750, Config Name: HallsOfTorment, Slug: halls-of-torment
+Slug generado a partir del nombre de configuración: hallsoftorment
+Iniciando búsqueda para AppId: 2218750, Config Name: HallsOfTorment, Slug: hallsoftorment
+Iniciando búsqueda para AppId: 2218750, Config Name: HallsOfTorment, Slug: hallsoftorment
+Slug generado a partir del nombre de configuración: hallsoftorment
+No results found with AppId, trying config name: HallsOfTorment
+No results found with config name, trying slug: hallsoftorment
+Juego detectado: Halls of Torment
+Detectando juego para el ejecutable: /home/deck/Desktop/Darkest.Dungeon.II.v1.06.66951.ALL.DLC/Darkest.Dungeon.II.v1.06.66951.ALL.DLC/Darkest Dungeon II.exe
+Iniciando búsqueda para AppId: , Config Name: Darkest Dungeon II, Slug: darkest-dungeon-ii
+Iniciando búsqueda para AppId: , Config Name: Darkest Dungeon II, Slug: darkest-dungeon-ii
+Slug generado a partir del nombre de configuración: darkestdungeonii
+Iniciando búsqueda para AppId: , Config Name: Darkest Dungeon II, Slug: darkest-dungeon-ii
+Iniciando búsqueda para AppId: , Config Name: Darkest Dungeon II, Slug: darkest-dungeon-ii
+Slug generado a partir del nombre de configuración: darkestdungeonii
+Iniciando búsqueda para AppId: , Config Name: Darkest Dungeon II, Slug: darkest-dungeon
+Iniciando búsqueda para AppId: , Config Name: Darkest Dungeon II, Slug: darkest-dungeon
+Slug generado a partir del nombre de configuración: darkestdungeonii
+Iniciando búsqueda para AppId: , Config Name: Darkest Dungeon II, Slug: darkest-dungeon
+Iniciando búsqueda para AppId: , Config Name: Darkest Dungeon II, Slug: darkest-dungeon
+Slug generado a partir del nombre de configuración: darkestdungeonii
+Juego detectado: Darkest Dungeon II
+Detectando juego para el ejecutable: /home/deck/Desktop/Dead-Cells/Dead Cells/deadcells.exe
+Nombre del juego encontrado en archivo /home/deck/Desktop/Dead-Cells/Dead Cells/steam_api.ini: Dead Cells The End Is Near
+Nombre del juego encontrado en archivos: Dead Cells The End Is Near
+AppId encontrado: 588650
+Iniciando búsqueda para AppId: 588650, Config Name: deadcells, Slug: deadcells
+Iniciando búsqueda para AppId: 588650, Config Name: deadcells, Slug: deadcells
+Slug generado a partir del nombre de configuración: deadcells
+No results found with AppId, trying config name: deadcells
+No results found with config name, trying slug: deadcells
+Iniciando búsqueda para AppId: 588650, Config Name: deadcells, Slug: deadcells
+Iniciando búsqueda para AppId: 588650, Config Name: deadcells, Slug: deadcells
+Slug generado a partir del nombre de configuración: deadcells
+No results found with AppId, trying config name: deadcells
+No results found with config name, trying slug: deadcells
+Juego no encontrado en ninguna fuente.
