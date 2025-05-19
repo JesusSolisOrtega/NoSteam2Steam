@@ -1,4 +1,4 @@
-\# NoSteam2Steam
+# NoSteam2Steam
 
 NoSteam2Steam es una herramienta diseñada para gestionar juegos no pertenecientes a Steam, permitiendo sincronizar partidas guardadas, agregar juegos a la biblioteca de Steam y realizar respaldos automáticos. Este proyecto está optimizado para su uso en Steam Deck, pero también puede ser utilizado en otras plataformas si se realizan modificaciones (especialmente en las conversiones de rutas que dependen de cada SO).
 
@@ -32,16 +32,16 @@ El proyecto presupone backups en el mismo formato que GBM y una herramienta de s
 
 ### Clonar el repositorio:
 
-\`\`\`bash
+```bash
 git clone https://github.com/JesusSolisOrtega/NoSteam2Steam.git
 cd NoSteam2Steam
-\`\`\`
+```
 
 ### Instalar dependencias:
 
-\`\`\`bash
+```bash
 pip install -r requirements.txt
-\`\`\`
+```
 
 ## Uso
 
@@ -49,20 +49,20 @@ pip install -r requirements.txt
 
 Ejecuta el script principal para acceder al menú de opciones:
 
-\`\`\`bash
+```bash
 python noSteam2Steam.py
-\`\`\`
+```
 
 Las opciones disponibles incluyen:
 
-  * \*\*Sincronización automática:\*\* Agrega juegos y sincroniza partidas guardadas.
-  * \*\*Agregar juegos a Steam automáticamente:\*\* Detecta y agrega juegos no pertenecientes a Steam.
-  * \*\*Sincronización de partidas guardadas:\*\* Sincroniza manualmente las partidas guardadas.
-  * \*\*Agregar manualmente un juego a Steam:\*\* Permite agregar juegos específicos.
-  * \*\*Limpiar configuración de NoSteam2Steam:\*\* Elimina configuraciones y datos temporales.
-  * \*\*Activar/desactivar Syncthing:\*\* Gestiona el servicio de sincronización en segundo plano.
-  * \*\*Cambiar carpetas de juegos sincronizados:\*\* Modifica las carpetas donde se buscan juegos y partidas guardadas.
-  * \*\*Salir:\*\* Cierra la aplicación.
+  * **Sincronización automática:** Agrega juegos y sincroniza partidas guardadas.
+  * **Agregar juegos a Steam automáticamente:** Detecta y agrega juegos no pertenecientes a Steam.
+  * **Sincronización de partidas guardadas:** Sincroniza manualmente las partidas guardadas.
+  * **Agregar manualmente un juego a Steam:** Permite agregar juegos específicos.
+  * **Limpiar configuración de NoSteam2Steam:** Elimina configuraciones y datos temporales.
+  * **Activar/desactivar Syncthing:** Gestiona el servicio de sincronización en segundo plano.
+  * **Cambiar carpetas de juegos sincronizados:** Modifica las carpetas donde se buscan juegos y partidas guardadas.
+  * **Salir:** Cierra la aplicación.
 
 
 ### Funcionamiento
