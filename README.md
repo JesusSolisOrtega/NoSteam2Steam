@@ -8,11 +8,10 @@ El proyecto presupone backups en el mismo formato que GBM y una herramienta de s
 
 ## Características
 
-* \*\*Sincronización de partidas guardadas:\*\* Sincroniza automáticamente las partidas guardadas entre diferentes dispositivos.
-* \*\*Gestión de juegos no pertenecientes a Steam:\*\* Agrega juegos de otras plataformas (como GOG, Heroic, etc.) a la biblioteca de Steam.
-* \*\*Respaldo de partidas guardadas:\*\* Crea respaldos automáticos de las partidas guardadas en formato \`.7z\`.
-* \*\*Restauración de partidas perdidas:\*\* Detecta y restaura partidas guardadas que puedan haberse perdido.
-* \*\*Compatibilidad con múltiples plataformas:\*\* Soporte para juegos nativos de Linux y juegos de Windows ejecutados a través de Proton.
+* **Sincronización de partidas guardadas:** Sincroniza automáticamente las partidas guardadas entre diferentes dispositivos.
+* **Gestión de juegos no pertenecientes a Steam:** Agrega juegos de otras plataformas (como GOG, Heroic, etc.) a la biblioteca de Steam.
+* **Respaldo de partidas guardadas:** Crea respaldos automáticos de las partidas guardadas en formato \`.7z\`.
+* **Restauración de partidas perdidas:** Detecta y restaura partidas guardadas que puedan haberse perdido.
 
 
 ### Dependencias:
@@ -98,6 +97,7 @@ La mayoría de las opciones del diálogo son autoexplicativas:
 Las dos principales referencias en que se ha basado el proyecto y cuyos archivos de configuraciones usamos como base de la búsqueda/identificación de juegos y archivos de guardado:
 
 GBM -> https://mikemaximus.github.io/gbm-web/
+
 Ludusavi Manifest -> https://github.com/mtkennerly/ludusavi-manifest
 
 Debo mencionar los siguientes repositorios que he usado de referencia para conseguir averiguar cómo modificar correctamente el binario de accesos directos de steam (shortcuts.vdf) y el cálculo de los distintos ids que steam usa para cada juego en sus operaciones internas:
