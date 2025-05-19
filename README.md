@@ -139,3 +139,7 @@ NO SE OTORGA NINGUNA GARANTÍA, EXPLÍCITA O IMPLÍCITA.
 
 Si tienes preguntas o sugerencias, no dudes en abrir un issue en el repositorio o contactarme directamente.
 Si tienes algún proyecto comercial donde quieras integrarlo contactame y seguramente no haya mucho problema ¡Gracias por usar NoSteam2Steam\!
+
+## Donaciones
+
+[![Paypal](https://www.paypal.com/donate/?hosted_button_id=VVRC7ZTVFJWDU)]
