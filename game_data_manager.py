@@ -2,8 +2,6 @@ import json
 from pathlib import Path
 from typing import Dict, Any
 import logging
-import json
-from pathlib import Path
 import threading
 import time
 from identify_game import run_identification
@@ -33,7 +31,7 @@ class GameDataManager:
                 with open(self.json_path, 'r', encoding='utf-8') as f:
                     return json.load(f)
             except (json.JSONDecodeError, IOError) as e:
-                logger.error(f"Error al cargar el archivo {self.json_path}: {str(e)}")
+                logger.error(f"Error loading file {self.json_path}: {str(e)}")
                 return {}
         return {}
 
@@ -80,9 +78,9 @@ class GameDataManager:
                 json.dump(self.data, f, ensure_ascii=False, indent=2)
             
             temp_path.replace(self.json_path)
-            logger.info(f"Datos guardados correctamente en {self.json_path}")
+            logger.info(f"Data successfully saved to {self.json_path}")
         except IOError as e:
-            logger.error(f"Error al guardar los datos: {str(e)}")
+            logger.error(f"Error saving data: {str(e)}")
             if temp_path.exists():
                 temp_path.unlink()
 
@@ -94,21 +92,21 @@ class GameDataManager:
 def main():
     start_time = time.time()
     
-    logger.info("Obteniendo datos iniciales...")
+    logger.info("Retrieving initial data...")
     associate_data = run_identification()
     
-    logger.info("Mejorando datos con información de Lutris...")
+    logger.info("Enhancing data with Lutris information...")
     enhancer = LutrisDataEnhancer(associate_data)
     enhanced_data = enhancer.enhance_with_lutris_data()
     
-    logger.info("Actualizando base de datos...")
+    logger.info("Updating database...")
     manager = GameDataManager()
     manager.update_data(enhanced_data)
     manager.save_data()
     
     elapsed = time.time() - start_time
-    logger.info(f"Proceso completado en {elapsed:.2f} segundos")
-    logger.info(f"Total de juegos procesados: {len(enhanced_data)}")
+    logger.info(f"Process completed in {elapsed:.2f} seconds")
+    logger.info(f"Total games processed: {len(enhanced_data)}")
 
 if __name__ == "__main__":
     main()
