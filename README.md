@@ -144,5 +144,5 @@ Si tienes algún proyecto comercial donde quieras integrarlo contactame y segura
 
 Si has encontrado útil NoSteam2Steam y quieres agradecer mi trabajo, puedes:
 
-* Invítarme a un café [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/F1F51F88U3)
+* [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/F1F51F88U3)
 * o hacer una donación [PayPal](https://www.paypal.com/donate/?hosted_button_id=VVRC7ZTVFJWDU)
