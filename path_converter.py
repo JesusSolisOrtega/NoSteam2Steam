@@ -17,12 +17,12 @@ class PathConverter:
         '<winProgramData>': ('users/Public', '%PROGRAMDATA%'),
         '<winDir>': ('windows', '%WINDIR%'),
         
-        # Linux (Nativo)
+        # Linux (Native)
         '<xdgData>': ('.local/share', '$XDG_DATA_HOME'),
         '<xdgConfig>': ('.config', '$XDG_CONFIG_HOME'),
     }
 
-    # Extensiones que identifican un ejecutable de Windows
+    # Extensions that identify a Windows executable
     WINDOWS_EXECUTABLE_EXTS = {'.exe', '.dll', '.bat', '.cmd'}
 
     @staticmethod
@@ -34,7 +34,6 @@ class PathConverter:
 
     @staticmethod
     def _should_process_path(path_info, tags, game_data=None):
-
         if not tags:
             return True
             
@@ -43,7 +42,7 @@ class PathConverter:
         only_config = tags_set == {'config'}
         
         if not has_save and only_config:
-            logger.debug(f"Filtrado por tags - Solo configuración: {path_info}")
+            logger.debug(f"Filtered by tags - Configuration only: {path_info}")
             return False
 
         if game_data and PathConverter._is_windows_game(game_data):
@@ -60,7 +59,7 @@ class PathConverter:
                             break
                 
                 if has_any_os_condition and not has_windows_os:
-                    logger.debug(f"Filtrado por OS - No Windows: {path_info}")
+                    logger.debug(f"Filtered by OS - Not Windows: {path_info}")
                     return False
 
         return True
@@ -68,14 +67,14 @@ class PathConverter:
     @staticmethod
     def get_proton_path(game_id):
         if not game_id:
-            logger.warning("Intento de obtener ruta Proton sin game_id")
+            logger.warning("Attempt to get Proton path without game_id")
             return None
         return STEAMDECK_PATH / str(game_id) / 'pfx' / 'drive_c'
 
     @staticmethod
     def expand_path(original_path, game_data=None, system='auto'):
         if not game_data:
-            logger.warning("Intento de expandir ruta sin game_data")
+            logger.warning("Attempt to expand path without game_data")
             return []
 
         game_id = game_data.get("app_id_short")
@@ -97,7 +96,7 @@ class PathConverter:
         base_path = None
         for system_obj in systems:
             if system_obj == 'windows' and not game_id:
-                logger.debug(f"Juego Windows sin ID, omitiendo: {original_path}")
+                logger.debug(f"Windows game without ID, skipping: {original_path}")
                 continue
 
             proton_path = PathConverter.get_proton_path(game_id) if system_obj == 'windows' and game_id else None
@@ -108,13 +107,7 @@ class PathConverter:
                     if install_dir and parent.name == install_dir:
                         base_path = parent
                         break
-            '''
-            else:
-                try:
-                    base_path = Path('<root>') / '<game>'
-                except ValueError:
-                    logger.debug(f"No se pudo calcular base_path para {exe_path}")
-            '''
+
             replacements = {
                 '<base>': (str(base_path) if base_path else '', '<base>'),
                 '<game>': (install_dir if install_dir else Path(exe_path).stem if exe_path else '', '<game>'),
@@ -154,7 +147,7 @@ class PathConverter:
                         'system': system_obj
                     })
             except Exception as e:
-                logger.debug(f"Error resolviendo ruta {physical_path}: {str(e)}")
+                logger.debug(f"Error resolving path {physical_path}: {str(e)}")
 
             if original_path.startswith('<base>'):
                 break
@@ -174,7 +167,7 @@ class PathConverter:
         tags = file_info.get('tags', [])
         
         if not PathConverter._should_process_path(file_info, tags, game_data):
-            logger.debug(f"Ruta filtrada por condiciones: {original_path}")
+            logger.debug(f"Path filtered by conditions: {original_path}")
             return []
             
         variants = PathConverter.expand_path(original_path, game_data)
@@ -186,7 +179,7 @@ class PathConverter:
                 if path.is_symlink():
                     path = path.resolve()
             except (OSError, RuntimeError) as e:
-                logger.debug(f"Error resolviendo symlink {path}: {str(e)}")
+                logger.debug(f"Error resolving symlink {path}: {str(e)}")
                 continue
                 
             if '<storeUserId>' in str(path):
@@ -218,13 +211,13 @@ class PathConverter:
                         'system': variant['system']
                     })
         
-        logger.debug(f"Encontradas {len(results)} variantes para {original_path}")
+        logger.debug(f"Found {len(results)} variants for {original_path}")
         return results
 
     @staticmethod
     def process_game_entry(game_data):
         if not game_data.get('files'):
-            logger.debug(f"Juego {game_data.get('app_id_short', '')} sin rutas definidas")
+            logger.debug(f"Game {game_data.get('app_id_short', '')} has no defined paths")
             return []
         
         processed_paths = []
@@ -243,13 +236,13 @@ class PathConverter:
                     'when': info.get('when', [])
                 })
         if len(processed_paths) > 1:
-            logger.info(f"Procesadas {len(processed_paths)} rutas válidas para {game_data.get('app_id_short', '')}")
+            logger.info(f"Processed {len(processed_paths)} valid paths for {game_data.get('app_id_short', '')}")
         return processed_paths
 
     @staticmethod
     def search_saves_on_alternative_appids(game_data, alternative_appids):
         if not game_data or not alternative_appids:
-            logger.warning("Búsqueda alternativa sin datos suficientes")
+            logger.warning("Alternative search without sufficient data")
             return []
             
         processed_paths = []
@@ -266,7 +259,7 @@ class PathConverter:
                     path['appid_actual'] = original_appid
                 processed_paths.extend(paths)
             except Exception as e:
-                logger.error(f"Error procesando appid alternativo {alternative_appid}: {str(e)}")
+                logger.error(f"Error processing alternative appid {alternative_appid}: {str(e)}")
                 continue
 
             if processed_paths:
@@ -276,7 +269,6 @@ class PathConverter:
 
 
 def _expand_placeholders_to_windows(path, game_data):
-
     game_id = game_data.get("app_id_short")
     exe_path = game_data.get("exe_path")
     install_dir = game_data.get("install_dir")
@@ -312,7 +304,6 @@ def _expand_placeholders_to_windows(path, game_data):
 
 
 def transform_path_from_windows_to_proton(windows_path, game_data, steamdeck_path=STEAMDECK_PATH):
-
     expanded_path = _expand_placeholders_to_windows(windows_path, game_data)
 
     if 'steam_app_id' in game_data:
