@@ -23,7 +23,6 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("no_steam_to_steam.log")
 
 def download_file(url, destination):
-
     try:
         response = requests.head(url, allow_redirects=True)
         response.raise_for_status()
@@ -35,7 +34,7 @@ def download_file(url, destination):
             if remote_last_modified:
                 local_last_modified = time.ctime(os.path.getmtime(destination))
                 if remote_last_modified <= local_last_modified:
-                    logger.info(f"El archivo {destination} no ha cambiado (Last-Modified).")
+                    logger.info(f"File {destination} has not changed (Last-Modified).")
                     return False
             if remote_etag:
                 etag_file = destination + ".etag"
@@ -43,14 +42,14 @@ def download_file(url, destination):
                     with open(etag_file, "r") as f:
                         local_etag = f.read().strip()
                         if remote_etag == local_etag:
-                            logger.info(f"El archivo {destination} no ha cambiado (ETag).")
+                            logger.info(f"File {destination} has not changed (ETag).")
                             return False
 
         response = requests.get(url)
         response.raise_for_status()
         with open(destination, "wb") as file:
             file.write(response.content)
-        logger.info(f"Archivo descargado y guardado en: {destination}")
+        logger.info(f"File downloaded and saved to: {destination}")
 
         if remote_etag:
             with open(destination + ".etag", "w") as f:
@@ -58,7 +57,7 @@ def download_file(url, destination):
 
         return True
     except requests.RequestException as e:
-        logger.error(f"Error al descargar el archivo: {e}")
+        logger.error(f"Error downloading file: {e}")
         return False
 
 def load_yaml_file(file_path):
@@ -72,9 +71,8 @@ def load_yaml_file(file_path):
                 return yaml.safe_load(data.decode('utf-8'))
                 
     except Exception as e:
-        logger.error(f"Error al cargar YAML: {str(e)[:200]}")
+        logger.error(f"Error loading YAML: {str(e)[:200]}")
         return None
-
 
 def index_xml_data(root):
     xml_index = {}
@@ -182,7 +180,6 @@ def index_yaml_data(yaml_data: Dict) -> Dict:
     return index
 
 def save_index_to_file(index: Dict, file_path: str) -> None:
-
     try:
         with open(file_path, "w", encoding="utf-8", buffering=2**18) as file: 
             json.dump(
@@ -194,21 +191,19 @@ def save_index_to_file(index: Dict, file_path: str) -> None:
                 allow_nan=False
             )
     except Exception as e:
-        logger.error(f"Error crítico al guardar {file_path}: {str(e)[:200]}...")
+        logger.error(f"Critical error saving {file_path}: {str(e)[:200]}...")
 
 def load_index_from_file(file_path: str) -> Optional[Dict]:
-    
     if not os.path.exists(file_path):
         return None
     try:
         with open(file_path, "r", encoding="utf-8") as file:
             return json.load(file)
     except Exception as e:
-        logger.error(f"Error al cargar el índice desde {file_path}: {e}")
+        logger.error(f"Error loading index from {file_path}: {e}")
         return None
 
 def supports_vulkan():
-
     try:
         result = subprocess.run(["vulkaninfo"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         return result.returncode == 0
@@ -220,7 +215,6 @@ def supports_vulkan():
             return False
 
 def is_steamos():
-
     steamos_files = [
         "/usr/share/steamos", 
         "/home/deck", 
@@ -231,12 +225,11 @@ def is_steamos():
             if os.path.exists(file):
                 is_steamos = True
     except Exception as e:
-        logger.error(f"Error al verificar archivos específicos: {e}")
-    logger.info("\nIs steamOS:"+is_steamos+"\n")
+        logger.error(f"Error checking specific files: {e}")
+    logger.info("\nIs steamOS:"+str(is_steamos)+"\n")
     return is_steamos
 
 def path_exists_case_insensitive(path, dir_cache):
-
     p = Path(path)
     if p.exists():
         return str(p)
@@ -254,7 +247,6 @@ def path_exists_case_insensitive(path, dir_cache):
     return str(current)
 
 def generate_alternative_paths(relative_path):
-
     arch_pattern = re.compile(r'(x64|x86|x64vk|x86vk|win64|win32)', re.IGNORECASE)
     
     path_without_ext, ext = os.path.splitext(relative_path) 
@@ -266,7 +258,6 @@ def generate_alternative_paths(relative_path):
     alternative_paths = set()  
     for match in matches:
         if match.lower() in ['x64', 'win64', 'x64vk', 'x86', 'win32', 'x86vk']:
-            
             alternative_paths.add(path_without_ext.replace(match, 'x64') + ext)
             alternative_paths.add(path_without_ext.replace(match, 'x86') + ext)
             alternative_paths.add(path_without_ext.replace(match, 'win64') + ext) 
@@ -277,7 +268,6 @@ def generate_alternative_paths(relative_path):
     return list(alternative_paths)
 
 def select_best_path(relative_path, base_path):
-
     dir_cache = {}
 
     possible_paths = generate_alternative_paths(relative_path)
@@ -290,10 +280,10 @@ def select_best_path(relative_path, base_path):
 
     for path in possible_paths:
         full_path = os.path.join(base_path, path)
-        logger.info(f"Verificando ruta: {full_path}")
+        logger.info(f"Checking path: {full_path}")
         right_path = path_exists_case_insensitive(full_path, dir_cache)
         if right_path and os.path.isfile(right_path):
-            logger.info("Ruta válida encontrada.")
+            logger.info("Valid path found.")
             valid_paths.append(right_path)
     
     if not valid_paths:
@@ -315,9 +305,7 @@ def select_best_path(relative_path, base_path):
     
     return best_path if best_path is not None else valid_paths[0]
 
-
 def sort_launch_paths(launch_paths):
-
     current_os = platform.system().lower() 
     is_64bit = is_64bit_system()  
     
@@ -392,7 +380,6 @@ class DirectoryCache:
         self._cache.clear()
 
 def find_root_directory(sync_folder: str, yaml_index_by_install_dir: dict, dir_cache: DirectoryCache, excluded_folders: set = None) -> dict:
-
     if excluded_folders is None:
         excluded_folders = set()
 
@@ -415,7 +402,7 @@ def find_root_directory(sync_folder: str, yaml_index_by_install_dir: dict, dir_c
                     matches.update(result)
     
     except Exception as e:
-        logger.error(f"Error al buscar directorios raíz: {str(e)}")
+        logger.error(f"Error searching root directories: {str(e)}")
     
     return matches
 
@@ -493,11 +480,11 @@ class GameMatcher:
         if not all(indexes.values()):
             if self.first_load_attempt:
                 self.first_load_attempt = False
-                logger.info("Generando índices...")
+                logger.info("Generating indexes...")
                 create_or_update_indexes()
                 return self._load_indexes()
             else:
-                logger.error("No se pudieron cargar los índices. Abortada ejecución.")
+                logger.error("Could not load indexes. Execution aborted.")
                 sys.exit(1)
 
         if indexes['yaml']:
@@ -531,7 +518,6 @@ class GameMatcher:
         return indexes
 
     def _get_directory_contents(self, path: str, depth: int = 0) -> Dict[str, List[str]]:
-
         cached_contents = None
         try:
             cached_contents = self.dir_cache.get_directory_contents(path)
@@ -603,7 +589,7 @@ class GameMatcher:
                         if data.get('user_selected') is True
                     }
             except Exception as e:
-                logger.error(f"Error al cargar games.json: {str(e)}")
+                logger.error(f"Error loading games.json: {str(e)}")
         
         return user_selected
 
@@ -625,13 +611,13 @@ class GameMatcher:
 
     def associate_exes_with_ids(self) -> Dict[str, Dict]:
         if not os.path.exists(self.sync_folder):
-            logger.error(f"El directorio de juegos '{self.sync_folder}' no existe o no se puede acceder a él.")
+            logger.error(f"Game directory '{self.sync_folder}' does not exist or cannot be accessed.")
             return {}
 
         user_selected_games = self._load_user_selected_games()
         excluded_folders = self._get_excluded_folders(user_selected_games)
         excluded_folders.update(IGNORED_DIRS)
-        logger.info("Buscando coincidencias en directorios raíz...")
+        logger.info("Searching for matches in root directories...")
         self.matches = find_root_directory(
             sync_folder=self.sync_folder,
             yaml_index_by_install_dir=self.indexes['yaml_by_install_dir'],
@@ -639,7 +625,7 @@ class GameMatcher:
             excluded_folders=excluded_folders
         )
         self.matches.update(user_selected_games)
-        logger.info(f"Coincidencias iniciales encontradas: {len(self.matches)}")
+        logger.info(f"Initial matches found: {len(self.matches)}")
 
         folders_to_process = [
             (root_folder, os.path.join(self.sync_folder, root_folder))
@@ -649,7 +635,7 @@ class GameMatcher:
             (root_folder.lower() not in excluded_folders)
         ]
 
-        logger.info("\nBuscando identificadores de plataforma (Steam/GOG)...")
+        logger.info("\nSearching for platform identifiers (Steam/GOG)...")
         with ThreadPoolExecutor() as executor:
             futures = {
                 executor.submit(self._process_platform_identifiers, folder, path): folder
@@ -667,11 +653,11 @@ class GameMatcher:
                             if f not in self.matches
                         ]
                 except Exception as e:
-                    logger.error(f"Error procesando {folder}: {str(e)}")
+                    logger.error(f"Error processing {folder}: {str(e)}")
 
-        logger.info(f"Coincidencias después de plataformas: {len(self.matches)}")
+        logger.info(f"Matches after platform search: {len(self.matches)}")
 
-        logger.info("\nBuscando coincidencias en XML/YAML...")
+        logger.info("\nSearching for matches in XML/YAML...")
         with ThreadPoolExecutor() as executor:
             futures = {
                 executor.submit(self._process_root_folder, folder, path): folder
@@ -686,9 +672,9 @@ class GameMatcher:
                     if result:
                         self.matches[folder] = result
                 except Exception as e:
-                    logger.error(f"Error procesando {folder}: {str(e)}")
+                    logger.error(f"Error processing {folder}: {str(e)}")
 
-        logger.info(f"Coincidencias finales encontradas: {len(self.matches)}")
+        logger.info(f"Final matches found: {len(self.matches)}")
         return self.matches
 
     def _process_platform_identifiers(self, root_folder: str, root_folder_path: str) -> Optional[Dict]:
@@ -720,7 +706,6 @@ class GameMatcher:
         return None
 
     def _identify_platform(self, folder_path: str) -> Optional[Dict]:
-
         for item in self._explore_directory_tree(folder_path):
             if item['type'] != 'file':
                 continue
@@ -776,7 +761,7 @@ class GameMatcher:
             }
 
         except Exception as e:
-            logger.error(f"Error procesando {file_path}: {str(e)}")
+            logger.error(f"Error processing {file_path}: {str(e)}")
             return None
 
     def _load_gog_info_file(self, file_path: str) -> Optional[Dict]:
@@ -806,8 +791,8 @@ class GameMatcher:
 
     def _handle_steam_pattern_detection(self, file_path: str) -> Optional[Dict]:
         patterns = [
-            re.compile(r'appid\s*=\s*(\d{3,})', re.IGNORECASE),  # Patrón original
-            re.compile(r'#\s*appid\s*[\r\n]+\s*id\s*=\s*(\d{3,})', re.IGNORECASE)  # Nuevo patrón
+            re.compile(r'appid\s*=\s*(\d{3,})', re.IGNORECASE),  # Original pattern
+            re.compile(r'#\s*appid\s*[\r\n]+\s*id\s*=\s*(\d{3,})', re.IGNORECASE)  # New pattern
         ]
         
         try:
@@ -831,7 +816,7 @@ class GameMatcher:
                     return self._build_steam_response(match.group(1), file_path)
                     
         except Exception as e:
-            logger.error(f"Error procesando {file_path}: {str(e)}")
+            logger.error(f"Error processing {file_path}: {str(e)}")
         
         return None
 
@@ -885,13 +870,12 @@ class GameMatcher:
                         return result
         
         except (TypeError, ValueError) as e:
-            logger.error(f"Error al procesar JSON: {str(e)}")
+            logger.error(f"Error processing JSON: {str(e)}")
         
         return None
 
     def _handle_steam_match(self, root_folder: str, root_folder_path: str, 
                         steam_appid: str, steam_file: str) -> Optional[Dict]:
-
         yaml_entry = self.indexes['yaml_by_steam_id'].get(steam_appid)
         
         result = {
@@ -937,7 +921,6 @@ class GameMatcher:
 
     def _handle_gog_match(self, root_folder: str, root_folder_path: str, 
                         gog_info: Dict, exe_path: str = '') -> Optional[Dict]:
-        """Versión mejorada que acepta el ejecutable encontrado previamente"""
         yaml_entry = self.indexes['yaml_by_gog_id'].get(gog_info['id'])
         
         result = {
@@ -1048,7 +1031,7 @@ class GameMatcher:
             return best_match
         
         except Exception as e:
-            logger.error(f"Error procesando {root_folder}: {str(e)}")
+            logger.error(f"Error processing {root_folder}: {str(e)}")
             return None
     
     def _find_jre_paths(self, root_folder_path: str) -> Dict[str, Optional[str]]:
@@ -1298,7 +1281,7 @@ def associate_exes_with_ids(sync_folder: str = DEFAULT_SYNC_FOLDER, xml_file: st
                     if data.get('user_selected') is True
                 }
         except Exception as e:
-            logger.error(f"Error al cargar games.json: {str(e)}")
+            logger.error(f"Error loading games.json: {str(e)}")
     
     matcher = GameMatcher(sync_folder, xml_file, yaml_file, indexes, max_depth)
     all_matches = matcher.associate_exes_with_ids()
@@ -1350,16 +1333,16 @@ def create_or_update_indexes() -> Dict[str, Any]:
 def verify_and_download_files():
 
     if not os.path.exists(XML_FILE):
-        logger.info(f"El archivo XML no se encontró en la ruta: {XML_FILE}")
-        logger.info("Intentando descargar el archivo XML desde GitHub...")
+        logger.info(f"XML file not found in path: {XML_FILE}")
+        logger.info("trying to download the XML file from GitHub...")
         if not download_file(XML_URL, XML_FILE):
-            logger.error("No se pudo descargar el archivo XML.")
+            logger.error("Not able to download the XML file.")
 
     if not os.path.exists(YAML_FILE):
-        logger.info(f"El archivo YAML no se encontró en la ruta: {YAML_FILE}")
-        logger.info("Intentando descargar el archivo YAML desde GitHub...")
+        logger.info(f"YAML file not found in path: {YAML_FILE}")
+        logger.info("trying to download the YAML file from GitHub...")
         if not download_file(YAML_URL, YAML_FILE):
-            logger.error("No se pudo descargar el archivo YAML.")
+            logger.error("not able to download the YAML file.")
 
     return create_or_update_indexes()
 
@@ -1373,7 +1356,7 @@ def get_sync_folders() -> List[str]:
                 f.write("\n".join(default_folders))
             return [folder for folder in default_folders if os.path.exists(folder)]
         except Exception as e:
-            logger.error(f"No se pudo crear {SYNC_FOLDERS_FILE}: {e}")
+            logger.error(f"Couldn't create {SYNC_FOLDERS_FILE}: {e}")
             return [DEFAULT_SYNC_FOLDER]
 
     try:
@@ -1387,10 +1370,10 @@ def get_sync_folders() -> List[str]:
                     f.write("\n".join(default_folders))
                 return [folder for folder in default_folders if os.path.exists(folder)]
             except Exception as e:
-                logger.error(f"No se pudo actualizar {SYNC_FOLDERS_FILE}: {e}")
+                logger.error(f"Couldn't update {SYNC_FOLDERS_FILE}: {e}")
                 return [DEFAULT_SYNC_FOLDER]
     except Exception as e:
-        logger.error(f"Error leyendo {SYNC_FOLDERS_FILE}: {e}")
+        logger.error(f"Error reading {SYNC_FOLDERS_FILE}: {e}")
         return [DEFAULT_SYNC_FOLDER]
 
     try:
@@ -1402,7 +1385,7 @@ def get_sync_folders() -> List[str]:
         return valid_folders if valid_folders else [DEFAULT_SYNC_FOLDER]
         
     except Exception as e:
-        logger.error(f"Error procesando {SYNC_FOLDERS_FILE}: {e}")
+        logger.error(f"Error processing {SYNC_FOLDERS_FILE}: {e}")
         return [DEFAULT_SYNC_FOLDER]
 
 
@@ -1412,18 +1395,14 @@ def get_default_sync_folders() -> List[str]:
     home_games = os.path.join(Path.home(), "Games")
     default_folders.add(home_games)
 
-    '''Es posible apoyarse en los archivos de configuración para obtener directamente
-    los directorios de instalación concretos de cada juego para las instalaciones de la tienda,
-    El problema es que nos tenemos que depender en el caso de GOG (es el que he podido probar, asumo que epic es igual)
-    en que el nombre de la carpeta de instalación sea exactamente el nombre del juego y a partir de ahí buscar el .exe para
-    ese juego. No es mala solución y podría mejorar la eficiencia. No obstante, nuestra lógica actual es perfectamente capaz de 
-    gestionar la busqueda de juegos, especialmente de gog y con el complemento de la búsqueda manual parece una completa 
-    perdida de tiempo. No obstante si se decide adoptar este enfoque, 
-    para sideloads, la ubicación es: <heroic-path>/sideloads_apps/library.json (contiene información relevante pero al ser un
-    un sideload, ya lo gestiona nuestra aplicación y puede generar duplicados) (app_name se relaciona con el archivo homonimo en 
-    <heroic-path>/GamesConfig/<app_name> que contienen el prefix de wine (para partidas) y otra información relevante)
-    Para GOG: <heroic-path>/gog_store/installed.json (poca información relevante, aunque tenemos herramientas para gestionarlo)
-
+    '''It's possible to rely on configuration files to directly obtain
+the specific installation directories for each game for store installations.
+The problem is that, in the case of GOG (which is the one I've been able to test; I assume Epic is the same), we have to rely on the installation folder name being exactly the name of the game and then search for the .exe file for that game. It's not a bad solution and could improve efficiency. However, our current logic is perfectly capable of
+handling game searches, especially for GOG, and with the addition of manual search, it seems like a complete
+waste of time. However, if you decide to adopt this approach,
+for sideloads, the location is: <heroic-path>/sideloads_apps/library.json (it contains relevant information, but since it is a sideload, our application already manages it and can generate duplicates) (app_name is related to the file of the same name in
+<heroic-path>/GamesConfig/<app_name>, which contains the Wine prefix (for games) and other relevant information)
+For GOG: <heroic-path>/gog_store/installed.json (little relevant information, although we have tools to manage it)
     '''
     
     for path in HEROIC_PATHS:
@@ -1467,14 +1446,13 @@ def run_identification():
     
     all_matches = {}
     for folder in sync_folders:
-        logger.info(f"\nProcesando directorio: {folder}")
+        logger.info(f"\n Processing folder: {folder}")
         matches = associate_exes_with_ids(folder, XML_FILE, YAML_FILE, indexes, max_depth)
         all_matches.update(matches)
     
     return all_matches
 
 def add_files_to_user_selected(games_data: dict, matcher: GameMatcher) -> dict:
-    """Añade el campo 'files' a los juegos user_selected si no lo tienen."""
     yaml_by_name = matcher.indexes.get('yaml_by_name', {})
     
     for game_name, game_info in games_data.items():
@@ -1489,14 +1467,14 @@ def main():
 
     start_time = time.perf_counter()
     
-    logger.info("Iniciando proceso de identificación de juegos...")
+    logger.info("Starting Game identification process...")
     matches = run_identification()
 
-    logger.info("\nResultados encontrados:")
+    logger.info("\nResults:")
     for folder, data in matches.items():
-        logger.info(f"\nCarpeta: {folder}")
-        logger.info(f"  EXE encontrado: {data['exe_path']}")
-        logger.info(f"  Juego: {data['game_name']}")
+        logger.info(f"\nFolder: {folder}")
+        logger.info(f"  EXE found: {data['exe_path']}")
+        logger.info(f"  Game: {data['game_name']}")
         if data['steam_id']:
             logger.info(f"  SteamID: {data['steam_id']}")
         if data['lutris_id']:
@@ -1510,11 +1488,11 @@ def main():
     if elapsed > 60:
         minutes = int(elapsed // 60)
         seconds = elapsed % 60
-        time_str = f"{minutes} minutos y {seconds:.2f} segundos"
+        time_str = f"{minutes} minutes y {seconds:.2f} seconds"
     else:
-        time_str = f"{elapsed:.2f} segundos"
+        time_str = f"{elapsed:.2f} seconds"
     
-    logger.info(f"\nProceso completado. Tiempo total: {time_str}")
+    logger.info(f"\nFinished. Total time: {time_str}")
 
 if __name__ == "__main__":
     main()
