@@ -1,148 +1,148 @@
 # NoSteam2Steam
 
-NoSteam2Steam es una herramienta diseñada para gestionar juegos no pertenecientes a Steam, permitiendo sincronizar partidas guardadas, agregar juegos a la biblioteca de Steam y realizar respaldos automáticos. Este proyecto está optimizado para su uso en Steam Deck, pero también puede ser utilizado en otras plataformas si se realizan modificaciones (especialmente en las conversiones de rutas que dependen de cada SO).
+NoSteam2Steam is a tool designed to manage non-Steam games, allowing users to sync save files, add games to the Steam library, and perform automatic backups. This project is optimized for use on the Steam Deck but can also be used on other platforms with modifications (especially regarding path conversions, which are OS-dependent).
 
-Este proyecto se apoya en Game Backup Monitor (GBM) como referencia/herramienta principal de creacción de backups en windows. Con ciertos ajustes se podría hacer una herramienta independiente, no obstante está fuera del alcance inicial previsto para el proyecto. 
+This project relies on **Game Backup Monitor (GBM)** as the primary reference/tool for creating backups on Windows. With some adjustments, it could become a standalone tool, though this falls outside the initial scope of the project.
 
-El proyecto presupone backups en el mismo formato que GBM y una herramienta de sincronización de carpetas. NoSteam2Steam usa esta carpeta para sincronizar las partidas entre los datos de guardado locales y las partidas de windows. En nuestro caso para la sincronización de carpetas entre windows y steamdeck hemos elegido syncthing, pero se puede usar cualquier otra herramienta que cumpla la misma función.
+NoSteam2Steam assumes backups are in the same format as GBM and uses a folder synchronization tool to sync saves between local data and Windows saves. For syncing folders between Windows and the Steam Deck, we chose **Syncthing** (Syncthingy on steamdeck), but any other tool with the same functionality can be used.
 
-## Características
+## Features
 
-* **Sincronización de partidas guardadas:** Sincroniza automáticamente las partidas guardadas entre diferentes dispositivos.
-* **Gestión de juegos no pertenecientes a Steam:** Agrega juegos de otras plataformas (como GOG, Heroic, etc.) a la biblioteca de Steam.
-* **Respaldo de partidas guardadas:** Crea respaldos automáticos de las partidas guardadas en formato \`.7z\`.
-* **Restauración de partidas perdidas:** Detecta y restaura partidas guardadas que puedan haberse perdido.
+* **Save file synchronization:** Automatically syncs save files across different devices.
+* **Non-Steam game management:** Adds games from other platforms (e.g., GOG, Heroic, etc.) to the Steam library.
+* **Save file backups:** Creates automatic backups of save files in \`.7z\` format.
+* **Lost saves restoration:** Detects and restores lost save files.
 
 
-### Dependencias:
+### Dependencies:
 
-* Python 3.11 o superior
-* \`py7zr\` para la manipulación de archivos \`.7z\`
-* \`zenity\` para la interfaz gráfica de usuario
-* \`requests\` para consultas a APIs externas
-* \`vdf\` para manejar archivos de configuración de Steam
+* Python 3.11 or higher
+* \`py7zr\` for \`.7z\` file manipulation
+* \`zenity\` for the graphical user interface
+* \`requests\` for external API queries
+* \`vdf\` for handling Steam configuration files
 
-### Sistema operativo:
+### Supported OS:
 
 * Steam Deck (Linux)
-* Otras distribuciones de Linux (no probado/puede necesitar ajustes menores)
+* Other Linux distributions (untested/may require minor adjustments)
 
-## Instalación
+## Installation
 
-### Clonar el repositorio:
+### Clone the repository:
 
 ```bash
 git clone https://github.com/JesusSolisOrtega/NoSteam2Steam.git
 cd NoSteam2Steam
 ```
 
-### Instalar dependencias:
+### Install dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## Uso
+## Usage
 
-### Menú principal
+### Main Menu
 
-Ejecuta el script principal para acceder al menú de opciones:
+Run the main script to access the options menu:
 
 ```bash
 python noSteam2Steam.py
 ```
 
-Las opciones disponibles incluyen:
+Available options include:
 
-  * **Sincronización automática:** Agrega juegos y sincroniza partidas guardadas.
-  * **Agregar juegos a Steam automáticamente:** Detecta y agrega juegos no pertenecientes a Steam.
-  * **Sincronización de partidas guardadas:** Sincroniza manualmente las partidas guardadas.
-  * **Agregar manualmente un juego a Steam:** Permite agregar juegos específicos.
-  * **Limpiar configuración de NoSteam2Steam:** Elimina configuraciones y datos temporales.
-  * **Activar/desactivar Syncthing:** Gestiona el servicio de sincronización en segundo plano.
-  * **Cambiar carpetas de juegos sincronizados:** Modifica las carpetas donde se buscan juegos y partidas guardadas.
-  * **Salir:** Cierra la aplicación.
-
-
-### Funcionamiento (Breve explicación técnica)
-
-El programa se compone de 3 (realmente 4) módulos principales, cada uno realiza una función específica. 
-
-El primero es la identificación de juegos, para lo cual busca en la carpeta de sincronización designada y busca los ejecutables de los juegos. Luego adicionalmente complementa con información de lutris que usará despues. 
-
-El segundo se encarga de agregar correctamente el juego a steam, asociar las imagenes, etc. Un aspecto importante de esta fase es que calcula los ids de los juegos agregados lo cual es necesario para la fase de sincronización. 
-
-El tercero (el motivo principal para la creación del programa), es el encargado de la sincronización de las partidas. Este módulo lee los backups de la carpeta designada y los sincroniza con los archivos locales de las partidas de juegos agregados a steam. Para ello nos apoyamos en la estructura de los backups creados por Game Backup Monitor (GBM) y en los archivos de configuraciones de juegos de GBM y ludusavi.
-
-*El último módulo es la busqueda manual de los juegos que a nivel funcional cumple la misma función que el primer módulo para la identificación, pero permite la selección por parte del usuario y sobreescribe la entrada en caso de haber sido detectado previamente un juego asociado a dicho ejecutable. La detección automática está programada para respetar las selecciones manuales.
-
-*Por último hay una serie de funcionalidades extra como la eliminación de configuraciones en caso de que haya un comportamiento indebido o simplemente para hacer un añadido y/o sincronización limpios. El programa está pensado para tener el mejor balance entre fiabilidad (por ejemplo, no sobreescribir partidas en caso de duda como que haya varios backups del mismo juego) y minimizar las preguntas al usuario cuando sea posible para agilizar y simplificar la ejecución. Por ello cuando se selecciona sincronizar un archivo o hay alguna entrada manual, asume que para futuras ejecuciones este será el comportamiento deseado.
-
-*Tanto el primer como el segundo módulo actualizan los datos en caso de que haya cambios (Salvo la descarga de imágenes que no se vuelven a descargar en caso de existir, ya que asumimos que las imágenes no necesitan actualizarse una vez encontradas)
-
-La mayoría de las opciones del diálogo son autoexplicativas:
-
-1.- Sincronización automática -> El programa completo, es decir identifica, agrega y sincroniza las partidas de los juegos agregados.
-
-2.- Agregar juegos a Steam automáticamente -> ejecuta el primer y segundo módulo (idetifica y agrega a steam)
-
-3.- Sincronización de partidas guardadas -> ejecuta la sincronización de partidas
-
-4.- Limpiar configuración -> Distintas opciones para eliminar la configuración/decisiones respecto a los juegos agregados, las partidas sincronizadas o ambas.
-
-5.- Activar/desactivar Syncthing -> permite activar el servicio de syncthing para que funcione en el modo juego de steam (para la sincronización de las carpetas, ya sea de las partidas guardadas o si se ha decidido sincronizar una carpeta con las instalaciones de los juegos, etc.**)
-
-6.- Cambiar carpetas de juegos sincronizados -> Permite seleccionar las carpetas en las que se encontrarán los juegos sincronizados, se recomienda usar la carpeta por defecto ($Home/games), aunque se pueden agregar varias o borrarlas.
+  * **Automatic Sync:** Adds games and syncs save files.
+  * **Automatically Add Games to Steam:** Detects and adds non-Steam games.
+  * **Manual Save File Sync:** Manually syncs save files.
+  * **Manually Add a Game to Steam:** Allows adding specific games.
+  * **Reset NoSteam2Steam Configuration:** Clears settings and temporary data.
+  * **Enable/Disable Syncthing:** Manages the background sync service.
+  * **Change Synced Game Folders:** Modifies folders where games and saves are searched.
+  * **Exit:** Closes the application.
 
 
-** Por pruebas realizadas, syncthing funciona bien para los respaldos de partidas guardadas, pero con los juegos ha dado problemas para archivos grandes, con lo que se recomienda otros métodos o programas para pasar los juegos al dispositivo desde windows (o hacerlo manualmente)
+### Technical Overview (Brief Explanation)
 
-## Agradecimientos y referencias
+The program consists of three (actually four) main modules, each handling a specific task: 
 
-Las dos principales referencias en que se ha basado el proyecto y cuyos archivos de configuraciones usamos como base de la búsqueda/identificación de juegos y archivos de guardado:
+1. Game Identification: Searches the designated sync folder for game executables and supplements this with Lutris data.
 
-GBM -> https://mikemaximus.github.io/gbm-web/
+2. Steam Integration: Adds games to Steam, associates images, and calculates game IDs (necessary for syncing).
 
-Ludusavi Manifest -> https://github.com/mtkennerly/ludusavi-manifest
+3. Save File Sync: The core feature—reads backups from the designated folder and syncs them with local save files of Steam-added games. It relies on the backup structure from Game Backup Monitor (GBM) and configuration files from GBM and Ludusavi.
 
-Debo mencionar los siguientes repositorios que he usado de referencia para conseguir averiguar cómo modificar correctamente el binario de accesos directos de steam (shortcuts.vdf) y el cálculo de los distintos ids que steam usa para cada juego en sus operaciones internas:
+*The fourth module is manual game detection, which functions similarly to the first module but allows user selection and overwrites previous entries if a game was already associated with an executable. Automatic detection respects manual selections.
 
-Steam Shortcut Manager -> https://github.com/CorporalQuesadilla/Steam-Shortcut-Manager
+*Additional functionalities include resetting configurations for troubleshooting or clean setups. The program prioritizes reliability (e.g., avoiding overwriting saves if uncertain) while minimizing user prompts for efficiency. Once a file is synced or manually entered, it assumes this behavior for future runs.
 
-Heroic Games Launcher -> https://github.com/Heroic-Games-Launcher/HeroicGamesLauncher/tree/main
+Both the first and second modules update data if changes are detected (except for images, which are not redownloaded once found).
 
-SteamGridDB -> https://github.com/SteamGridDB/steam-rom-manager/blob/master/src/lib/helpers/steam/generate-app-id.ts
+Most menu options are self-explanatory:
+
+1. Automatic Sync → Full process: identifies, adds, and syncs saves.
+
+2. Automatically Add Games to Steam → Runs the first two modules (identification + Steam integration).
+
+3. Manual Save Sync → Syncs saves.
+
+4. Reset Configuration → Options to clear game/sync settings.
+
+5. Enable/Disable Syncthing → Toggles Syncthing for sync folder management in Steam Game Mode (Note: Syncthing works well for saves but struggles with large game files—consider alternatives for game transfers).
+
+6. Change Synced Game Folders → Adjusts folders for synced games (default: $HOME/games).
 
 
-## Contribuciones
+** Based on tests, SyncThing works well for backups of saved games, but it has caused problems with games for large files, so other methods or programs are recommended to transfer games to the device from Windows (or do it manually).
 
-¡Las contribuciones son bienvenidas\! Si deseas colaborar, por favor:
+## Credits & References
 
-1.  Haz un fork del repositorio.
-2.  Crea una rama para tu funcionalidad o corrección de errores
-3.  Realiza tus cambios y haz un commit
-4.  Envía un pull request.
+Key projects used as references for game/save file identification:
 
-## Licencia
+* **GBM** -> https://mikemaximus.github.io/gbm-web/
+
+* **Ludusavi Manifest** -> https://github.com/mtkennerly/ludusavi-manifest
+
+Additional repositories for Steam shortcut manipulation and ID calculations:
+
+* Steam Shortcut Manager -> https://github.com/CorporalQuesadilla/Steam-Shortcut-Manager
+
+* Heroic Games Launcher -> https://github.com/Heroic-Games-Launcher/HeroicGamesLauncher/tree/main
+
+* SteamGridDB -> https://github.com/SteamGridDB/steam-rom-manager/blob/master/src/lib/helpers/steam/generate-app-id.ts
+
+
+## Contributions
+
+Contributions are welcome! To collaborate:
+
+1.  Fork the repository.
+2.  Create a branch for your feature/fix.
+3.  Commit your changes.
+4.  Submit a pull request.
+
+## License
 
 Copyright (c) 2025 Jesús Solís Ortega
 
-Este software se distribuye para fines educativos y personales.  
-Queda prohibido cualquier uso comercial, distribución, sublicencia, venta o integración en productos o servicios con fines lucrativos, excepto por el titular de los derechos.  
-Se permite el uso, copia y modificación para fines no comerciales, siempre que se mantenga este aviso de copyright.
+This software is distributed for **educational and personal use only**.
+**Commercial use**, distribution, sublicensing, sale, or integration into for-profit products/services is **prohibited** without the copyright holder's consent.
+Non-commercial use, copying, and modification are permitted, provided this copyright notice remains intact.
 
-Para cualquier uso comercial, contactar con el autor.
+For commercial inquiries, contact the author.
 
-NO SE OTORGA NINGUNA GARANTÍA, EXPLÍCITA O IMPLÍCITA.
+**NO WARRANTIES, EXPRESS OR IMPLIED, ARE PROVIDED**.
 
-## Contacto
+## Contact
 
-Si tienes preguntas o sugerencias, no dudes en abrir un issue en el repositorio o contactarme directamente.
-Si tienes algún proyecto comercial donde quieras integrarlo contactame y seguramente no haya mucho problema ¡Gracias por usar NoSteam2Steam\!
+For questions or suggestions, open an issue in the repository or contact me directly.
+For commercial integration projects, reach out—I’m likely open to collaboration. Thanks for using NoSteam2Steam!
 
-## Donaciones
+## Donations
 
-Si has encontrado útil NoSteam2Steam y quieres agradecer mi trabajo, puedes:
+If you find NoSteam2Steam useful and wish to support my work:
 
 * [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/F1F51F88U3)
-* o hacer una donación [PayPal](https://www.paypal.com/donate/?hosted_button_id=VVRC7ZTVFJWDU)
+* Or donate via [PayPal](https://www.paypal.com/donate/?hosted_button_id=VVRC7ZTVFJWDU)
