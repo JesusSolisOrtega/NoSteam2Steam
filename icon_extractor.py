@@ -8,29 +8,29 @@ logger = logging.getLogger("no_steam_to_steam")
 
 def extract_icon(exe_path, output_path):
     if os.path.exists(output_path):
-        logger.info(f"El archivo {output_path} ya existe. Saltando extracción.")
+        logger.info(f"The file {output_path} already exists. Skipping extraction.")
         return True
     
     if not os.path.exists(exe_path):
-        logger.error(f"Error: No se encontró el archivo {exe_path}")
+        logger.error(f"Error: File {exe_path} not found.")
         return False
 
     success, icon_data = standart_extraction_method(exe_path)
     if success:
         with open(output_path, "wb") as f:
             f.write(icon_data)
-        logger.info(f"Icono extraído correctamente (método estándar): {output_path}")
+        logger.info(f"Icon successfully extracted (standard method): {output_path}")
         return True
     
-    logger.info("Fallo en método estándar, intentando método flexible completo...")
+    logger.info("Standard method failed, trying full flexible method...")
     success, icon_data = flexible_extraction_method(exe_path)
     if success:
         with open(output_path, "wb") as f:
             f.write(icon_data)
-        logger.info(f"Icono extraído correctamente (método flexible): {output_path}")
+        logger.info(f"Icon successfully extracted (flexible method): {output_path}")
         return True
     
-    logger.error("No se pudo extraer el icono con ningún método.")
+    logger.error("Icon could not be extracted with any method.")
     return False
 
 def standart_extraction_method(exe_path):
@@ -45,7 +45,7 @@ def standart_extraction_method(exe_path):
         if hasattr(pe, 'DIRECTORY_ENTRY_RESOURCE'):
             mapped_data = pe.get_memory_mapped_image()
 
-            # Buscar grupo de iconos
+            # Look for icon group
             for entry in pe.DIRECTORY_ENTRY_RESOURCE.entries:
                 if entry.id == pefile.RESOURCE_TYPE['RT_GROUP_ICON']:
                     for res in entry.directory.entries:
@@ -87,7 +87,7 @@ def standart_extraction_method(exe_path):
                 if icon_id in icon_data:
                     actual_size = len(icon_data[icon_id])
                     if actual_size != bytes_in_res:
-                        logger.warning(f"Advertencia: Tamaño de icono {icon_id} no coincide ({actual_size} vs {bytes_in_res})")
+                        logger.warning(f"Warning: Icon size mismatch for {icon_id} ({actual_size} vs {bytes_in_res})")
                         size_mismatch = True
                         continue
                     
@@ -108,7 +108,7 @@ def standart_extraction_method(exe_path):
         return True, ico_data
 
     except Exception as e:
-        logger.error(f"Error en método estándar: {str(e)}")
+        logger.error(f"Error in standard method: {str(e)}")
         return False, None
     finally:
         if 'pe' in locals():
@@ -180,7 +180,7 @@ def flexible_extraction_method(exe_path):
                     if icon_id in single_icons:
                         actual_size = len(single_icons[icon_id])
                         if actual_size != size:
-                            logger.warning(f"Advertencia (flexible): Tamaño de icono {icon_id} no coincide ({actual_size} vs {size})")
+                            logger.warning(f"Warning (flexible): Icon size mismatch for {icon_id} ({actual_size} vs {size})")
                             continue
                         
                         icon_entries.append({
@@ -194,7 +194,7 @@ def flexible_extraction_method(exe_path):
                 if icon_entries:
                     ico_data = build_complete_ico(icon_entries)
             except Exception as e:
-                logger.error(f"Error al procesar grupo de iconos (flexible): {e}")
+                logger.error(f"Error processing icon group (flexible): {e}")
 
         if not ico_data and single_icons:
             icon_entries = []
@@ -222,7 +222,7 @@ def flexible_extraction_method(exe_path):
         return False, None
 
     except Exception as e:
-        logger.error(f"Error en método flexible: {str(e)}")
+        logger.error(f"Error in flexible method: {str(e)}")
         return False, None
     finally:
         if 'pe' in locals():
