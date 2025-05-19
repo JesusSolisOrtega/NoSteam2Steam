@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 import uuid
 from path_converter import PathConverter, transform_path_from_windows_to_proton
-import py7zr 
+import py7zr
 import xml.etree.ElementTree as ET
 
 from config import ID_MAP_PATH, STEAMDECK_PATH, get_backups_directory
@@ -17,7 +17,6 @@ import logging
 logger = logging.getLogger('GBM_Backup')
 
 def create_file_7z_gbm(source_paths, metadata, target_dir, file_name):
-
     target_dir.mkdir(parents=True, exist_ok=True)
     file_7z = target_dir / file_name
 
@@ -99,34 +98,34 @@ def create_file_7z_gbm(source_paths, metadata, target_dir, file_name):
                         z.write(item_path, arcname=arcname)
                 else:
                     z.write(source_path, arcname=source_path.name)
-            
+
             z.write(temp_xml_path, arcname="_gbm_backup_metadata.xml")
-            
+
     except Exception as e:
-        logger.error(f"Error al crear archivo 7z: {e}")
+        logger.error(f"Error creating 7z file: {e}")
         if file_7z.exists():
             file_7z.unlink()
         raise
     finally:
         temp_xml_path.unlink(missing_ok=True)
-    
+
     return file_7z
 
 def create_backup_gbm(game_name, config_save, process_name, backup_root_dir):
     config_id = generate_config_id(game_name, config_save)
     folder_name = f"{game_name} [{config_id}]"
     file_name = f"{game_name} [{config_id}].7z"
-    
+
     backup_dir = backup_root_dir / folder_name
     backup_dir.mkdir(parents=True, exist_ok=True)
-    
+
     origin_path = config_save['physical_path']
     source_paths = []
     if origin_path.is_dir():
         source_paths = [origin_path]
     else:
         source_paths = [origin_path]
-            
+
     try:
         file_7z = create_file_7z_gbm(
             source_paths=source_paths,
@@ -135,7 +134,7 @@ def create_backup_gbm(game_name, config_save, process_name, backup_root_dir):
                 "game_name": game_name,
                 "process_name": process_name,
                 "original_path": config_save['original_path'],
-                "meta_path": config_save['meta_path'],      
+                "meta_path": config_save['meta_path'],
                 "is_folder": origin_path.is_dir(),
                 "os_code": assign_os_code(config_save.get('when', [])),
                 "tags": ["Ludusavi"],
@@ -145,7 +144,7 @@ def create_backup_gbm(game_name, config_save, process_name, backup_root_dir):
             target_dir=backup_dir,
             file_name=file_name
         )
-        
+
         return {
             'backup_file': file_7z,
             'original_path': origin_path,
@@ -153,11 +152,10 @@ def create_backup_gbm(game_name, config_save, process_name, backup_root_dir):
             'config_id': config_id
         }
     except Exception as e:
-        logger.error(f"Error en crear_backup_gbm: {e}")
+        logger.error(f"Error in create_backup_gbm: {e}")
         raise
 
 def generate_config_id(game_name, config_save):
-
     unique_str = f"{game_name}_{config_save['meta_path']}"
     return str(uuid.uuid5(uuid.NAMESPACE_URL, unique_str))
 
@@ -166,57 +164,57 @@ def assign_os_code(when_conditions):
     for condition in when_conditions:
         if 'os' in condition:
             systems.add(condition['os'])
-    
+
     return {
         'windows': 1,
         'linux': 2,
         'mac': 3
-    }.get(next(iter(systems), 0) if systems else 1 )  
+    }.get(next(iter(systems), 0) if systems else 1 )
 def is_empty_folder(dir_path):
     try:
         return not any(file.is_file() for file in dir_path.rglob('*'))
     except Exception as e:
-        logger.error(f"No se pudo verificar directorio {dir_path}: {e}")
+        logger.error(f"Could not verify directory {dir_path}: {e}")
         return True
 
 def filter_valid_paths(processed_paths):
     filtered_paths = []
-    
+
     for path_info in processed_paths:
         path = path_info['physical_path']
-        
+
         if not path.exists():
-            logger.debug(f"Filtrado - Ruta no existe: {path}")
+            logger.debug(f"Filtered out - Path does not exist: {path}")
             continue
-            
+
         if path.is_dir():
             if is_empty_folder(path):
-                logger.debug(f"Filtrado - Directorio vacío: {path}")
+                logger.debug(f"Filtered out - Empty directory: {path}")
                 continue
-            logger.debug(f"Válido - Directorio con contenido: {path}")
+            logger.debug(f"Valid - Directory with content: {path}")
         else:
-            logger.debug(f"Válido - Archivo: {path}")
-            
+            logger.debug(f"Valid - File: {path}")
+
         filtered_paths.append(path_info)
-    
+
     return filtered_paths
 
 def get_valid_paths(game_data, alternative_appids=None):
     if not game_data.get('files'):
-        logger.debug(f"Juego {game_data.get('app_id_short')} sin rutas definidas")
+        logger.debug(f"Game {game_data.get('app_id_short')} has no defined paths")
         return []
-    
+
     if alternative_appids:
         processed_paths = PathConverter.search_saves_on_alternative_appids(game_data, alternative_appids)
 
     else:
         processed_paths = PathConverter.process_game_entry(game_data)
 
-    logger.debug(f"Procesadas {len(processed_paths)} rutas iniciales")
-    
+    logger.debug(f"Processed {len(processed_paths)} initial paths")
+
     filtered_paths = filter_valid_paths(processed_paths)
-    logger.info(f"✓ Juego {game_data.get('app_id_short')}: {len(filtered_paths)} rutas válidas")
-    
+    logger.info(f"✓ Game {game_data.get('app_id_short')}: {len(filtered_paths)} valid paths")
+
     return filtered_paths
 
 def get_process_name(game_data):
@@ -245,58 +243,56 @@ def load_gbm_configs(xml_path):
                 'FileType': game.find('FileType').text if game.find('FileType') is not None else ""
             }
     except Exception as e:
-        logger.error(f"Error al cargar GBM_Official.xml: {e}")
+        logger.error(f"Error loading GBM_Official.xml: {e}")
     return configs
 
 def search_config_gbm(game_name, gbm_configs):
-
     original_clean_name = game_name.strip().lower()
     norm_name = normalize_name(game_name)
-    
+
     for config in gbm_configs.values():
         original_name_config = config['original_name'].lower()
         config_name_norm = normalize_name(config['original_name'])
-        
+
         if original_clean_name == original_name_config:
-            logger.debug(f"Match exacto encontrado para: {game_name}")
+            logger.debug(f"Exact match found for: {game_name}")
             return config
-            
+
         if norm_name == config_name_norm:
-            logger.debug(f"Match normalizado encontrado para: {game_name}")
+            logger.debug(f"Normalized match found for: {game_name}")
             return config
-    
-    logger.debug(f"No se encontraron coincidencias para: {game_name}")
-    return None  
+
+    logger.debug(f"No matches found for: {game_name}")
+    return None
 
 def clean_source_paths(source_paths, exclude_list):
-
     if not exclude_list or not source_paths:
         return source_paths
-    
+
     exclude_patterns = exclude_list.split(':')
-    
+
     filtered_paths = []
     for path in source_paths:
         if path.is_dir():
             included_files = []
             for item in path.rglob('*'):
-                if item.is_file(): 
+                if item.is_file():
                     exclude = any(fnmatch(item.name, pattern) for pattern in exclude_patterns)
                     if not exclude:
                         included_files.append(item)
-            
+
             if included_files:
                 filtered_paths.append(path)
         else:
             exclude = any(fnmatch(path.name, pattern) for pattern in exclude_patterns)
             if not exclude:
                 filtered_paths.append(path)
-    
+
     return filtered_paths
 
 def create_backup_from_gbm(game_name, gbm_config, backup_root_dir, game_data=None, alternative_appids=None):
     try:
-        
+
         proton_path = transform_path_from_windows_to_proton(
             gbm_config['windows_path'],
             game_data,
@@ -316,23 +312,23 @@ def create_backup_from_gbm(game_name, gbm_config, backup_root_dir, game_data=Non
                     if alternative_path.is_dir():
                         if is_empty_folder(alternative_path):
                             continue
-                    
-                    logger.debug(f"Ruta alternativa encontrada: {alternative_path}")
+
+                    logger.debug(f"Alternative path found: {alternative_path}")
                     proton_path = alternative_path
                     break
 
         if is_folder:
             if proton_path.exists() and proton_path.is_dir():
                 if is_empty_folder(proton_path):
-                    logger.warning(f"Directorio vacío: {proton_path}")
+                    logger.warning(f"Empty directory: {proton_path}")
                     return None
-                
+
                 source_paths = list(proton_path.glob('*'))
         else:
             if file_type:
                 source_paths = process_filetype(proton_path.parent if proton_path.is_file() else proton_path, file_type)
                 if not source_paths:
-                    logger.warning(f"No se encontraron archivos que coincidan con FileType: {file_type}")
+                    logger.warning(f"No files found matching FileType: {file_type}")
                     return None
             elif proton_path.exists() and proton_path.is_file():
                 source_paths = [proton_path]
@@ -341,7 +337,7 @@ def create_backup_from_gbm(game_name, gbm_config, backup_root_dir, game_data=Non
             source_paths = clean_source_paths(source_paths, exclude_list)
 
         if not source_paths:
-            logger.warning(f"No se encontraron archivos válidos para {game_name}")
+            logger.warning(f"No valid files found for {game_name}")
             return None
 
         metadata = {
@@ -359,7 +355,7 @@ def create_backup_from_gbm(game_name, gbm_config, backup_root_dir, game_data=Non
             target_dir=backup_root_dir / gbm_config['original_name'],
             file_name=f"{gbm_config['original_name']}.7z"
         )
-        
+
         return {
             'backup_file': file_7z,
             'original_path': proton_path,
@@ -367,15 +363,15 @@ def create_backup_from_gbm(game_name, gbm_config, backup_root_dir, game_data=Non
             'source': 'GBM_Official'
         }
     except Exception as e:
-        logger.error(f"Error al crear backup GBM: {e}")
+        logger.error(f"Error creating GBM backup: {e}")
         return None
 
 def process_filetype(base_folder, file_type):
     from fnmatch import fnmatch
     matching_files = []
-    
+
     patterns = file_type.split(':') if ':' in file_type else [file_type]
-    
+
     for pattern in patterns:
         if ':' in pattern and '*' not in pattern:
             file, subdir = pattern.split(':', 1)
@@ -383,7 +379,7 @@ def process_filetype(base_folder, file_type):
             if search_path.exists() and (search_path / file.strip()).exists():
                 matching_files.append(search_path / file.strip())
             continue
-        
+
         if '*' in pattern and ('/' in pattern or '\\' in pattern):
             folder_part, file_part = pattern.replace('\\', '/').rsplit('/', 1)
             for match_dir in base_folder.glob(folder_part):
@@ -392,16 +388,16 @@ def process_filetype(base_folder, file_type):
                         if file.is_file() and fnmatch(file.name, file_part):
                             matching_files.append(file)
             continue
-        
+
         for file in base_folder.glob(pattern):
             if file.is_file() and fnmatch(file.name, pattern):
                 matching_files.append(file)
-    
-    return list(set(matching_files)) 
+
+    return list(set(matching_files))
 
 def verify_and_create_missing_backup(game_name, game_mapping, inventory, record, alternative_appids=None):
     if game_name in inventory:
-        logger.debug(f"Juego {game_name} ya en inventario")
+        logger.debug(f"Game {game_name} already in inventory")
         return False
 
     backups_path = get_backups_directory()
@@ -409,10 +405,10 @@ def verify_and_create_missing_backup(game_name, game_mapping, inventory, record,
 
     gbm_configs = load_gbm_configs(Path(__file__).parent / 'GBM_Official.xml')
     if gbm_config := search_config_gbm(game_name, gbm_configs):
-        logger.info(f"✓ Configuración GBM encontrada para {game_name}")
+        logger.info(f"✓ GBM configuration found for {game_name}")
         if result := create_backup_from_gbm(game_name, gbm_config, backups_path, game_data, alternative_appids):
             if alternative_appids:
-                logger.info(f"Backup creado desde ruta alternativa: {result['backup_file']}")
+                logger.info(f"Backup created from alternative path: {result['backup_file']}")
                 return True  
             else:
                 record.setdefault(game_name, {})[str(result['backup_file'])] = {
@@ -426,14 +422,14 @@ def verify_and_create_missing_backup(game_name, game_mapping, inventory, record,
                 return True
 
     if not game_data or not game_data.get('files'):
-        logger.debug(f"Juego {game_name} sin datos válidos")
+        logger.debug(f"Juego {game_name} has no valid data")
         return False
     
     process_name = get_process_name(game_data)
     paths_with_info = get_valid_paths(game_data, alternative_appids)
     
     if not paths_with_info:
-        logger.info(f"✗ Juego {game_name}: Sin rutas válidas")
+        logger.info(f"✗ Game {game_name}: No valid paths")
         return False
     
     successes = 0
@@ -455,11 +451,11 @@ def verify_and_create_missing_backup(game_name, game_mapping, inventory, record,
                         "source": "Ludusavi"
                     }
                 successes += 1
-                logger.info(f"Backup creado: {result['backup_file']} desde {config_save['physical_path']}")
+                logger.info(f"Backup created: {result['backup_file']} from {config_save['physical_path']}")
         except Exception as e:
-            logger.error(f"Error en {game_name}: {str(e)}", exc_info=True)
+            logger.error(f"Error in {game_name}: {str(e)}", exc_info=True)
     
-    logger.info(f"► Juego {game_name}: {successes}/{len(paths_with_info)} backups creados")
+    logger.info(f"► Game {game_name}: {successes}/{len(paths_with_info)} backups created")
     return successes > 0
 
 def load_games_mapping(path_id_map=ID_MAP_PATH):
@@ -467,5 +463,5 @@ def load_games_mapping(path_id_map=ID_MAP_PATH):
         with open(path_id_map, 'r', encoding='utf-8') as file:
             return json.load(file)
     except Exception as e:
-        logger.error(f"Error al cargar el archivo JSON: {e}")
+        logger.error(f"Error loading JSON file: {e}")
         return None
