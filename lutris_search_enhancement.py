@@ -52,7 +52,7 @@ class LutrisDataEnhancer:
         try:
             search_term = str(search_term).strip()
             if not search_term:
-                logger.debug("Búsqueda con término vacío ignorada")
+                logger.debug("Empty search term ignored")
                 return None
 
             if search_by == "lutris_id":
@@ -60,7 +60,7 @@ class LutrisDataEnhancer:
             else:
                 url = f"{self.LUTRIS_API_URL}?search={quote(search_term)}"
 
-            logger.debug(f"Consultando Lutris: {url}")
+            logger.debug(f"Querying Lutris: {url}")
             response = self.session.get(url, timeout=self.REQUEST_TIMEOUT)
             response.raise_for_status()
             data = response.json()
@@ -69,13 +69,13 @@ class LutrisDataEnhancer:
 
         except requests.exceptions.HTTPError as e:
             if e.response.status_code == 404:
-                logger.debug(f"No encontrado en Lutris: {search_term}")
+                logger.debug(f"Not found in Lutris: {search_term}")
             else:
-                logger.warning(f"Error HTTP ({e.response.status_code}) al consultar Lutris: {e}")
+                logger.warning(f"HTTP error ({e.response.status_code}) when querying Lutris: {e}")
         except requests.exceptions.RequestException as e:
-            logger.warning(f"Error de conexión al consultar Lutris: {e}")
+            logger.warning(f"Connection error when querying Lutris: {e}")
         except Exception as e:
-            logger.error(f"Error inesperado al consultar {search_term}: {str(e)}")
+            logger.error(f"Unexpected error when querying {search_term}: {str(e)}")
 
         return None
 
@@ -110,7 +110,6 @@ class LutrisDataEnhancer:
         ))
 
     def _get_lutris_data(self, game_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-
         search_order = [
             ("lutris_id", "lutris_id"),
             ("steam_id", "steamid"),
@@ -255,7 +254,7 @@ class LutrisDataEnhancer:
             lutris_data = self._get_lutris_data(game_data)
             processed_data = self._process_lutris_response(lutris_data, game_data)
         except Exception as e:
-            logger.warning(f"Error al mejorar datos para {folder}, devolviendo datos base: {str(e)}")
+            logger.warning(f"Error enhancing data for {folder}, returning base data: {str(e)}")
             processed_data = self._get_empty_response_structure(game_data)
         
         return folder, {
@@ -280,7 +279,7 @@ class LutrisDataEnhancer:
                     folder, result = future.result()
                     enhanced_data[folder] = result
                 except Exception as e:
-                    logger.error(f"Error procesando juego {folder}: {str(e)}")
+                    logger.error(f"Error processing game {folder}: {str(e)}")
         
         self.session.close()
         return enhanced_data
