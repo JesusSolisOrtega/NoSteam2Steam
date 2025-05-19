@@ -42,14 +42,13 @@ def save_steam_id_mapping(steam_id_mapping):
             with open("steam_id_mapping.json", "w") as f:
                 json.dump(existing_mapping, f, indent=4)
             
-            logging.info("Relación juego-steam_id actualizada en steam_id_mapping.json")
+            logging.info("Game-steam_id mapping updated in steam_id_mapping.json")
         else:
-            logging.info("No se encontraron juegos nuevos para actualizar.")
+            logging.info("No new games found to update.")
     except Exception as e:
-        logging.error(f"Error al guardar la relación juego-steam_id: {e}")
+        logging.error(f"Error saving game-steam_id mapping: {e}")
 
 def process_user_selected_games(json_file):
-
     try:
         with open(json_file, "r", encoding="utf-8") as f:
             games_data = json.load(f)
@@ -67,12 +66,12 @@ def process_user_selected_games(json_file):
             with open(json_file, "w", encoding="utf-8") as f:
                 json.dump(updated_games_data, f, ensure_ascii=False, indent=4)
 
-            logging.info("Campo 'files' añadido a los juegos seleccionados manualmente.")
+            logging.info("'files' field added to manually selected games.")
         else:
-            logging.info("No se encontraron juegos seleccionados manualmente que requieran procesamiento.")
+            logging.info("No manually selected games found that require processing.")
 
     except Exception as e:
-        logging.error(f"Error al procesar los juegos seleccionados manualmente: {e}")
+        logging.error(f"Error processing manually selected games: {e}")
         sys.exit(1)
 
 def load_games(json_file):
@@ -86,21 +85,21 @@ def load_games(json_file):
         games = {key: value for key, value in data.items() if isinstance(value, dict) and "name" in value and "exe_path" in value}
         
         if not games:
-            logging.error("No se encontraron juegos válidos en el archivo JSON.")
+            logging.error("No valid games found in the JSON file.")
             sys.exit(1)
         
         return games
     except Exception as e:
-        logging.error(f"Error al cargar el archivo JSON: {e}")
+        logging.error(f"Error loading JSON file: {e}")
         sys.exit(1)
 
 def save_user_mapping(user_mapping):
     try:
         with open(USER_MAPPING_PATH, "w") as f:
             json.dump(user_mapping, f, indent=4)
-        logging.info(f"Relación usuario-ID guardada en {USER_MAPPING_PATH}")
+        logging.info(f"User-ID mapping saved in {USER_MAPPING_PATH}")
     except Exception as e:
-        logging.error(f"Error al guardar la relación usuario-ID: {e}")
+        logging.error(f"Error saving user-ID mapping: {e}")
 
 def select_steam_user():
     try:
@@ -112,7 +111,7 @@ def select_steam_user():
         if not user_folders:
             subprocess.run(['zenity', '--error', 
                           '--title=Error', 
-                          '--text=No se encontró la carpeta de usuario de Steam.'],
+                          '--text=Steam user folder not found.'],
                           check=True)
             return None
 
@@ -122,22 +121,22 @@ def select_steam_user():
         zenity_args = [
             'zenity',
             '--list',
-            '--title=Seleccionar usuario de Steam',
-            '--text=Seleccione un usuario:',
+            '--title=Select Steam User',
+            '--text=Select a user:',
             '--radiolist',
-            '--column=Seleccionar',
-            '--column=ID Usuario',
-            '--column=Nombre',
+            '--column=Select',
+            '--column=User ID',
+            '--column=Name',
             '--width=500',
             '--height=300',
-            '--extra-button=Todos los usuarios',
-            '--cancel-label=Cancelar'
+            '--extra-button=All users',
+            '--cancel-label=Cancel'
         ]
 
         for user_id in user_folders:
             username = get_steam_username(user_id)
             user_mapping[user_id] = username
-            display_name = f"{username} (actual)" if user_id == current_user else username
+            display_name = f"{username} (current)" if user_id == current_user else username
             
             zenity_args.extend(['FALSE', user_id, display_name])
 
@@ -153,17 +152,17 @@ def select_steam_user():
             
         output = result.stdout.strip()
         
-        if output == "Todos los usuarios":
+        if output == "All users":
             return "all"
         elif output:
             return output 
         return None
 
     except Exception as e:
-        logging.error(f"Error al seleccionar usuario: {e}")
+        logging.error(f"Error selecting user: {e}")
         subprocess.run(['zenity', '--error',
                        '--title=Error',
-                       f'--text=Error al seleccionar usuario: {str(e)}'],
+                       f'--text=Error selecting user: {str(e)}'],
                        check=True)
         return None
 
@@ -180,7 +179,7 @@ def select_steam_user(STEAM_USERDATA_DIR, get_current_user, get_steam_username, 
         ]
 
         if not user_folders:
-            QMessageBox.critical(None, "Error", "No se encontró la carpeta de usuario de Steam.")
+            QMessageBox.critical(None, "Error", "Steam user folder not found.")
             return None
 
         current_user = get_current_user()
@@ -189,14 +188,14 @@ def select_steam_user(STEAM_USERDATA_DIR, get_current_user, get_steam_username, 
 
         # Create dialog
         dialog = QDialog()
-        dialog.setWindowTitle("Seleccionar usuario de Steam")
+        dialog.setWindowTitle("Select Steam User")
         dialog.setMinimumSize(600, 400)  # Larger size for Steam Deck touch screen
 
         # Main layout
         layout = QVBoxLayout(dialog)
         
         # Add label
-        label = QLabel("Selecciona un usuario de Steam:")
+        label = QLabel("Select a Steam user:")
         label.setStyleSheet("font-size: 18px;")
         layout.addWidget(label)
 
@@ -212,7 +211,7 @@ def select_steam_user(STEAM_USERDATA_DIR, get_current_user, get_steam_username, 
             username = get_steam_username(user_id)
             user_mapping[user_id] = username
             
-            display_name = f"{username} (usuario actual)" if user_id == current_user else username
+            display_name = f"{username} (current user)" if user_id == current_user else username
             
             btn = QPushButton(display_name)
             btn.setStyleSheet("""
@@ -231,7 +230,7 @@ def select_steam_user(STEAM_USERDATA_DIR, get_current_user, get_steam_username, 
         layout.addWidget(scroll)
 
         # Add "All users" button
-        all_users_btn = QPushButton("Todos los usuarios")
+        all_users_btn = QPushButton("All users")
         all_users_btn.setStyleSheet("""
             QPushButton {
                 padding: 20px;
@@ -261,15 +260,14 @@ def select_steam_user(STEAM_USERDATA_DIR, get_current_user, get_steam_username, 
         return selected_user[0]
 
     except Exception as e:
-        logging.error(f"Error al seleccionar el usuario de Steam: {e}")
-        QMessageBox.critical(None, "Error", f"Ocurrió un error: {str(e)}")
+        logging.error(f"Error selecting Steam user: {e}")
+        QMessageBox.critical(None, "Error", f"An error occurred: {str(e)}")
         return None
 '''
 
 def download_image(url, path):
-
     if not url:
-        logging.warning(f"URL de imagen vacía para {path}")
+        logging.warning(f"Empty image URL for {path}")
         return False
     try:
         response = requests.get(url, timeout=10)
@@ -278,14 +276,14 @@ def download_image(url, path):
                 f.write(response.content)
             return True
         else:
-            logging.warning(f"No se pudo descargar la imagen desde {url}. Código de estado: {response.status_code}")
+            logging.warning(f"Could not download image from {url}. Status code: {response.status_code}")
     except Exception as e:
-        logging.error(f"Error al descargar la imagen desde {url}: {e}")
+        logging.error(f"Error downloading image from {url}: {e}")
     return False
 
 def get_steam_images(app_id):
     """
-    Obtiene las URLs de imágenes desde Steam CDN.
+    Gets image URLs from Steam CDN.
     """
     base_url = f"https://cdn.akamai.steamstatic.com/steam/apps/{app_id}"
     return {
@@ -296,7 +294,6 @@ def get_steam_images(app_id):
     }
 
 def get_thegamesdb_images(game_name):
-
     search_url = f"https://api.thegamesdb.net/v1/Games/ByGameName?name={quote(game_name)}"
     try:
         response = requests.get(search_url, timeout=10)
@@ -316,11 +313,10 @@ def get_thegamesdb_images(game_name):
                         "icon": images_data.get("icon", "") or images_data.get("clearlogo", ""), 
                     }
     except Exception as e:
-        logging.error(f"Error obteniendo imágenes de TheGamesDB para {game_name}: {e}")
+        logging.error(f"Error getting images from TheGamesDB for {game_name}: {e}")
     return {}
 
 def save_grid_images(app_id_short, USER_CONFIG_DIR, game_data, bigpicture_appid=None, exe_path=None):
-
     grid_path = os.path.join(USER_CONFIG_DIR, "grid")
     icons_path = os.path.join(USER_CONFIG_DIR, "icons")
     os.makedirs(grid_path, exist_ok=True)
@@ -367,7 +363,7 @@ def save_grid_images(app_id_short, USER_CONFIG_DIR, game_data, bigpicture_appid=
         "icon": icon_path,
     }
 
-    logging.info(f"Verificando imágenes para {game_data['name']}")
+    logging.info(f"Checking images for {game_data['name']}")
 
     if image_mapping["icon"] and icon_path:
         if image_mapping["icon"].startswith(('http://', 'https://')):
@@ -375,7 +371,7 @@ def save_grid_images(app_id_short, USER_CONFIG_DIR, game_data, bigpicture_appid=
                 if not download_image(image_mapping["icon"], icon_path):
                     icon_path = os.path.join(icons_path, f"{app_id_short}.ico")
                     if exe_path and extract_icon(exe_path, icon_path):
-                        logging.info(f"Ícono extraído del ejecutable para {game_data['name']}")
+                        logging.info(f"Icon extracted from executable for {game_data['name']}")
                         image_mapping["icon"] = icon_path
                         image_files["icon"] = icon_path
                     else:
@@ -412,7 +408,7 @@ def save_grid_images(app_id_short, USER_CONFIG_DIR, game_data, bigpicture_appid=
                     download_tasks.append((url, bigpicture_image_path))
 
     if download_tasks:
-        logging.info(f"Descargando {len(download_tasks)} imágenes para {game_data['name']}")
+        logging.info(f"Downloading {len(download_tasks)} images for {game_data['name']}")
         with concurrent.futures.ThreadPoolExecutor() as executor:
             future_to_url = {executor.submit(download_image, url, path): (url, path) for url, path in download_tasks}
             
@@ -420,18 +416,17 @@ def save_grid_images(app_id_short, USER_CONFIG_DIR, game_data, bigpicture_appid=
                 url, path = future_to_url[future]
                 try:
                     if not future.result():
-                        logging.error(f"Error al descargar {url}")
+                        logging.error(f"Error downloading {url}")
                 except Exception as e:
-                    logging.error(f"Error inesperado al descargar {url}: {e}")
+                    logging.error(f"Unexpected error downloading {url}: {e}")
     else:
-        logging.info(f"Todas las imágenes para {game_data['name']} ya existen")
+        logging.info(f"All images for {game_data['name']} already exist")
 
     for key in image_mapping:
         if key in image_files and os.path.exists(image_files[key]):
             image_mapping[key] = image_files[key]
 
     return image_mapping
-
 
 def read_type(reader):
     return reader.read(1)
@@ -462,7 +457,7 @@ def read_object(reader):
         elif type_byte == b'\x02':  # VdfType.Int
             result[name] = read_int(reader)
         else:
-            raise ValueError(f"Tipo desconocido: {type_byte.hex()}")
+            raise ValueError(f"Unknown type: {type_byte.hex()}")
     return result
 
 def write_type(writer, value):
@@ -491,7 +486,6 @@ def write_object(writer, value):
             write_int(writer, sub_object)
     write_type(writer, b'\x08')  # VdfType.ObjectEnd
 
-
 def load_shortcuts(path):
     if not os.path.exists(path):
         return {}
@@ -514,7 +508,6 @@ def get_valid_shortcuts(shortcuts_path):
     return valid_shortcuts, removed_count
 
 def reindex_shortcuts_alphabetically(shortcuts):
-
     sorted_shortcuts = sorted(shortcuts.items(),
                             key=lambda x: x[1].get('appname', '').lower())
     
@@ -522,11 +515,10 @@ def reindex_shortcuts_alphabetically(shortcuts):
     for new_index, (old_index, shortcut_data) in enumerate(sorted_shortcuts):
         reindexed[str(new_index)] = shortcut_data
     
-    logging.info(f"Reindexados {len(reindexed)} shortcuts ordenados alfabéticamente")
+    logging.info(f"Reindexed {len(reindexed)} shortcuts alphabetically")
     return reindexed
 
 def save_shortcuts(path, shortcuts):
-
     try:
         backup_path = path + "_old"
         if os.path.exists(path):
@@ -534,17 +526,16 @@ def save_shortcuts(path, shortcuts):
 
         with open(path, "wb") as f:
             write_object(f, {"shortcuts": shortcuts})
-        logging.info(f"Archivo shortcuts.vdf actualizado correctamente")
+        logging.info(f"shortcuts.vdf file updated successfully")
 
         if os.path.exists(backup_path):
             os.remove(backup_path)
             
     except Exception as e:
-        logging.error(f"Error al guardar: {e}")
+        logging.error(f"Error saving: {e}")
         if os.path.exists(backup_path):
             os.rename(backup_path, path)
         sys.exit(1)
-
 
 def add_entry(shortcuts, input_tuple):
     entry_id = input_tuple[13][0]
@@ -569,7 +560,6 @@ def add_entry(shortcuts, input_tuple):
     }
 
 def input_preparation(args, entry_index):
-
     var_appid = str(args[0])  
     var_app_name = args[1]
     var_path = f'"{args[2]}"'  
@@ -591,7 +581,6 @@ def input_preparation(args, entry_index):
             var_allow_overlay, var_open_vr, var_last_play_time, var_tags, entry_index)
 
 def game_exists(shortcuts_path, exe_path):
-
     normalized_exe_path = os.path.normcase(os.path.normpath(exe_path)).encode('utf-8')
     if os.path.exists(shortcuts_path):
         try:
@@ -599,7 +588,7 @@ def game_exists(shortcuts_path, exe_path):
                 content = f.read()
                 return normalized_exe_path in content
         except Exception as e:
-            logging.error(f"Error al leer el archivo shortcuts.vdf: {e}")
+            logging.error(f"Error reading shortcuts.vdf file: {e}")
             return False
 
 def find_entry_index(shortcuts):
@@ -609,10 +598,9 @@ def find_entry_index(shortcuts):
     return str(entry_index), entry_index
 
 def set_proton_compat_tool(short_appid, compat_tool):
-
     try:
         if not os.path.exists(CONFIG_VDF_PATH):
-            logging.error(f"El archivo {CONFIG_VDF_PATH} no existe.")
+            logging.error(f"File {CONFIG_VDF_PATH} does not exist.")
             return
 
         with open(CONFIG_VDF_PATH, "r", encoding="utf-8") as f:
@@ -638,9 +626,9 @@ def set_proton_compat_tool(short_appid, compat_tool):
         with open(CONFIG_VDF_PATH, "w", encoding="utf-8") as f:
             vdf.dump(config_data, f, pretty=True)
         
-        logging.info(f"Configuración de Proton actualizada para {short_appid}.")
+        logging.info(f"Proton configuration updated for {short_appid}.")
     except Exception as e:
-        logging.error(f"Error al configurar Proton en config.vdf: {e}")
+        logging.error(f"Error setting Proton in config.vdf: {e}")
 
 def add_games_to_shortcuts(games, user_id):
     USER_CONFIG_DIR = os.path.join(STEAM_USERDATA_DIR, user_id, "config")
@@ -702,27 +690,26 @@ def add_games_to_shortcuts(games, user_id):
 
             set_proton_compat_tool(app_id_short, get_proton_version())
 
-
         save_shortcuts(shortcuts_path, shortcuts)
             
-        logging.info(f"Resumen: {games_added} juegos añadidos, {games_updated} juegos actualizados (imágenes), {removed_count} juegos eliminados (ejecutables no encontrados)")
+        logging.info(f"Summary: {games_added} games added, {games_updated} games updated (images), {removed_count} games removed (executables not found)")
     except Exception as e:
-        logging.error(f"Error al procesar el archivo shortcuts.vdf: {e}")
+        logging.error(f"Error processing shortcuts.vdf file: {e}")
         sys.exit(1)
 
     return steam_id_mapping
 
 def main(json_file):
-    logging.info("Iniciando el script...")
+    logging.info("Starting script...")
 
     if not os.path.exists(json_file):
-        logging.error(f"El archivo JSON no existe: {json_file}")
+        logging.error(f"JSON file does not exist: {json_file}")
         sys.exit(1)
 
     process_user_selected_games(json_file)
 
     games = load_games(json_file)
-    logging.info(f"Se cargaron {len(games)} juegos desde el archivo JSON.")
+    logging.info(f"Loaded {len(games)} games from JSON file.")
 
 #    selected_user = select_steam_user(STEAM_USERDATA_DIR, get_current_user, get_steam_username, save_user_mapping)
 #    selected_user = select_steam_user()
@@ -741,12 +728,12 @@ def main(json_file):
     steam_id_mapping = {}
 
     for user_id in user_folders:
-        logging.info(f"Procesando usuario: {user_id}")
+        logging.info(f"Processing user: {user_id}")
         user_steam_id_mapping = add_games_to_shortcuts(games, user_id)
         steam_id_mapping.update(user_steam_id_mapping)
 
     save_steam_id_mapping(steam_id_mapping)
-    logging.info("Script finalizado con éxito.")
+    logging.info("Script finished successfully.")
 
 if __name__ == "__main__":
     if len(sys.argv) == 1:
@@ -755,7 +742,7 @@ if __name__ == "__main__":
         json_file = sys.argv[1]
 
     if not os.path.exists(json_file):
-        logging.error(f"El archivo JSON no existe: {json_file}")
+        logging.error(f"JSON file does not exist: {json_file}")
         sys.exit(1)
 
     main(json_file)
