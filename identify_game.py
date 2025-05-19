@@ -937,7 +937,6 @@ class GameMatcher:
 
     def _handle_gog_match(self, root_folder: str, root_folder_path: str, 
                         gog_info: Dict, exe_path: str = '') -> Optional[Dict]:
-        """Versión mejorada que acepta el ejecutable encontrado previamente"""
         yaml_entry = self.indexes['yaml_by_gog_id'].get(gog_info['id'])
         
         result = {
@@ -1474,7 +1473,6 @@ def run_identification():
     return all_matches
 
 def add_files_to_user_selected(games_data: dict, matcher: GameMatcher) -> dict:
-    """Añade el campo 'files' a los juegos user_selected si no lo tienen."""
     yaml_by_name = matcher.indexes.get('yaml_by_name', {})
     
     for game_name, game_info in games_data.items():
