@@ -10,17 +10,17 @@ El proyecto presupone backups en el mismo formato que GBM y una herramienta de s
 
 * **Sincronización de partidas guardadas:** Sincroniza automáticamente las partidas guardadas entre diferentes dispositivos.
 * **Gestión de juegos no pertenecientes a Steam:** Agrega juegos de otras plataformas (como GOG, Heroic, etc.) a la biblioteca de Steam.
-* **Respaldo de partidas guardadas:** Crea respaldos automáticos de las partidas guardadas en formato \`.7z\`.
+* **Respaldo de partidas guardadas:** Crea respaldos automáticos de las partidas guardadas en formato `.7z`.
 * **Restauración de partidas perdidas:** Detecta y restaura partidas guardadas que puedan haberse perdido.
 
 
 ### Dependencias:
 
 * Python 3.11 o superior
-* \`py7zr\` para la manipulación de archivos \`.7z\`
-* \`zenity\` para la interfaz gráfica de usuario
-* \`requests\` para consultas a APIs externas
-* \`vdf\` para manejar archivos de configuración de Steam
+* `py7zr` para la manipulación de archivos `.7z`
+* `zenity` para la interfaz gráfica de usuario
+* `requests` para consultas a APIs externas
+* `vdf` para manejar archivos de configuración de Steam
 
 ### Sistema operativo:
 
@@ -68,11 +68,11 @@ Las opciones disponibles incluyen:
 
 El programa se compone de 3 (realmente 4) módulos principales, cada uno realiza una función específica. 
 
-El primero es la identificación de juegos, para lo cual busca en la carpeta de sincronización designada y busca los ejecutables de los juegos. Luego adicionalmente complementa con información de lutris que usará despues. 
+1. Identificación de juegos, para lo cual busca en la carpeta de sincronización designada y busca los ejecutables de los juegos. Luego adicionalmente complementa con información de lutris que usará despues. 
 
-El segundo se encarga de agregar correctamente el juego a steam, asociar las imagenes, etc. Un aspecto importante de esta fase es que calcula los ids de los juegos agregados lo cual es necesario para la fase de sincronización. 
+2. Agrega el juego a steam, asocia las imagenes, etc. Un aspecto importante de esta fase es que calcula los ids de los juegos agregados lo cual es necesario para la fase de sincronización. 
 
-El tercero (el motivo principal para la creación del programa), es el encargado de la sincronización de las partidas. Este módulo lee los backups de la carpeta designada y los sincroniza con los archivos locales de las partidas de juegos agregados a steam. Para ello nos apoyamos en la estructura de los backups creados por Game Backup Monitor (GBM) y en los archivos de configuraciones de juegos de GBM y ludusavi.
+3. Sincroniza las partidas (el motivo principal para la creación del programa). Este módulo lee los backups de la carpeta designada y los sincroniza con los archivos locales de las partidas de juegos agregados a steam. Para ello nos apoyamos en la estructura de los backups creados por Game Backup Monitor (GBM) y en los archivos de configuraciones de juegos de GBM y ludusavi.
 
 *El último módulo es la busqueda manual de los juegos que a nivel funcional cumple la misma función que el primer módulo para la identificación, pero permite la selección por parte del usuario y sobreescribe la entrada en caso de haber sido detectado previamente un juego asociado a dicho ejecutable. La detección automática está programada para respetar las selecciones manuales.
 
@@ -82,17 +82,17 @@ El tercero (el motivo principal para la creación del programa), es el encargado
 
 La mayoría de las opciones del diálogo son autoexplicativas:
 
-1.- Sincronización automática -> El programa completo, es decir identifica, agrega y sincroniza las partidas de los juegos agregados.
+1. Sincronización automática -> El programa completo, es decir identifica, agrega y sincroniza las partidas de los juegos agregados.
 
-2.- Agregar juegos a Steam automáticamente -> ejecuta el primer y segundo módulo (idetifica y agrega a steam)
+2. Agregar juegos a Steam automáticamente -> ejecuta el primer y segundo módulo (idetifica y agrega a steam)
 
-3.- Sincronización de partidas guardadas -> ejecuta la sincronización de partidas
+3. Sincronización de partidas guardadas -> ejecuta la sincronización de partidas
 
-4.- Limpiar configuración -> Distintas opciones para eliminar la configuración/decisiones respecto a los juegos agregados, las partidas sincronizadas o ambas.
+4. Limpiar configuración -> Distintas opciones para eliminar la configuración/decisiones respecto a los juegos agregados, las partidas sincronizadas o ambas.
 
-5.- Activar/desactivar Syncthing -> permite activar el servicio de syncthing para que funcione en el modo juego de steam (para la sincronización de las carpetas, ya sea de las partidas guardadas o si se ha decidido sincronizar una carpeta con las instalaciones de los juegos, etc.**)
+5. Activar/desactivar Syncthing -> permite activar el servicio de syncthing para que funcione en el modo juego de steam (para la sincronización de las carpetas, ya sea de las partidas guardadas o si se ha decidido sincronizar una carpeta con las instalaciones de los juegos, etc.**)
 
-6.- Cambiar carpetas de juegos sincronizados -> Permite seleccionar las carpetas en las que se encontrarán los juegos sincronizados, se recomienda usar la carpeta por defecto ($Home/games), aunque se pueden agregar varias o borrarlas.
+6. Cambiar carpetas de juegos sincronizados -> Permite seleccionar las carpetas en las que se encontrarán los juegos sincronizados, se recomienda usar la carpeta por defecto ($Home/games), aunque se pueden agregar varias o borrarlas.
 
 
 ** Por pruebas realizadas, syncthing funciona bien para los respaldos de partidas guardadas, pero con los juegos ha dado problemas para archivos grandes, con lo que se recomienda otros métodos o programas para pasar los juegos al dispositivo desde windows (o hacerlo manualmente)
@@ -101,9 +101,9 @@ La mayoría de las opciones del diálogo son autoexplicativas:
 
 Las dos principales referencias en que se ha basado el proyecto y cuyos archivos de configuraciones usamos como base de la búsqueda/identificación de juegos y archivos de guardado:
 
-GBM -> https://mikemaximus.github.io/gbm-web/
+**GBM** -> https://mikemaximus.github.io/gbm-web/
 
-Ludusavi Manifest -> https://github.com/mtkennerly/ludusavi-manifest
+**Ludusavi Manifest** -> https://github.com/mtkennerly/ludusavi-manifest
 
 Debo mencionar los siguientes repositorios que he usado de referencia para conseguir averiguar cómo modificar correctamente el binario de accesos directos de steam (shortcuts.vdf) y el cálculo de los distintos ids que steam usa para cada juego en sus operaciones internas:
 
