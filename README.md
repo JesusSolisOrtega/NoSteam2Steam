@@ -17,10 +17,10 @@ NoSteam2Steam assumes backups are in the same format as GBM and uses a folder sy
 ### Dependencies:
 
 * Python 3.11 or higher
-* \`py7zr\` for \`.7z\` file manipulation
-* \`zenity\` for the graphical user interface
-* \`requests\` for external API queries
-* \`vdf\` for handling Steam configuration files
+* `py7zr` for `.7z` file manipulation
+* `zenity` for the graphical user interface
+* `requests` for external API queries
+* `vdf` for handling Steam configuration files
 
 ### Supported OS:
 
