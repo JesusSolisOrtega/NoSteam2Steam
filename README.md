@@ -142,4 +142,6 @@ Si tienes algún proyecto comercial donde quieras integrarlo contactame y segura
 
 ## Donaciones
 
-[![Paypal](https://www.paypal.com/donate/?hosted_button_id=VVRC7ZTVFJWDU)]
+Si has encontrado útil NoSteam2Steam y quieres agradecer mi trabajo
+
+* **PayPal:** [https://www.paypal.com/donate/?hosted_button_id=VVRC7ZTVFJWDU]
