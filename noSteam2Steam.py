@@ -12,21 +12,21 @@ logger = logging.getLogger("no_steam_to_steam.log")
 
 def show_main_menu():
     menu = [
-        "1", "Sincronización automática (agrega juegos y sincroniza partidas)",
-        "2", "Agregar juegos a Steam automáticamente",
-        "3", "Sincronización de partidas guardadas",
-        "4", "Agregar manualmente un juego a Steam",
-        "5", "Limpiar configuración de NoSteam2Steam",
-        "6", "Activar/desactivar Syncthing",
-        "7", "Cambiar carpetas de juegos sincronizados",
-        "8", "Salir"
+        "1", "Automatic sync (add games and sync saves)",
+        "2", "Add games to Steam automatically",
+        "3", "Game saves synchronization",
+        "4", "Manually add a game to Steam",
+        "5", "Clean NoSteam2Steam configuration",
+        "6", "Enable/disable Syncthing",
+        "7", "Change synchronized game folders",
+        "8", "Exit"
     ]
     
     cmd = [
         'zenity', '--list',
-        '--title=NoSteam2Steam - Gestión de Juegos No-Steam',
-        '--text=Seleccione una opción:',
-        '--column=Opción', '--column=Descripción',
+        '--title=NoSteam2Steam - Non-Steam Games Management',
+        '--text=Select an option:',
+        '--column=Option', '--column=Description',
         '--width=650', '--height=400',
     ] + menu
 
@@ -38,7 +38,7 @@ def show_main_menu():
 
 def run_script(script_path, args=None):
     if not script_path.exists():
-        logger.error(f"Error: No se encontró el script {script_path}")
+        logger.error(f"Error: Script not found {script_path}")
         return False
     
     try:
@@ -53,7 +53,7 @@ def run_script(script_path, args=None):
         subprocess.run(cmd, check=True)
         return True
     except subprocess.CalledProcessError as e:
-        logger.error(f"Error al ejecutar {script_path}: {e}")
+        logger.error(f"Error executing {script_path}: {e}")
         return False
 
 def main():
@@ -71,7 +71,7 @@ def main():
             try:
                 run_sync()
             except Exception as e:
-                logger.error(f"Error en la sincronización: {e}")
+                logger.error(f"Sync error: {e}")
                 continue
             
         elif option == "2":
@@ -89,7 +89,7 @@ def main():
             try:
                 show_cleanup_dialog()
             except Exception as e:
-                logger.error(f"Error en eliminando configuración: {e}")
+                logger.error(f"Error cleaning configuration: {e}")
                 continue
         elif option == "6":
             try:
@@ -105,11 +105,10 @@ def main():
                 logger.error(f"Error: {e}")
                 continue
             
-            
         subprocess.run([
             'zenity', '--info',
-            '--title=Operación completada',
-            '--text=La acción seleccionada ha finalizado.',
+            '--title=Operation completed',
+            '--text=The selected action has finished.',
             '--timeout=2'
         ])
 
@@ -117,7 +116,7 @@ if __name__ == "__main__":
     try:
         subprocess.run(['zenity', '--version'], check=True, stdout=subprocess.DEVNULL)
     except (subprocess.CalledProcessError, FileNotFoundError):
-        logger.error("Error: Zenity no está instalado. Por favor instálalo con:")
+        logger.error("Error: Zenity is not installed. Please install it with:")
         logger.error("sudo apt install zenity")
         sys.exit(1)
     
