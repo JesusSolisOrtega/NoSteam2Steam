@@ -57,11 +57,11 @@ def get_backups_directory():
                         resolved_path = (script_dir / custom_path).resolve()
                         if resolved_path.is_dir():
                             return str(resolved_path)
-                        logger.warning(f"Ruta configurada inválida: {custom_path}")
+                        logger.warning(f"Configured path is not valid: {custom_path}")
         
         return default_directory
     except Exception as e:
-        logger.error(f"Error al leer configuración: {e}")
+        logger.error(f"Error reading configuration: {e}")
         return DEFAULT_BACKUPS_PATH
 
 # Identify_games.py
@@ -147,7 +147,7 @@ def get_steam_username(user_id):
         
         return username
     except Exception as e:
-        logging.error(f"Error al leer localconfig.vdf: {e}")
+        logging.error(f"Error reading localconfig.vdf: {e}")
         return user_id 
 
 def get_current_user():
@@ -164,7 +164,7 @@ def get_current_user():
                 return str(steamid64_to_accountid(user_id))
         return None
     except Exception as e:
-        logging.error(f"Error al leer loginusers.vdf: {e}")
+        logging.error(f"Error reading loginusers.vdf: {e}")
         return None
 
 # add2Steam.py
