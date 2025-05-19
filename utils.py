@@ -1,4 +1,3 @@
-# utils.py
 import hashlib
 import logging
 import os
@@ -21,7 +20,7 @@ def compute_hash(path, max_workers=None, size_threshold=100*1024*1024):
         elif path.is_dir():
             return _hash_dir(path, max_workers, size_threshold)
     except Exception as e:
-        logger.error(f"Error al calcular hash: {path} - {str(e)}")
+        logger.error(f"Error calculating hash: {path} - {str(e)}")
         return None
 
 def _hash_file(file_path, size_threshold, sample_size=1*1024*1024):
@@ -51,7 +50,7 @@ def _hash_file(file_path, size_threshold, sample_size=1*1024*1024):
 
         return hasher.hexdigest()
     except Exception as e:
-        logger.error(f"Error procesando {file_path}: {str(e)}")
+        logger.error(f"Error processing {file_path}: {str(e)}")
         return None
 
 def _hash_dir(dir_path, max_workers=None, size_threshold=150*1024*1024):
@@ -104,8 +103,7 @@ def _hash_dir(dir_path, max_workers=None, size_threshold=150*1024*1024):
 
     return hasher.hexdigest()
 
-def delete_current_config(game_data = True, saves = True) -> bool:
-
+def delete_current_config(game_data=True, saves=True) -> bool:
     config_files = []
     if game_data:
         config_files.append("games.json")
@@ -125,9 +123,9 @@ def delete_current_config(game_data = True, saves = True) -> bool:
         try:
             if os.path.exists(file_path):
                 os.remove(file_path)
-                logger.info(f"Eliminado: {file_path}")
+                logger.info(f"Deleted: {file_path}")
         except Exception as e:
-            logger.error(f"Error eliminando {file_path}: {e}")
+            logger.error(f"Error deleting {file_path}: {e}")
             success = False
     
     return success
@@ -135,7 +133,7 @@ def delete_current_config(game_data = True, saves = True) -> bool:
 def delete_games_images() -> bool:
     user = get_current_user()
     if not user:
-        logger.info("No se pudo determinar el usuario actual")
+        logger.info("Could not determine current user")
         return False
     
     steam_config_path = Path(f"/home/deck/.steam/steam/userdata/{user}/config")
@@ -152,25 +150,24 @@ def delete_games_images() -> bool:
                         item.unlink()
 
         except Exception as e:
-            logger.error(f"Error limpiando {folder_path}: {e}")
+            logger.error(f"Error cleaning {folder_path}: {e}")
             success = False
     
     return success
 
 def show_cleanup_dialog():
-
     try:
         selection = subprocess.run([
             'zenity',
             '--list',
-            '--title=Opciones de limpieza',
-            '--text=Seleccione qué desea borrar:',
-            '--column=Opción', '--column=Descripción',
-            '1', 'Borrar toda la configuración',
-            '2', 'Borrar configuración e imágenes',
-            '3', 'borrar configuración de juegos detectados (no borra juegos)',
-            '4', 'Borrar configuración de partidas (no borra partidas)',
-            '5', 'Borrar imágenes de juegos',
+            '--title=Cleanup Options',
+            '--text=Select what to delete:',
+            '--column=Option', '--column=Description',
+            '1', 'Delete all configuration',
+            '2', 'Delete configuration and images',
+            '3', 'Delete detected games configuration (does not delete games)',
+            '4', 'Delete save games configuration (does not delete saves)',
+            '5', 'Delete game images',
             '--height=350',
             '--width=500'
         ], capture_output=True, text=True).stdout.strip()
@@ -181,8 +178,8 @@ def show_cleanup_dialog():
         confirm = subprocess.run([
             'zenity',
             '--question',
-            '--title=Confirmar',
-            '--text=¿Está seguro que desea continuar? Esta acción no se puede deshacer.',
+            '--title=Confirm',
+            '--text=Are you sure you want to continue? This action cannot be undone.',
             '--width=300'
         ]).returncode
 
@@ -206,8 +203,8 @@ def show_cleanup_dialog():
             subprocess.run([
                 'zenity',
                 '--info',
-                '--title=Completado',
-                '--text=La limpieza se completó correctamente',
+                '--title=Completed',
+                '--text=Cleanup completed successfully',
                 '--width=200'
             ])
         else:
@@ -215,7 +212,7 @@ def show_cleanup_dialog():
                 'zenity',
                 '--error',
                 '--title=Error',
-                '--text=Ocurrieron errores durante la limpieza',
+                '--text=Errors occurred during cleanup',
                 '--width=200'
             ])
 
@@ -226,13 +223,12 @@ def show_cleanup_dialog():
             'zenity',
             '--error',
             '--title=Error',
-            '--text=Error inesperado: ' + str(e),
+            '--text=Unexpected error: ' + str(e),
             '--width=300'
         ])
         return False
 
 def manage_syncthingy_service():
-
     def is_active():
         return subprocess.run(["systemctl", "--user", "is-active", "syncthingy.service"], 
                             capture_output=True).returncode == 0
@@ -245,11 +241,11 @@ def manage_syncthingy_service():
         active = is_active()
         zenity_cmd = [
             "zenity", "--list", "--radiolist",
-            "--title=Control SyncThingy",
-            f"--text=Estado: {'ACTIVO' if active else 'INACTIVO'}\nReinicio necesario para cambios completos",
-            "--column=Selección", "--column=Acción",
-            "TRUE", f"{'Desactivar' if active else 'Activar'} SyncThingy",
-            "FALSE", "Salir",
+            "--title=SyncThingy Control",
+            f"--text=Status: {'ACTIVE' if active else 'INACTIVE'}\nRestart required for full changes",
+            "--column=Selection", "--column=Action",
+            "TRUE", f"{'Deactivate' if active else 'Activate'} SyncThingy",
+            "FALSE", "Exit",
             "--width=350", "--height=250"
         ]
         result = subprocess.run(zenity_cmd, capture_output=True, text=True)
@@ -258,8 +254,8 @@ def manage_syncthingy_service():
     if not SERVICE_FILE.exists():
         install = subprocess.run([
             "zenity", "--question",
-            "--text=Servicio no instalado. ¿Instalar SyncThingy en background?",
-            "--ok-label=Instalar", "--cancel-label=Cancelar"
+            "--text=Service not installed. Install SyncThingy in background?",
+            "--ok-label=Install", "--cancel-label=Cancel"
         ]).returncode == 0
         
         if install:
@@ -271,16 +267,16 @@ def manage_syncthingy_service():
             subprocess.run(["systemctl", "--user", "daemon-reload"])
             subprocess.run([
                 "zenity", "--info",
-                "--text=Servicio instalado. Ejecute nuevamente para controlar.",
+                "--text=Service installed. Run again to control.",
                 "--timeout=2"
             ])
         return False
     
     choice = show_dialog()
-    if not choice or "Salir" in choice:
+    if not choice or "Exit" in choice:
         return False
     
-    if "Activar" in choice or "Desactivar" in choice:
+    if "Activate" in choice or "Deactivate" in choice:
         active = is_active()
         try:
             if active:
@@ -292,22 +288,20 @@ def manage_syncthingy_service():
             
             subprocess.run([
                 "zenity", "--info",
-                f"--text=SyncThingy {'activado' if not active else 'desactivado'}.\nReinicio recomendado.",
+                f"--text=SyncThingy {'activated' if not active else 'deactivated'}.\nRestart recommended.",
                 "--timeout=2"
             ])
             return True
         except subprocess.CalledProcessError:
             subprocess.run([
                 "zenity", "--error",
-                "--text=Error al cambiar el estado del servicio",
+                "--text=Error changing service status",
                 "--timeout=2"
             ])
     
     return False
 
-
 def manage_sync_folders() -> List[str]:
-
     current_folders = []
     if os.path.exists(SYNC_FOLDERS_FILE):
         with open(SYNC_FOLDERS_FILE, 'r') as f:
@@ -316,22 +310,22 @@ def manage_sync_folders() -> List[str]:
     while True:
         choice = subprocess.run([
             'zenity', '--list',
-            '--title=Gestión de Carpetas de Sincronización',
-            '--text=Seleccione una acción:',
-            '--column=Acción',
-            'Añadir carpeta',
-            'Eliminar carpeta',
+            '--title=Sync Folders Management',
+            '--text=Select an action:',
+            '--column=Action',
+            'Add folder',
+            'Remove folder',
             '--hide-header',
-            '--cancel-label=Salir'
+            '--cancel-label=Exit'
         ], capture_output=True, text=True).stdout.strip()
 
         if not choice:
             break
 
-        if choice == 'Añadir carpeta':
+        if choice == 'Add folder':
             new_folder = subprocess.run([
                 'zenity', '--file-selection',
-                '--title=Seleccionar carpeta para sincronizar',
+                '--title=Select folder to sync',
                 '--directory'
             ], capture_output=True, text=True).stdout.strip()
 
@@ -340,11 +334,11 @@ def manage_sync_folders() -> List[str]:
                 with open(SYNC_FOLDERS_FILE, 'w') as f:
                     f.write("\n".join(current_folders))
 
-        elif choice == 'Eliminar carpeta':
+        elif choice == 'Remove folder':
             if not current_folders:
                 subprocess.run([
                     'zenity', '--info',
-                    '--text=No hay carpetas para eliminar',
+                    '--text=No folders to remove',
                     '--timeout=2'
                 ])
                 continue
@@ -352,10 +346,10 @@ def manage_sync_folders() -> List[str]:
             folders_formatted = "\n".join([f"FALSE\n{folder}" for folder in current_folders])
             selected = subprocess.run([
                 'zenity', '--list',
-                '--title=Seleccionar carpetas a eliminar',
-                '--text=Marque las carpetas a remover:',
-                '--column=Selección',
-                '--column=Carpeta',
+                '--title=Select folders to remove',
+                '--text=Check folders to remove:',
+                '--column=Selection',
+                '--column=Folder',
                 '--checklist',
                 '--separator=\n',
                 '--multiple'
@@ -375,31 +369,31 @@ def select_backup_directory():
     config_file = ALTERNATIVE_BACKUPS_PATH_FILE
 
     zenity_command = [
-        'zenity', '--list', '--title=Selección de directorio de backups',
-        '--text=Seleccione una opción:', '--column=Opción',
-        'Seleccionar directorio personalizado',
-        'Usar directorio por defecto (/home/deck/Backups)',
+        'zenity', '--list', '--title=Backup Directory Selection',
+        '--text=Select an option:', '--column=Option',
+        'Select custom directory',
+        'Use default directory (/home/deck/Backups)',
         '--height=200', '--width=400'
     ]
 
     try:
         option = subprocess.check_output(zenity_command, text=True).strip()
         
-        if option == 'Seleccionar directorio personalizado':
+        if option == 'Select custom directory':
             dir_dialog = ['zenity', '--file-selection', '--directory', 
-                         '--title=Seleccione el directorio de backups']
+                         '--title=Select backup directory']
             selected_dir = subprocess.check_output(dir_dialog, text=True).strip()
             
             with open(config_file, 'w') as f:
                 f.write(selected_dir)
-            logger.info(f"Directorio seleccionado guardado: {selected_dir}")
+            logger.info(f"Selected directory saved: {selected_dir}")
             
-        elif option == 'Usar directorio por defecto (/home/deck/Backups)':
+        elif option == 'Use default directory (/home/deck/Backups)':
             if os.path.exists(config_file):
                 os.remove(config_file)
-                logger.info("Se ha restaurado el directorio por defecto")
+                logger.info("Restored default directory")
             else:
-                logger.info("Ya se estaba usando el directorio por defecto")
+                logger.info("Already using default directory")
                 
     except subprocess.CalledProcessError:
-        logger.info("Operación cancelada por el usuario")
+        logger.info("Operation cancelled by user")
