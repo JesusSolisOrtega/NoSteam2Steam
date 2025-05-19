@@ -16,12 +16,11 @@ from utils import compute_hash
 logger = logging.getLogger('GBM_Backup')
 
 def load_games_mapping(path_id_map=ID_MAP_PATH):
-
     try:
         with open(path_id_map, 'r') as file:
             return json.load(file)
     except Exception as e:
-        logger.error(f"Error al cargar el archivo JSON: {e}")
+        logger.error(f"Error loading JSON file: {e}")
         return None
 
 def generate_games_inventory(backups_path=DEFAULT_BACKUPS_PATH, inventory_path="games_backups_inventory.json"):
@@ -35,7 +34,7 @@ def generate_games_inventory(backups_path=DEFAULT_BACKUPS_PATH, inventory_path="
                     if f.is_file() and f.suffix.lower() == '.7z']
         
         if not files_7z:
-            logger.warning(f"Advertencia: No se encontraron archivos .7z en {folder.name}")
+            logger.warning(f"Warning: No .7z files found in {folder.name}")
             continue
 
         backups_metadata = []
@@ -49,7 +48,7 @@ def generate_games_inventory(backups_path=DEFAULT_BACKUPS_PATH, inventory_path="
                 })
 
         if not backups_metadata:
-            logger.warning(f"Advertencia: No se encontraron metadatos válidos en {folder.name}")
+            logger.warning(f"Warning: No valid metadata found in {folder.name}")
             continue
 
         backups_metadata.sort(key=lambda x: x["timestamp"], reverse=True)
@@ -77,28 +76,27 @@ def generate_games_inventory(backups_path=DEFAULT_BACKUPS_PATH, inventory_path="
     try:
         with open(inventory_path, "w", encoding='utf-8') as file:
             json.dump(inventory, file, indent=4, ensure_ascii=False)
-        logger.info(f"Inventario generado y guardado en {inventory_path}")
+        logger.info(f"Inventory generated and saved to {inventory_path}")
         return inventory
     except Exception as e:
-        logger.error(f"Error al guardar el inventario: {str(e)}")
+        logger.error(f"Error saving inventory: {str(e)}")
         return False
 
 def load_games_backup_inventory(inventory_path="games_backups_inventory.json"):
     backups_path = get_backups_directory()
     try:
         if not Path(inventory_path).exists() or file_needs_update(inventory_path):
-            logger.info(f"El archivo de inventario no existe o está desactualizado. Generando inventario...")
+            logger.info(f"Inventory file doesn't exist or is outdated. Generating inventory...")
             if not generate_games_inventory(backups_path=backups_path, inventory_path=inventory_path):
                 return None
 
         with open(inventory_path, "r") as file:
             return json.load(file)
     except Exception as e:
-        logger.error(f"Error al cargar o generar el archivo de inventario: {e}")
+        logger.error(f"Error loading or generating inventory file: {e}")
         return None
 
 def file_needs_update(file_path, days_threshold=7):
-
     try:
         modification_date = datetime.fromtimestamp(Path(file_path).stat().st_mtime)
         current_date = datetime.now()
@@ -109,11 +107,10 @@ def file_needs_update(file_path, days_threshold=7):
     except FileNotFoundError:
         return True
     except Exception as e:
-        logger.error(f"Error al verificar la antigüedad del archivo: {e}")
+        logger.error(f"Error checking file age: {e}")
         return True
 
 def show_backup_selection_dialog(backups_info):
-
     try:
         if not backups_info:
             return -1
@@ -123,13 +120,13 @@ def show_backup_selection_dialog(backups_info):
         
         for i, backup in enumerate(backups_info):
             is_recent = backup.get("most_recent", False)
-            recent_text = " (MÁS RECIENTE)" if is_recent else ""
+            recent_text = " (MOST RECENT)" if is_recent else ""
             
             backup_text = (
-                f"Archivo: {backup['file'].name}{recent_text}\n"
-                f"Carpeta: {backup['folder']}\n"
-                f"Ruta original: {backup['original_path']}\n"
-                f"Última modificación: {backup['modification_date']}\n"
+                f"File: {backup['file'].name}{recent_text}\n"
+                f"Folder: {backup['folder']}\n"
+                f"Original path: {backup['original_path']}\n"
+                f"Last modification: {backup['modification_date']}\n"
             )
             
             zenity_list.append("TRUE" if is_recent else "FALSE")
@@ -142,16 +139,16 @@ def show_backup_selection_dialog(backups_info):
         cmd = [
             'zenity',
             '--list',
-            '--title=Selección de Backup',
-            '--text=Hay múltiples backups para la misma ruta. Selecciona cuál mantener:',
+            '--title=Backup Selection',
+            '--text=Multiple backups found for the same path. Select which one to keep:',
             '--radiolist',
-            '--column=Seleccionar',
+            '--column=Select',
             '--column=ID',
-            '--column=Información del Backup',
+            '--column=Backup Information',
             '--width=800',
             '--height=600',
-            '--ok-label=Aceptar',
-            '--cancel-label=Cancelar'
+            '--ok-label=OK',
+            '--cancel-label=Cancel'
         ] + zenity_list
 
         result = subprocess.run(cmd, 
@@ -168,19 +165,18 @@ def show_backup_selection_dialog(backups_info):
         return default_option
 
     except Exception as e:
-        logging.error(f"Error en diálogo de selección de backup: {e}")
+        logging.error(f"Error in backup selection dialog: {e}")
         subprocess.run([
             'zenity',
             '--error',
             '--title=Error',
-            f'--text=Error al seleccionar backup: {str(e)}'
+            f'--text=Error selecting backup: {str(e)}'
         ], check=True)
         return -1
 
 def find_backups(game_name, inventory, record, backups_path=DEFAULT_BACKUPS_PATH):
-
     if game_name not in inventory:
-        logger.info(f"No se encontraron backups para {game_name} en el inventario.")
+        logger.info(f"No backups found for {game_name} in inventory.")
         return None
     
     all_backups = []
@@ -189,7 +185,7 @@ def find_backups(game_name, inventory, record, backups_path=DEFAULT_BACKUPS_PATH
         folder_path = backups_path / folder
         
         if not folder_path.exists():
-            logger.warning(f"Advertencia: La carpeta {folder} no existe.")
+            logger.warning(f"Warning: Folder {folder} doesn't exist.")
             continue
         
         for file, metadata in entry["7z_files"].items():
@@ -205,7 +201,7 @@ def find_backups(game_name, inventory, record, backups_path=DEFAULT_BACKUPS_PATH
                 })
     
     if not all_backups:
-        logger.info(f"No se encontraron archivos .7z válidos para {game_name}")
+        logger.info(f"No valid .7z files found for {game_name}")
         return None
     
     if len(all_backups) == 1:
@@ -237,7 +233,7 @@ def find_backups(game_name, inventory, record, backups_path=DEFAULT_BACKUPS_PATH
                 reverse=True
             )
             chosen_backups.append(recorded_backups_sorted[0]["file"])
-            logger.info(f"Selección automática: {recorded_backups_sorted[0]['file'].name} (ya registrado)")
+            logger.info(f"Automatic selection: {recorded_backups_sorted[0]['file'].name} (already registered)")
             continue
         
         backups_sorted = sorted(backups, key=lambda x: x["timestamp"], reverse=True)
@@ -264,7 +260,7 @@ def load_metadata_from_7z(file_path_7z):
             game_name = root.findtext(".//GameData/Name")
             original_path = root.findtext(".//GameData/Path")
             if not game_name or not original_path:
-                logger.info(f"Error: El archivo de metadatos no contiene la información necesaria.")
+                logger.info(f"Error: Metadata file doesn't contain required information.")
                 return None
 
             metadata = {
@@ -275,12 +271,11 @@ def load_metadata_from_7z(file_path_7z):
             }
             return metadata
     except Exception as e:
-        logger.info(f"Error al leer el archivo de metadatos: {e}")
+        logger.info(f"Error reading metadata file: {e}")
         return None
     finally:
         if os.path.exists("_gbm_backup_metadata.xml"):
             os.remove("_gbm_backup_metadata.xml")
-
 
 def _copy_folder_7z(file_path_7z, destination_path):
     try:
@@ -294,13 +289,13 @@ def _copy_folder_7z(file_path_7z, destination_path):
             metadata_path.unlink()
             
         if not any(Path(destination_path).iterdir()):
-            logger.error(f"El archivo 7z {file_path_7z} está vacío o no contiene datos válidos")
+            logger.error(f"7z file {file_path_7z} is empty or contains no valid data")
             return False
             
         return True
         
     except Exception as e:
-        logger.error(f"Error al extraer {file_path_7z}: {str(e)}")
+        logger.error(f"Error extracting {file_path_7z}: {str(e)}")
         if Path(destination_path).exists():
             shutil.rmtree(destination_path, ignore_errors=True)
         return False
@@ -321,7 +316,7 @@ def _copy_file_7z(file_path_7z, destination_file_path):
         ]
         
         if not valid_files:
-            logger.error(f"No se encontraron archivos válidos en {file_path_7z}")
+            logger.error(f"No valid files found in {file_path_7z}")
             return False
         
         temp_file = valid_files[0]
@@ -330,14 +325,14 @@ def _copy_file_7z(file_path_7z, destination_file_path):
         return True
         
     except Exception as e:
-        logger.error(f"Error al copiar archivo desde {file_path_7z}: {str(e)}")
+        logger.error(f"Error copying file from {file_path_7z}: {str(e)}")
         return False
     finally:
         if temp_dir.exists():
             shutil.rmtree(temp_dir, ignore_errors=True)
 
 def copy_saves(file_path_7z, destination_path, is_folder=True):
-    logger.info(f"Iniciando copia desde {file_path_7z} a {destination_path}")
+    logger.info(f"Starting copy from {file_path_7z} to {destination_path}")
     
     if is_folder:
         result = _copy_folder_7z(file_path_7z, destination_path)
@@ -354,7 +349,7 @@ def load_sync_record(record_path="sync_record.json"):
         else:
             return {}
     except Exception as e:
-        logger.info(f"Error al cargar el registro de sincronización: {e}")
+        logger.info(f"Error loading sync record: {e}")
         return {}
 
 def save_sync_record(record, record_path="sync_record.json"):
@@ -362,10 +357,9 @@ def save_sync_record(record, record_path="sync_record.json"):
         with open(record_path, "w") as file:
             json.dump(record, file, indent=4)
     except Exception as e:
-        logger.info(f"Error al guardar el registro de sincronización: {e}")
+        logger.info(f"Error saving sync record: {e}")
 
 def get_files_date(path):
-
     if not path.exists():
         return None
 
@@ -382,7 +376,6 @@ def get_files_date(path):
     return most_recent_date
 
 def update_backup(file_path_7z, steamdeck_path, metadata=None):
-
     try:
         temp_dir = Path("temp_steamdeck")
         temp_dir.mkdir(parents=True, exist_ok=True)
@@ -392,7 +385,7 @@ def update_backup(file_path_7z, steamdeck_path, metadata=None):
 
         if is_folder:
             if not steamdeck_path.exists():
-                raise ValueError(f"Ruta no encontrada: {steamdeck_path}")
+                raise ValueError(f"Path not found: {steamdeck_path}")
 
             for file in steamdeck_path.rglob("*"):
                 if file.is_file():
@@ -404,7 +397,7 @@ def update_backup(file_path_7z, steamdeck_path, metadata=None):
             if file_type:
                 files_to_copy = process_filetype(steamdeck_path, file_type)
                 if not files_to_copy:
-                    raise ValueError(f"No se encontraron archivos que coincidan con: {file_type}")
+                    raise ValueError(f"No files matching: {file_type}")
 
                 for file in files_to_copy:
                     relative_path = file.relative_to(steamdeck_path.parent if steamdeck_path.is_dir() else steamdeck_path)
@@ -413,7 +406,7 @@ def update_backup(file_path_7z, steamdeck_path, metadata=None):
                     shutil.copy2(file, destination_path)
             else:
                 if not steamdeck_path.is_file():
-                    raise ValueError(f"Archivo no encontrado: {steamdeck_path}")
+                    raise ValueError(f"File not found: {steamdeck_path}")
                 shutil.copy2(steamdeck_path, temp_dir / steamdeck_path.name)
 
         with py7zr.SevenZipFile(file_path_7z, mode='a') as file_7z:
@@ -422,11 +415,11 @@ def update_backup(file_path_7z, steamdeck_path, metadata=None):
                     path_7z = file.relative_to(temp_dir)
                     file_7z.write(file, str(path_7z).replace('\\', '/'))
 
-        logger.info(f"✅ Backup actualizado correctamente: {file_path_7z}")
+        logger.info(f"✅ Backup updated successfully: {file_path_7z}")
         return True
 
     except Exception as e:
-        logger.error(f"❌ Error al actualizar backup: {str(e)}")
+        logger.error(f"❌ Error updating backup: {str(e)}")
         return False
     finally:
         if temp_dir.exists():
@@ -461,26 +454,26 @@ def show_sync_conflict_dialog(game_name, backup_date, steamdeck_date,
                             hash_local_record):
     try:
         if backup_date > steamdeck_date:
-            text_backup = f"Backup (más reciente: {backup_date.strftime('%Y-%m-%d %H:%M:%S')}"
-            text_local = f"Partida local (más antigua: {steamdeck_date.strftime('%Y-%m-%d %H:%M:%S')}"
+            text_backup = f"Backup (newer: {backup_date.strftime('%Y-%m-%d %H:%M:%S')}"
+            text_local = f"Local save (older: {steamdeck_date.strftime('%Y-%m-%d %H:%M:%S')}"
         elif steamdeck_date > backup_date:
-            text_backup = f"Backup (más antigua: {backup_date.strftime('%Y-%m-%d %H:%M:%S')}"
-            text_local = f"Partida local (más reciente: {steamdeck_date.strftime('%Y-%m-%d %H:%M:%S')})"
+            text_backup = f"Backup (older: {backup_date.strftime('%Y-%m-%d %H:%M:%S')}"
+            text_local = f"Local save (newer: {steamdeck_date.strftime('%Y-%m-%d %H:%M:%S')})"
         else:
-            text_backup = f"Backup (igual fecha: {backup_date.strftime('%Y-%m-%d %H:%M:%S')})"
-            text_local = f"Partida local (igual fecha: {steamdeck_date.strftime('%Y-%m-%d %H:%M:%S')})"
+            text_backup = f"Backup (same date: {backup_date.strftime('%Y-%m-%d %H:%M:%S')})"
+            text_local = f"Local save (same date: {steamdeck_date.strftime('%Y-%m-%d %H:%M:%S')})"
 
-        changes_backup = " (cambios)" if hash_backup != hash_backup_record else " (igual)"
-        changes_local = " (cambios)" if hash_local != hash_local_record else " (igual)"
+        changes_backup = " (changes)" if hash_backup != hash_backup_record else " (same)"
+        changes_local = " (changes)" if hash_local != hash_local_record else " (same)"
 
         aditional_message = ""
         if hash_backup_record is None or hash_local_record is None:
-            aditional_message = "\n\n⚠️ No existe un registro previo de sincronización para este juego."
+            aditional_message = "\n\n⚠️ No previous sync record exists for this game."
 
         message = (
-            f"Se detectaron cambios en los archivos de guardado para:\n"
+            f"Changes detected in save files for:\n"
             f"<b>{game_name}</b>{aditional_message}\n\n"
-            f"<b>¿Qué archivo deseas preservar?</b>\n\n"
+            f"<b>Which file do you want to preserve?</b>\n\n"
             f"<b>1. {text_backup}</b>\n"
             f"<b>2. {text_local}</b>\n\n"
             f"Backup files (hash): {changes_backup}\n"
@@ -490,11 +483,11 @@ def show_sync_conflict_dialog(game_name, backup_date, steamdeck_date,
         cmd = [
             'zenity',
             '--question',
-            '--title=Sincronización de partidas',
+            '--title=Save Game Sync',
             f'--text={message}',
-            '--ok-label=Usar Backup (1)',
-            '--cancel-label=Usar Local (2)',
-            '--extra-button=Cancelar',
+            '--ok-label=Use Backup (1)',
+            '--cancel-label=Use Local (2)',
+            '--extra-button=Cancel',
             '--width=700',
             '--height=400' 
         ]
@@ -504,22 +497,22 @@ def show_sync_conflict_dialog(game_name, backup_date, steamdeck_date,
                               stderr=subprocess.PIPE,
                               text=True)
 
-        if result.stderr.strip() == "Cancelar":
-            return "cancelar"
+        if result.stderr.strip() == "Cancel":
+            return "cancel"
         elif result.returncode == 0: 
             return "backup"
         else: 
             return "local"
 
     except Exception as e:
-        logging.error(f"Error en diálogo de conflicto: {e}")
+        logging.error(f"Error in conflict dialog: {e}")
         subprocess.run([
             'zenity',
             '--error',
             '--title=Error',
-            f'--text=Error al mostrar diálogo de conflicto: {str(e)}'
+            f'--text=Error showing conflict dialog: {str(e)}'
         ], check=True)
-        return "cancelar"
+        return "cancel"
 
 def sync_game(game_name, game_backup_path, steamdeck_path, record, metadata):
     is_folder = metadata.get("folder_save", "").lower() != "false"
@@ -529,14 +522,14 @@ def sync_game(game_name, game_backup_path, steamdeck_path, record, metadata):
     result = False
 
     if not backup_date and not steamdeck_date:
-        logger.info(f"No hay archivos de guardado en {game_backup_path} ni en {steamdeck_path}.")
+        logger.info(f"No save files in {game_backup_path} or {steamdeck_path}.")
         return result
 
     hash_backup = compute_hash(game_backup_path) if backup_date else None
     hash_local = compute_hash(steamdeck_path) if steamdeck_date else None
 
     if not steamdeck_date:
-        logger.info(f"Restaurando backup en Steam Deck...")
+        logger.info(f"Restoring backup to Steam Deck...")
         result = copy_saves(game_backup_path, steamdeck_path, is_folder)
         record.setdefault(game_name, {})[backup_key] = {
             "last_sync": datetime.now().isoformat(),
@@ -547,7 +540,7 @@ def sync_game(game_name, game_backup_path, steamdeck_path, record, metadata):
         return result
 
     if not backup_date:
-        logger.warning(f"Advertencia: Save local sin backup para {game_name}.")
+        logger.warning(f"Warning: Local save without backup for {game_name}.")
         return False
 
     game_record = record.setdefault(game_name, {})
@@ -559,7 +552,7 @@ def sync_game(game_name, game_backup_path, steamdeck_path, record, metadata):
             hash_local == backup_record.get("hash_local") and
             backup_date <= last_sync and
             steamdeck_date <= last_sync):
-            logger.info(f"No hay cambios en {game_name}.")
+            logger.info(f"No changes in {game_name}.")
             return True
 
     action = show_sync_conflict_dialog(
@@ -570,15 +563,15 @@ def sync_game(game_name, game_backup_path, steamdeck_path, record, metadata):
     )
 
     if action == "backup":
-        logger.info(f"Restaurando backup...")
+        logger.info(f"Restoring backup...")
         result = copy_saves(game_backup_path, steamdeck_path, is_folder)
         new_local_hash = compute_hash(steamdeck_path)
     elif action == "local":
-        logger.info(f"Actualizando backup...")
+        logger.info(f"Updating backup...")
         update_backup(game_backup_path, steamdeck_path, metadata)
         new_bacup_hash = compute_hash(game_backup_path)
     else: 
-        logger.info(f"Sincronización cancelada para {game_name}.")
+        logger.info(f"Sync canceled for {game_name}.")
         return result
 
     game_record[backup_key] = {
