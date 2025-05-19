@@ -64,7 +64,7 @@ Las opciones disponibles incluyen:
   * **Salir:** Cierra la aplicación.
 
 
-### Funcionamiento
+### Funcionamiento (Breve explicación técnica)
 
 El programa se compone de 3 (realmente 4) módulos principales, cada uno realiza una función específica. 
 
@@ -83,10 +83,15 @@ El tercero (el motivo principal para la creación del programa), es el encargado
 La mayoría de las opciones del diálogo son autoexplicativas:
 
 1.- Sincronización automática -> El programa completo, es decir identifica, agrega y sincroniza las partidas de los juegos agregados.
+
 2.- Agregar juegos a Steam automáticamente -> ejecuta el primer y segundo módulo (idetifica y agrega a steam)
+
 3.- Sincronización de partidas guardadas -> ejecuta la sincronización de partidas
+
 4.- Limpiar configuración -> Distintas opciones para eliminar la configuración/decisiones respecto a los juegos agregados, las partidas sincronizadas o ambas.
+
 5.- Activar/desactivar Syncthing -> permite activar el servicio de syncthing para que funcione en el modo juego de steam (para la sincronización de las carpetas, ya sea de las partidas guardadas o si se ha decidido sincronizar una carpeta con las instalaciones de los juegos, etc.**)
+
 6.- Cambiar carpetas de juegos sincronizados -> Permite seleccionar las carpetas en las que se encontrarán los juegos sincronizados, se recomienda usar la carpeta por defecto ($Home/games), aunque se pueden agregar varias o borrarlas.
 
 
