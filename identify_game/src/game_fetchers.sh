@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# Función para buscar juegos en SteamDB por AppID
 get_game_from_steamdb_by_app_id() {
     local app_id="$1"
     local url="https://steamdb.info/app/$app_id/"
@@ -33,7 +32,6 @@ get_game_from_steamdb_by_app_id() {
     echo "null"
 }
 
-# Función para buscar juegos en SteamDB por nombre
 get_game_from_steamdb_by_name() {
     local game_name="$1"
     local url="https://steamdb.info/search/?a=app&q=$game_name"
@@ -68,7 +66,6 @@ get_game_from_steamdb_by_name() {
     fi
 }
 
-# Función para buscar juegos en RAWG por nombre
 get_game_from_rawg_by_name() {
     local game_name="$1"
     local url="https://api.rawg.io/api/games?search=${game_name}&search_precise=false&page_size=5"
@@ -103,7 +100,6 @@ get_game_from_rawg_by_name() {
     fi
 }
 
-# Función para buscar juegos en Lutris por nombre
 get_game_from_lutris_by_name() {
     local game_name="$1"
     game_name=$(echo "$game_name" | tr -d '[](){}' | sed 's/[0-9]*$//' | tr ' ' '+')
