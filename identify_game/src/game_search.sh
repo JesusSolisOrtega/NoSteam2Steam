@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# Import fetchers
 source "$(dirname "$0")/game_fetchers.sh"
 source "$(dirname "$0")/slug_generation.sh"
 
