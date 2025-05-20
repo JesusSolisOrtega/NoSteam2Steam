@@ -1,14 +1,11 @@
 #!/bin/bash
 
-# Definir la ruta del archivo de log en el directorio actual
 LOG_FILE="$(pwd)/identify_game.log"
 
-# Verificar dependencias
 check_dependencies() {
     local missing_deps=()
     local failed_installs=()
     
-    # Verificar dependencias necesarias
     if ! command -v jq >/dev/null 2>&1; then
         missing_deps+=("jq")
     fi
@@ -21,7 +18,6 @@ check_dependencies() {
         missing_deps+=("zenity")
     fi
     
-    # Si hay dependencias faltantes, intentar instalarlas
     if [ ${#missing_deps[@]} -ne 0 ]; then
         echo "Faltan las siguientes dependencias: ${missing_deps[*]}"
         echo "Intentando instalar automáticamente..."
@@ -32,7 +28,6 @@ check_dependencies() {
             fi
         done
         
-        # Si alguna instalación falló, mostrar mensaje
         if [ ${#failed_installs[@]} -ne 0 ]; then
             echo "Error: No se pudieron instalar todas las dependencias."
             echo "Por favor, instala manualmente: ${failed_installs[*]}"
@@ -42,7 +37,6 @@ check_dependencies() {
     fi
 }
 
-# Function to log data to a file
 log_data() {
     local data="$@"
     local log_dir
@@ -51,7 +45,6 @@ log_data() {
     echo "$data" >> "$LOG_FILE"
 }
 
-# Function to load games data from JSON file
 load_games_data() {
     if [ -f "$GAMES_JSON_FILE" ]; then
         cat "$GAMES_JSON_FILE"
@@ -60,13 +53,11 @@ load_games_data() {
     fi
 }
 
-# Function to save games data to JSON file
 save_games_data() {
     local data="$1"
     echo "$data" > "$GAMES_JSON_FILE"
 }
 
-# Function to process the results and update the games data
 process_results() {
     local results="$1"
     local games_data="$2"
@@ -77,7 +68,6 @@ process_results() {
     echo "$updated_games"
 }
 
-# Function to calculate Levenshtein distance between two strings
 levenshtein() {
     if [ "$#" -ne 2 ]; then
         echo "Usage: levenshtein string1 string2" >&2
