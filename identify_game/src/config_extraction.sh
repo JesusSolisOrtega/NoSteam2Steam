@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# Función para extraer el AppId de archivos de configuración
 extract_app_id() {
     local exe_path="$1"
     local app_id=""
@@ -20,7 +19,6 @@ extract_app_id() {
     echo "$app_id"
 }
 
-# Función para buscar el nombre del juego en archivos adicionales
 search_game_name_in_files() {
     local exe_path="$1"
     local game_dir
@@ -29,7 +27,6 @@ search_game_name_in_files() {
 
     game_dir=$(dirname "$exe_path")
 
-    # Buscar en archivos .ini, .pak, .pck, .xml, .json, .cfg, o globalgamemanagers
     for file in "$game_dir"/*.ini "$game_dir"/*.pak "$game_dir"/*.pck "$game_dir"/*.xml "$game_dir"/*.json "$game_dir"/*.cfg "$game_dir"/globalgamemanagers; do
         if [ -f "$file" ]; then
             game_name=$(strings "$file" | grep -E "AppName|GameName|ProductName" | head -n 1 | cut -d'=' -f2- || true)
@@ -52,7 +49,6 @@ search_game_name_in_files() {
     fi
 }
 
-# Función para extraer información de configuración
 extract_config_info() {
     local exe_path="$1"
     local config_info=""
