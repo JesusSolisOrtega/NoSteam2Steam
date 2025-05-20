@@ -1,7 +1,6 @@
 #!/bin/bash
 
 
-# Función para detectar el juego a partir del ejecutable
 detect_game_from_exe() {
     local exe_path="$1"
     local games_data="$2"
@@ -39,7 +38,6 @@ detect_game_from_exe() {
 
     config_name=$(basename "$exe_path" | sed 's/\.[^.]*$//')
 
-    # Generar slugs
     slugs=()
     slugs+=("$(extract_slug "$exe_name")")
     slugs+=("$(extract_slug_without_hyphens "$exe_name")")
@@ -49,7 +47,6 @@ detect_game_from_exe() {
         slugs+=("$(extract_slug_without_hyphens "$base_name")")
     fi
 
-    # Realizar búsqueda con todos los slugs generados
     slugs=$(IFS='|'; echo "${slugs[*]}")
     log_data "Iniciando búsqueda para AppId: $app_id, Config Name: $config_name, Slug: $slug"
     results=$(search_game "$slugs" "$app_id" "$config_name")
