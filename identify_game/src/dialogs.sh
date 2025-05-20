@@ -1,8 +1,6 @@
 #!/bin/bash
 
-# Function to select executable file
 select_exe_file() {
-    # Use zenity for a more touch-friendly interface on Steam Deck
     if command -v zenity >/dev/null 2>&1; then
         zenity --file-selection \
                --title="Select the game executable" \
@@ -14,7 +12,6 @@ select_exe_file() {
     fi
 }
 
-# Function to select the correct match from the results
 select_correct_match() {
     local matches="$1"
     local search_term="$2"
@@ -23,7 +20,6 @@ select_correct_match() {
     local count
     local choice
     
-    # Ensure matches is valid JSON and has a .matches array
     if ! echo "$matches" | jq '.matches' >/dev/null 2>&1; then
         echo "Invalid matches data."
         return 1
@@ -36,7 +32,6 @@ select_correct_match() {
         return 1
     fi
     
-    # Calculate Levenshtein distance and add it to each match
     for ((i=0; i<count; i++)); do
         name=$(echo "$matches" | jq -r ".matches[$i].name")
         levenshtein_distance=$(levenshtein "$search_term" "$name")
@@ -44,12 +39,10 @@ select_correct_match() {
         matches=$(echo "$matches" | jq ".matches[$i] += {levenshtein: $levenshtein_distance, priority: $priority}")
     done
     
-    # Sort matches by priority and then by Levenshtein distance (lower first)
     matches=$(echo "$matches" | jq '{
         matches: (.matches | sort_by(.priority, .levenshtein))
     }')
     
-    # Create options for zenity with more details
     for ((i=0; i<count; i++)); do
         name=$(echo "$matches" | jq -r ".matches[$i].name")
         source=$(echo "$matches" | jq -r ".matches[$i].source")
@@ -58,7 +51,6 @@ select_correct_match() {
         options+=("$i" "$name ($source) - $released - $platforms")
     done
     
-    # Show selection dialog with zenity
     choice=$(zenity --list \
                     --title="Select the correct game" \
                     --column="ID" --column="Game (Source) - launch Date - Platforms" \
