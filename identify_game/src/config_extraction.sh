@@ -14,7 +14,7 @@ extract_app_id() {
     fi
 
     if [ -n "$app_id" ]; then
-        log_data "AppId encontrado en archivos de configuración: $app_id"
+        log_data "AppId found in configuration files: $app_id"
     fi
 
     echo "$app_id"
@@ -34,7 +34,7 @@ search_game_name_in_files() {
         if [ -f "$file" ]; then
             game_name=$(strings "$file" | grep -E "AppName|GameName|ProductName" | head -n 1 | cut -d'=' -f2- || true)
             if [ -n "$game_name" ]; then
-                log_data "Nombre del juego encontrado en archivo $file: $game_name"
+                log_data "Game name found in file $file: $game_name"
                 break
             fi
         fi
