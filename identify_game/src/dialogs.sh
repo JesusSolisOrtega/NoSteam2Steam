@@ -5,11 +5,11 @@ select_exe_file() {
     # Use zenity for a more touch-friendly interface on Steam Deck
     if command -v zenity >/dev/null 2>&1; then
         zenity --file-selection \
-               --title="Selecciona el ejecutable del juego" \
-               --file-filter="Ejecutables | *.exe" \
+               --title="Select the game executable" \
+               --file-filter="Executables | *.exe" \
                --window-icon="/usr/share/icons/steam.png"
     else
-        read -p "Introduce la ruta completa del ejecutable (.exe): " file_path
+        read -p "Insert the full path to the executable (.exe): " file_path
         echo "$file_path"
     fi
 }
@@ -32,7 +32,7 @@ select_correct_match() {
     count=$(echo "$matches" | jq '.matches | length')
     
     if [ -z "$count" ] || [ "$count" -eq 0 ]; then
-        echo "No hay coincidencias para seleccionar."
+        echo "There is no matches to select."
         return 1
     fi
     
@@ -60,15 +60,15 @@ select_correct_match() {
     
     # Show selection dialog with zenity
     choice=$(zenity --list \
-                    --title="Selecciona el juego correcto" \
-                    --column="ID" --column="Juego (Fuente) - Lanzamiento - Plataformas" \
+                    --title="Select the correct game" \
+                    --column="ID" --column="Game (Source) - launch Date - Platforms" \
                     "${options[@]}" \
                     --height=400 --width=600)
     
     if [ -n "$choice" ]; then
         echo "$matches" | jq ".matches[$choice]"
     else
-        echo "No se seleccionó ningún juego."
+        echo "There was not selected game."
         return 1
     fi
 }
