@@ -14,13 +14,13 @@ detect_game_from_exe() {
 
     exe_name=$(basename "$exe_path" | sed 's/\.[^.]*$//')
 
-    log_data "Detectando juego para el ejecutable: $exe_path"
+    log_data "Matching game for executable: $exe_path"
 
     if [ -z "$game_name" ]; then
         game_name=$(search_game_name_in_files "$exe_path")
         if [ -n "$game_name" ]; then
             search_priority=$(echo "$search_priority" | jq --arg name "$game_name" '. += {($name): 2}')
-            log_data "Nombre del juego encontrado en archivos: $game_name"
+            log_data "Game name found in files: $game_name"
         fi
     fi
 
@@ -34,7 +34,7 @@ detect_game_from_exe() {
 
     if [ -n "$app_id" ]; then
         search_priority=$(echo "$search_priority" | jq --arg app_id "$app_id" '. += {($app_id): 1}')
-        log_data "AppId encontrado: $app_id"
+        log_data "AppId found: $app_id"
     fi
 
     config_name=$(basename "$exe_path" | sed 's/\.[^.]*$//')
@@ -51,7 +51,7 @@ detect_game_from_exe() {
 
     # Realizar búsqueda con todos los slugs generados
     slugs=$(IFS='|'; echo "${slugs[*]}")
-    log_data "Iniciando búsqueda para AppId: $app_id, Config Name: $config_name, Slug: $slug"
+    log_data "Starting search for AppId: $app_id, Config Name: $config_name, Slug: $slug"
     results=$(search_game "$slugs" "$app_id" "$config_name")
     combined_results=$(echo "$combined_results" | jq --argjson new_matches "$(echo "$results" | jq '.matches')" '.matches += $new_matches')
     
@@ -77,12 +77,12 @@ detect_game_from_exe() {
                 } | with_entries(if .value == null then .value = "" else . end)')
             game_name=$(echo "$selected_info" | jq -r '.name')
             updated_data=$(echo "$games_data" | jq --arg name "$game_name" --argjson info "$selected_info" '. + {($name): $info}')
-            log_data "Juego detectado: $game_name"
+            log_data "Game found: $game_name"
             echo "$updated_data"
             return 0
         fi
     fi
 
-    log_data "Juego no encontrado en ninguna fuente."
+    log_data "Game not found in any source."
     return 1
 }
