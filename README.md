@@ -39,6 +39,14 @@ cd NoSteam2Steam
 ### Instalar dependencias:
 
 ```bash
+python3 -m venv venv
+```
+
+```bash
+source venv/bin/activate
+```
+
+```bash
 pip install -r requirements.txt
 ```
 
@@ -47,6 +55,12 @@ pip install -r requirements.txt
 ### Menú principal
 
 Ejecuta el script principal para acceder al menú de opciones:
+
+para ello abre una terminal en el directorio de noSteam2Steam (menú contextual -> Open Terminal Here)
+
+```bash
+source venv/bin/activate
+```
 
 ```bash
 python noSteam2Steam.py
