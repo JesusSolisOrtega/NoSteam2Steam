@@ -36,6 +36,13 @@ git clone https://github.com/JesusSolisOrtega/NoSteam2Steam.git
 cd NoSteam2Steam
 ```
 
+Si lo quieres en Español en su lugar puedes emplear este comando:
+
+```bash
+git clone --branch main-es --single-branch https://github.com/usuario/repositorio.git
+cd NoSteam2Steam
+```
+
 ### Instalar dependencias:
 
 ```bash
