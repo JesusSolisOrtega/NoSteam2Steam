@@ -2,7 +2,7 @@
 
 **NoSteam2Steam** is a tool designed to manage non-Steam games by allowing users to:
 
-* Automatically add games to the Steam library (with artwork and icons)
+* Automatically detect and add non-Steam games to the Steam library (with artwork, icons, and the best available compatibility tool)
 
 * Sync and back up save files
 
@@ -28,7 +28,7 @@ If you’re only interested in:
 * **Non-Steam game management:** Adds games from other platforms (e.g., GOG, Heroic, etc.) to the Steam library.
 * **Save file backups:** Creates automatic backups of save files in \`.7z\` format.
 * **Lost saves restoration:** Detects and restores lost save files.
-
+* **Compatibility tool auto-selection**: Automatically chooses the best available compatibility layer (e.g., Proton-ge) based on your system setup.
 
 ### Dependencies:
 
@@ -89,9 +89,9 @@ Available options include:
 
 The program consists of three (actually four) main modules, each handling a specific task: 
 
-1. Game Identification: Searches the designated sync folder for game executables and supplements this with Lutris data.
+1. Game Identification: Searches the designated sync folder for game executables and supplements this with Lutris data. It also auto-select the best available launcher if it have x86, x64 and/or Vulkan executables.
 
-2. Steam Integration: Adds games to Steam, associates images, and calculates game IDs (necessary for syncing).
+2. Steam Integration: Steam Integration: Adds games to Steam, associates images, calculates game IDs, and automatically selects the most suitable compatibility tool available on the system.
 
 3. Save File Sync: The core feature—reads backups from the designated folder and syncs them with local save files of Steam-added games. It relies on the backup structure from Game Backup Monitor (GBM) and configuration files from GBM and Ludusavi.
 
@@ -125,6 +125,8 @@ Key projects used as references for game/save file identification:
 * **GBM** -> https://mikemaximus.github.io/gbm-web/
 
 * **Ludusavi Manifest** -> https://github.com/mtkennerly/ludusavi-manifest
+
+* **Lutris**
 
 Additional repositories for Steam shortcut manipulation and ID calculations:
 
