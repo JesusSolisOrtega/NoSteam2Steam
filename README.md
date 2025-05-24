@@ -77,7 +77,7 @@ Las opciones disponibles incluyen:
 
   * **Sincronización automática:** Agrega juegos y sincroniza partidas guardadas.
   * **Agregar juegos a Steam automáticamente:** Detecta y agrega juegos no pertenecientes a Steam.
-  * **Sincronización de partidas guardadas:** Sincroniza manualmente las partidas guardadas.
+  * **Sincronización de partidas guardadas:** Opciones de sincronización de partidas guardadas (sincronizar partidas actuales/restaurar partidas perdidas).
   * **Agregar manualmente un juego a Steam:** Permite agregar juegos específicos.
   * **Limpiar configuración de NoSteam2Steam:** Elimina configuraciones y datos temporales.
   * **Activar/desactivar Syncthing:** Gestiona el servicio de sincronización en segundo plano.
