@@ -31,40 +31,31 @@ NoSteam2Steam assumes backups are in the same format as GBM and uses a folder sy
 
 ### Clone the repository:
 
+Using the Terminal:
+
 ```bash
 git clone https://github.com/JesusSolisOrtega/NoSteam2Steam.git
 cd NoSteam2Steam
 ```
 
-### Install dependencies:
+Alternatively, you can simply download the `.zip` and extract it
+
+### Installation:
+
+Double click on the `installer.sh` file to install noSteam2Steam
+
+If, for any reason, it doesn’t run, open a terminal and run it manually:
 
 ```bash
-python3 -m venv venv
-```
-
-```bash
-source venv/bin/activate
-```
-
-```bash
-pip install -r requirements.txt
+bash installer.sh
 ```
 
 ## Usage
 
 ### Main Menu
 
-Run the main script to access the options menu:
+**Run the shortcut to access the options menu**
 
-You must run a konsole in the noSteam2Steam folder
-
-```bash
-source venv/bin/activate
-```
-
-```bash
-python noSteam2Steam.py
-```
 
 Available options include:
 
