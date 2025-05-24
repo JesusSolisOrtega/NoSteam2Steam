@@ -1,10 +1,26 @@
 # NoSteam2Steam
 
-NoSteam2Steam is a tool designed to manage non-Steam games, allowing users to sync save files, add games to the Steam library, and perform automatic backups. This project is optimized for use on the Steam Deck but can also be used on other platforms with modifications (especially regarding path conversions, which are OS-dependent).
+**NoSteam2Steam** is a tool designed to manage non-Steam games by allowing users to:
 
-This project relies on **Game Backup Monitor (GBM)** as the primary reference/tool for creating backups on Windows. With some adjustments, it could become a standalone tool, though this falls outside the initial scope of the project.
+* Automatically add games to the Steam library (with artwork and icons)
 
-NoSteam2Steam assumes backups are in the same format as GBM and uses a folder synchronization tool to sync saves between local data and Windows saves. For syncing folders between Windows and the Steam Deck, we chose **Syncthing** (Syncthingy on steamdeck), but any other tool with the same functionality can be used.
+* Sync and back up save files
+
+* Restore lost saves from previously added games
+
+While it's optimized for the **Steam Deck**, it can also be used on other platforms with some adjustments—particularly related to OS-specific path conversions.
+
+This project uses **Game Backup Monitor (GBM)** as the main reference/tool for creating backups on Windows. However, **NoSteam2Steam** can be used as a standalone tool on the Steam Deck.
+
+Backups are expected to follow the same folder structure as GBM. To sync save files between local Steam Deck data and Windows saves, we use **Syncthing** (known as Syncthingy on the Steam Deck). That said, any folder synchronization tool with similar functionality can be used.
+
+If you’re only interested in:
+
+* Adding non-Steam games to Steam with artwork, or
+
+* Backing up and restoring save files locally on the Steam Deck, including restoring saves from previously added games
+
+...then **NoSteam2Steam** can handle it all on its own — no additional tools required.
 
 ## Features
 
