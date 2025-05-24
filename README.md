@@ -70,7 +70,7 @@ Available options include:
 
   * **Automatic Sync:** Adds games and syncs save files.
   * **Automatically Add Games to Steam:** Detects and adds non-Steam games.
-  * **Manual Save File Sync:** Manually syncs save files.
+  * **Game saves synchronization:** Options to sync save files (sync gamesaves/restore old saves).
   * **Manually Add a Game to Steam:** Allows adding specific games.
   * **Reset NoSteam2Steam Configuration:** Clears settings and temporary data.
   * **Enable/Disable Syncthing:** Manages the background sync service.
