@@ -31,6 +31,8 @@ El proyecto presupone backups en el mismo formato que GBM y una herramienta de s
 
 ### Clonar el repositorio:
 
+Usando la terminal:
+
 ```bash
 git clone https://github.com/JesusSolisOrtega/NoSteam2Steam.git
 cd NoSteam2Steam
@@ -43,35 +45,23 @@ git clone --branch main-es --single-branch https://github.com/usuario/repositori
 cd NoSteam2Steam
 ```
 
-### Instalar dependencias:
+También puedes simplemente descargar el archivo `.zip` y descomprimirlo.
+
+### Instalación
+
+Haz doble clic en el archivo `installer.sh` para instalar NoSteam2Steam.
+
+Si por alguna razón no se ejecuta, abre una terminal y ejecútalo manualmente:
 
 ```bash
-python3 -m venv venv
-```
-
-```bash
-source venv/bin/activate
-```
-
-```bash
-pip install -r requirements.txt
+bash installer.sh
 ```
 
 ## Uso
 
 ### Menú principal
 
-Ejecuta el script principal para acceder al menú de opciones:
-
-para ello abre una terminal en el directorio de noSteam2Steam (menú contextual -> Open Terminal Here)
-
-```bash
-source venv/bin/activate
-```
-
-```bash
-python noSteam2Steam.py
-```
+**Ejecuta el acceso directo para abrir el menú de opciones.**
 
 Las opciones disponibles incluyen:
 
