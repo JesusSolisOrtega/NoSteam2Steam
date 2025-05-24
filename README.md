@@ -1,10 +1,27 @@
 # NoSteam2Steam
 
-NoSteam2Steam es una herramienta diseñada para gestionar juegos no pertenecientes a Steam, permitiendo sincronizar partidas guardadas, agregar juegos a la biblioteca de Steam y realizar respaldos automáticos. Este proyecto está optimizado para su uso en Steam Deck, pero también puede ser utilizado en otras plataformas si se realizan modificaciones (especialmente en las conversiones de rutas que dependen de cada SO).
+**NoSteam2Steam** es una herramienta diseñada para gestionar juegos que no están en Steam, permitiendo a los usuarios:
 
-Este proyecto se apoya en Game Backup Monitor (GBM) como referencia/herramienta principal de creacción de backups en windows. Con ciertos ajustes se podría hacer una herramienta independiente, no obstante está fuera del alcance inicial previsto para el proyecto. 
+* Añadir automáticamente juegos a la biblioteca de Steam (con imágenes e íconos)
 
-El proyecto presupone backups en el mismo formato que GBM y una herramienta de sincronización de carpetas. NoSteam2Steam usa esta carpeta para sincronizar las partidas entre los datos de guardado locales y las partidas de windows. En nuestro caso para la sincronización de carpetas entre windows y steamdeck hemos elegido syncthing, pero se puede usar cualquier otra herramienta que cumpla la misma función.
+* Sincronizar y respaldar partidas guardadas
+
+* Restaurar partidas perdidas de juegos añadidos previamente
+
+Aunque está optimizada para el **Steam Deck**, también puede usarse en otras plataformas con algunas modificaciones, especialmente relacionadas con la conversión de rutas específicas del sistema operativo.
+
+Este proyecto utiliza **Game Backup Monitor (GBM)** como herramienta principal de referencia para crear copias de seguridad en Windows. Sin embargo, **NoSteam2Steam** también puede funcionar como una herramienta independiente en Steam Deck.
+
+Las copias de seguridad deben seguir la misma estructura de carpetas que GBM. Para sincronizar partidas entre los datos locales del Steam Deck y los guardados en Windows, usamos **Syncthing** (conocido como Syncthingy en el Steam Deck). No obstante, se puede usar cualquier otra herramienta de sincronización de carpetas con funcionalidad similar.
+
+Si solo te interesa:
+
+* Añadir juegos que no están en Steam a tu biblioteca con sus imágenes, o
+
+* Realizar copias de seguridad y restaurar partidas localmente en el Steam Deck (incluyendo partidas perdidas de juegos añadidos previamente)
+
+...entonces **NoSteam2Steam** puede encargarse de todo por sí mismo — no necesitas herramientas adicionales.
+
 
 ## Características
 
