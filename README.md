@@ -2,7 +2,7 @@
 
 **NoSteam2Steam** es una herramienta diseñada para gestionar juegos que no están en Steam, permitiendo a los usuarios:
 
-* Añadir automáticamente juegos a la biblioteca de Steam (con imágenes e íconos)
+* Detectar y añadir automáticamente juegos no-Steam a la biblioteca de Steam (con imágenes, iconos y la mejor herramienta de compatibilidad disponible)
 
 * Sincronizar y respaldar partidas guardadas
 
@@ -25,10 +25,11 @@ Si solo te interesa:
 
 ## Características
 
-* **Sincronización de partidas guardadas:** Sincroniza automáticamente las partidas guardadas entre diferentes dispositivos.
+* **Sincronización de partidas guardadas:** Sincroniza automáticamente las partidas guardadas en la carpeta de Backups.
 * **Gestión de juegos no pertenecientes a Steam:** Agrega juegos de otras plataformas (como GOG, Heroic, etc.) a la biblioteca de Steam.
 * **Respaldo de partidas guardadas:** Crea respaldos automáticos de las partidas guardadas en formato `.7z`.
 * **Restauración de partidas perdidas:** Detecta y restaura partidas guardadas que puedan haberse perdido.
+* **Selección automática de herramienta de compatibilidad:** Elige automáticamente la capa de compatibilidad más adecuada (por ejemplo, Proton-ge) según la configuración de tu sistema.
 
 
 ### Dependencias:
@@ -98,7 +99,7 @@ El programa se compone de 3 (realmente 4) módulos principales, cada uno realiza
 
 1. Identificación de juegos, para lo cual busca en la carpeta de sincronización designada y busca los ejecutables de los juegos. Luego adicionalmente complementa con información de lutris que usará despues. 
 
-2. Agrega el juego a steam, asocia las imagenes, etc. Un aspecto importante de esta fase es que calcula los ids de los juegos agregados lo cual es necesario para la fase de sincronización. 
+2. Integración con Steam: Añade juegos a Steam, asocia imágenes, calcula los IDs necesarios para la sincronización y selecciona automáticamente la herramienta de compatibilidad más adecuada disponible en el sistema. Tambien usa las terminaciones de los ejecutables cuando hay varios y evalua es sistema para autoseleccionar el mejor en función de si el ejecutable es x86, x64 y/o el sistema soporta Vulkan.
 
 3. Sincroniza las partidas (el motivo principal para la creación del programa). Este módulo lee los backups de la carpeta designada y los sincroniza con los archivos locales de las partidas de juegos agregados a steam. Para ello nos apoyamos en la estructura de los backups creados por Game Backup Monitor (GBM) y en los archivos de configuraciones de juegos de GBM y ludusavi.
 
