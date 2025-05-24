@@ -24,7 +24,7 @@ If you’re only interested in:
 
 ## Features
 
-* **Save file synchronization:** Automatically syncs save files across different devices.
+* **Save file synchronization:** Automatically syncs save files in the backups folder.
 * **Non-Steam game management:** Adds games from other platforms (e.g., GOG, Heroic, etc.) to the Steam library.
 * **Save file backups:** Creates automatic backups of save files in \`.7z\` format.
 * **Lost saves restoration:** Detects and restores lost save files.
