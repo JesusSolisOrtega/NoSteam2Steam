@@ -72,6 +72,7 @@ bash installer.sh
 
 **Run the shortcut to access the options menu**
 
+**Important**: After adding games with NoSteam2Steam, you need to restart Steam for it to recognize the changes and properly show the new games.
 
 Available options include:
 
