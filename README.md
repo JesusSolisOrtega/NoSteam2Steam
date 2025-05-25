@@ -81,6 +81,8 @@ bash installer.sh
 
 **Ejecuta el acceso directo para abrir el menú de opciones.**
 
+**Importante:** Es necesario reiniciar steam tras añadir juegos, de modo que sea capaz de leer los cambios y mostrarlos en la biblioteca.
+
 Las opciones disponibles incluyen:
 
   * **Sincronización automática:** Agrega juegos y sincroniza partidas guardadas.
