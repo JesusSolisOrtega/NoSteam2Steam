@@ -82,7 +82,7 @@ IGNORED_FILES = {
 IGNORED_DIRS = {
     "heroic", "prefixes", "_commonredist", "_redist", "commonredist", "redist", "redistributables", 
     "prerequisites", "support", "extras", "tools", "update", "patches", "patch", "installer", 
-    "installers", "setup"
+    "installers", "setup", "noSteam2Steam"
     }
 
 HEROIC_PATHS = [
