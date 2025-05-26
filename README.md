@@ -32,6 +32,8 @@ If you’re only interested in:
 
 ### Dependencies:
 
+(They are already bundled in the executable (released version))
+
 * Python 3.11 or higher
 * `py7zr` for `.7z` file manipulation
 * `zenity` for the graphical user interface
@@ -45,34 +47,37 @@ If you’re only interested in:
 
 ## Installation
 
-### Clone the repository:
+### Download noSteam2Steam:
 
-Using the Terminal:
-
-```bash
-git clone https://github.com/JesusSolisOrtega/NoSteam2Steam.git
-cd NoSteam2Steam
-```
-
-Alternatively, you can simply download the `.zip` and extract it
-
-### Installation:
-
-* You may need to activate developer mode. In game mode -> settings -> system -> developer mode.
-
-Double click on the `installer.sh` file to install noSteam2Steam
-
-If, for any reason, it doesn’t run, open a terminal and run it manually:
+Go to the following URL and download the latest release of noSteam2Steam:
 
 ```bash
-bash installer.sh
+https://github.com/JesusSolisOrtega/NoSteam2Steam/releases/tag/v1.0.0
 ```
+
+### Install:
+
+Place the downloaded file wherever you prefer — for example, in ~/Desktop.
 
 ## Usage
 
-### Main Menu
+### Launching noSteam2Steam
 
-**Run the shortcut to access the options menu**
+Double-click the `noSteam2Steam` file to run the app.
+
+If it doesn't start, you may need to make it executable first. To do that, open a terminal in the same folder and run:
+
+```bash
+chmod +x noSteam2Steam
+```
+
+After that, you can double-click it or run it from the terminal with:
+
+```bash
+./noSteam2Steam
+```
+
+### Main Menu
 
 **Important**: After adding games with NoSteam2Steam, you need to restart Steam for it to recognize the changes and properly show the new games.
 
