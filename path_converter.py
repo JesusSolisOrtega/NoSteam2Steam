@@ -1,6 +1,7 @@
 import re
 from pathlib import Path
 import logging
+from add2steam import get_current_user
 
 from config import STEAMDECK_PATH, ROOT_PATH
 
@@ -283,7 +284,6 @@ def _expand_placeholders_to_windows(path, game_data):
 
     store_user_id = None
     if '<storeUserId>' or '%SteamID3%' in path:
-        from add2steam import get_current_user
         store_user_id = get_current_user()
 
     placeholders = {

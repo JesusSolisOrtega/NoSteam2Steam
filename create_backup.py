@@ -9,10 +9,11 @@ from path_converter import PathConverter, transform_path_from_windows_to_proton
 import py7zr
 import xml.etree.ElementTree as ET
 
-from config import ID_MAP_PATH, STEAMDECK_PATH, get_backups_directory
+from config import ID_MAP_PATH, SCRIPT_DIR, STEAMDECK_PATH, get_backups_directory
 from utils import compute_hash
 
 import logging
+
 
 logger = logging.getLogger('GBM_Backup')
 
@@ -367,7 +368,6 @@ def create_backup_from_gbm(game_name, gbm_config, backup_root_dir, game_data=Non
         return None
 
 def process_filetype(base_folder, file_type):
-    from fnmatch import fnmatch
     matching_files = []
 
     patterns = file_type.split(':') if ':' in file_type else [file_type]
@@ -403,7 +403,7 @@ def verify_and_create_missing_backup(game_name, game_mapping, inventory, record,
     backups_path = get_backups_directory()
     game_data = game_mapping.get(game_name)
 
-    gbm_configs = load_gbm_configs(Path(__file__).parent / 'GBM_Official.xml')
+    gbm_configs = load_gbm_configs(SCRIPT_DIR / 'GBM_Official.xml')
     if gbm_config := search_config_gbm(game_name, gbm_configs):
         logger.info(f"✓ GBM configuration found for {game_name}")
         if result := create_backup_from_gbm(game_name, gbm_config, backups_path, game_data, alternative_appids):

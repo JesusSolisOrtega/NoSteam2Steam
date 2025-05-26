@@ -3,10 +3,13 @@ import logging
 import subprocess
 import sys
 
+import add2steam
+import backup_manager
+import game_data_manager
 from backup_manager import run_sync
 from utils import manage_sync_folders, show_cleanup_dialog, manage_syncthingy_service
 
-from config import GAME_DATA_MANAGER, ADD2STEAM, BACKUP_MANAGER, MANUAL_ADD_SCRIPT
+from config import MANUAL_ADD_SCRIPT
 
 logger = logging.getLogger("no_steam_to_steam.log")
 
@@ -64,10 +67,8 @@ def main():
             break
             
         if option == "1":
-            if not run_script(GAME_DATA_MANAGER):
-                continue
-            if not run_script(ADD2STEAM):
-                continue
+            game_data_manager.main()
+            add2steam.main()
             try:
                 run_sync()
             except Exception as e:
@@ -75,12 +76,11 @@ def main():
                 continue
             
         elif option == "2":
-            if not run_script(GAME_DATA_MANAGER):
-                continue
-            run_script(ADD2STEAM)
+            game_data_manager.main()
+            add2steam.main()
             
         elif option == "3":
-            run_script(BACKUP_MANAGER)
+            backup_manager.main()
             
         elif option == "4":
             run_script(MANUAL_ADD_SCRIPT)

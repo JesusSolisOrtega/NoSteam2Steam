@@ -17,7 +17,7 @@ import platform
 import time
 from typing import Dict, List, Optional, Set, Any
 
-from config import GOG_PATHS, HEROIC_PATHS, DEFAULT_SYNC_FOLDER, IGNORED_FILES, IGNORED_DIRS, XML_FILE, YAML_FILE, XML_URL, YAML_URL, SYNC_FOLDERS_FILE, INDEX_DIR
+from config import DEFAULT_GAMES_INFO_PATH, GOG_PATHS, HEROIC_PATHS, DEFAULT_SYNC_FOLDER, IGNORED_FILES, IGNORED_DIRS, SCRIPT_DIR, XML_FILE, YAML_FILE, XML_URL, YAML_URL, SYNC_FOLDERS_FILE, INDEX_DIR
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("no_steam_to_steam.log")
@@ -577,7 +577,7 @@ class GameMatcher:
         return results
 
     def _load_user_selected_games(self) -> Dict[str, Dict]:
-        games_json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "games.json")
+        games_json_path = DEFAULT_GAMES_INFO_PATH
         user_selected = {}
         
         if os.path.exists(games_json_path):
@@ -1269,7 +1269,7 @@ def associate_exes_with_ids(sync_folder: str = DEFAULT_SYNC_FOLDER, xml_file: st
                             yaml_file: str = YAML_FILE, indexes: dict = None
                             , max_depth: int = 7) -> Dict[str, Dict]:
 
-    games_json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "games.json")
+    games_json_path = DEFAULT_GAMES_INFO_PATH
     user_selected_games = {}
     
     if os.path.exists(games_json_path):

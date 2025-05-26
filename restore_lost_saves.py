@@ -1,7 +1,7 @@
 from backup_restore import load_games_backup_inventory, generate_games_inventory
 from create_backup import load_games_mapping, verify_and_create_missing_backup
 
-from config import DEFAULT_BACKUPS_PATH, ID_MAP_PATH, STEAMDECK_PATH
+from config import DEFAULT_BACKUPS_PATH, ID_MAP_PATH, INVENTORY_FILE, STEAMDECK_PATH
 
 def restore_game_saves(game_name, games_mapping, inventory, backups_path=DEFAULT_BACKUPS_PATH):
 
@@ -23,7 +23,7 @@ def _get_alternative_appids(current_appid, games_mapping):
 
     return unknown_folders
 
-def restore_lost_saves(id_map_path=ID_MAP_PATH, backups_path=DEFAULT_BACKUPS_PATH, inventory_path="games_backups_inventory.json"):
+def restore_lost_saves(id_map_path=ID_MAP_PATH, backups_path=DEFAULT_BACKUPS_PATH, inventory_path=INVENTORY_FILE):
     games_mapping = load_games_mapping(id_map_path)
     if not games_mapping:
         return

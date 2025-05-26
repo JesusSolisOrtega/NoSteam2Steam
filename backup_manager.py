@@ -10,7 +10,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 
 
-from config import ID_MAP_PATH, get_backups_directory
+from config import ID_MAP_PATH, INVENTORY_FILE, SCRIPT_DIR, get_backups_directory
 from utils import select_backup_directory
 
 logger = logging.getLogger('GBM_Backup')
@@ -24,7 +24,7 @@ def config_logging():
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 
     file_handler = RotatingFileHandler(
-        'gbm_backup.log',
+        str(SCRIPT_DIR / "gbm_backup.log"),
         maxBytes=1*1024*1024,
         backupCount=3,
         encoding='utf-8'
@@ -39,7 +39,7 @@ def config_logging():
     logger.addHandler(file_handler)
 #    logger.addHandler(console_handler)
 
-def run_sync(id_map_path=ID_MAP_PATH, backups_path=get_backups_directory(), inventory_path="games_backups_inventory.json"):
+def run_sync(id_map_path=ID_MAP_PATH, backups_path=get_backups_directory(), inventory_path=INVENTORY_FILE):
     config_logging()
 
     logger.info("Starting synchronization process")
@@ -143,6 +143,9 @@ def show_sync_options_dialog():
                           '--title=Error',
                           f'--text=Error displaying options: {str(e)}'],
                          check=True)
+
+def main():
+    show_sync_options_dialog()
 
 if __name__ == "__main__":
     show_sync_options_dialog()

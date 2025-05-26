@@ -2,31 +2,47 @@ import os
 from pathlib import Path
 import binascii
 import re
+import sys
 import vdf
 import logging
 
+
+def get_noSteam2Steam_dir():
+    program_data_folder_name = "noSteam2Steam_Data"
+    home_dir = Path.home()
+    data_dir = home_dir / program_data_folder_name
+    data_dir.mkdir(parents=True, exist_ok=True)
+    return data_dir
+
+def get_resource_path(relative_path):
+
+    try:
+        base_path = sys._MEIPASS
+    except AttributeError:
+        # En desarrollo, el base_path es el directorio del script actual.
+        base_path = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(base_path, relative_path)
+
+# main modules files paths
+SCRIPT_DIR = get_noSteam2Steam_dir()
+MANUAL_ADD_SCRIPT = get_resource_path(os.path.join("identify_game", "src", "main.sh"))
 
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[
-        logging.FileHandler("no_steam_to_steam.log"),
+        logging.FileHandler(str(SCRIPT_DIR / "no_steam_to_steam.log")),
         logging.StreamHandler()
     ]
 )
 
 logger = logging.getLogger("no_steam_to_steam.log")
 
-# main modules files paths
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-GAME_DATA_MANAGER = Path(SCRIPT_DIR) / "game_data_manager.py"
-ADD2STEAM = Path(SCRIPT_DIR) / "add2steam.py"
-BACKUP_MANAGER = Path(SCRIPT_DIR) / "backup_manager.py"
-MANUAL_ADD_SCRIPT = Path(SCRIPT_DIR) / "identify_game/src/main.sh"
-
 # config paths
 DEFAULT_SYNC_FOLDER = os.path.expanduser("~/home/Games")
 SYNC_FOLDERS_FILE = os.path.join(SCRIPT_DIR, "sync_folders.txt")
+INVENTORY_FILE = str(os.path.join(SCRIPT_DIR, "games_backups_inventory.json"))
+STEAM_ID_MAPPING_FILE = str(os.path.join(SCRIPT_DIR, "steam_id_mapping.json"))
 XML_FILE = os.path.join(SCRIPT_DIR, "GBM_Official.xml")
 YAML_FILE = os.path.join(SCRIPT_DIR, "manifest.yaml")
 INDEX_DIR = os.path.join(SCRIPT_DIR, "indexes")
@@ -36,13 +52,14 @@ YAML_URL = "https://raw.githubusercontent.com/mtkennerly/ludusavi-manifest/refs/
 # Saves related paths
 STEAMDECK_PATH = Path("/home/deck/.local/share/Steam/steamapps/compatdata")
 DEFAULT_BACKUPS_PATH = Path("/home/deck/Backups")
-ALTERNATIVE_BACKUPS_PATH_FILE = Path(SCRIPT_DIR) / "alternative_backups_path.txt"
-ID_MAP_PATH = Path(SCRIPT_DIR) / "steam_id_mapping.json"
+ALTERNATIVE_BACKUPS_PATH_FILE = SCRIPT_DIR / "alternative_backups_path.txt"
+ID_MAP_PATH = SCRIPT_DIR / "steam_id_mapping.json"
+SYNC_RECORD_FILE = str(SCRIPT_DIR / "sync_record.json")
 ROOT_PATH = Path("/home/deck/.local/share/Steam/steamapps")
 
 def get_backups_directory():
     try:
-        script_dir = Path(__file__).parent.resolve()
+        script_dir = SCRIPT_DIR.resolve()
         config_file = ALTERNATIVE_BACKUPS_PATH_FILE
         default_directory = DEFAULT_BACKUPS_PATH
         
@@ -170,8 +187,8 @@ def get_current_user():
 # add2Steam.py
 STEAM_USERDATA_DIR = os.path.expanduser("~/.local/share/Steam/userdata")
 SHORTCUTS_FILE = "shortcuts.vdf"
-DEFAULT_GAMES_INFO_PATH = os.path.join(os.path.dirname(__file__), "games.json")
-USER_MAPPING_PATH = os.path.join(os.path.dirname(__file__), "user_mapping.json")
+DEFAULT_GAMES_INFO_PATH = os.path.join(SCRIPT_DIR, "games.json")
+USER_MAPPING_PATH = os.path.join(SCRIPT_DIR, "user_mapping.json")
 CONFIG_VDF_PATH = os.path.expanduser("~/.steam/steam/config/config.vdf")
 LOGINUSERS_PATH = os.path.expanduser("~/.local/share/Steam/config/loginusers.vdf")
 

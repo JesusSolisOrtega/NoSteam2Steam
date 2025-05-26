@@ -10,7 +10,7 @@ from datetime import datetime
 from fnmatch import fnmatch
 
 
-from config import DEFAULT_BACKUPS_PATH, ID_MAP_PATH, get_backups_directory
+from config import DEFAULT_BACKUPS_PATH, ID_MAP_PATH, INVENTORY_FILE, SYNC_RECORD_FILE, get_backups_directory
 from utils import compute_hash
 
 logger = logging.getLogger('GBM_Backup')
@@ -23,7 +23,7 @@ def load_games_mapping(path_id_map=ID_MAP_PATH):
         logger.error(f"Error loading JSON file: {e}")
         return None
 
-def generate_games_inventory(backups_path=DEFAULT_BACKUPS_PATH, inventory_path="games_backups_inventory.json"):
+def generate_games_inventory(backups_path=DEFAULT_BACKUPS_PATH, inventory_path=INVENTORY_FILE):
     inventory = {}
 
     for folder in backups_path.iterdir():
@@ -82,7 +82,7 @@ def generate_games_inventory(backups_path=DEFAULT_BACKUPS_PATH, inventory_path="
         logger.error(f"Error saving inventory: {str(e)}")
         return False
 
-def load_games_backup_inventory(inventory_path="games_backups_inventory.json"):
+def load_games_backup_inventory(inventory_path=INVENTORY_FILE):
     backups_path = get_backups_directory()
     try:
         if not Path(inventory_path).exists() or file_needs_update(inventory_path):
@@ -341,7 +341,7 @@ def copy_saves(file_path_7z, destination_path, is_folder=True):
     
     return result
 
-def load_sync_record(record_path="sync_record.json"):
+def load_sync_record(record_path=SYNC_RECORD_FILE):
     try:
         if Path(record_path).exists():
             with open(record_path, "r") as file:
@@ -352,7 +352,7 @@ def load_sync_record(record_path="sync_record.json"):
         logger.info(f"Error loading sync record: {e}")
         return {}
 
-def save_sync_record(record, record_path="sync_record.json"):
+def save_sync_record(record, record_path=SYNC_RECORD_FILE):
     try:
         with open(record_path, "w") as file:
             json.dump(record, file, indent=4)

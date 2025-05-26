@@ -16,7 +16,7 @@ from urllib.parse import quote
 from icon_extractor import extract_icon
 from identify_game import GameMatcher, add_files_to_user_selected
 
-from config import (STEAM_USERDATA_DIR, SHORTCUTS_FILE, DEFAULT_GAMES_INFO_PATH, USER_MAPPING_PATH, 
+from config import (SCRIPT_DIR, STEAM_ID_MAPPING_FILE, STEAM_USERDATA_DIR, SHORTCUTS_FILE, DEFAULT_GAMES_INFO_PATH, USER_MAPPING_PATH, 
                     CONFIG_VDF_PATH, get_current_user, generate_app_id, generate_short_app_id,
                     generate_shortcut_id, get_proton_version, get_steam_username)
 
@@ -24,7 +24,7 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[
-        logging.FileHandler("no_steam_to_steam.log"),
+        logging.FileHandler(str(SCRIPT_DIR / "no_steam_to_steam.log")),
         logging.StreamHandler()
     ]
 )
@@ -32,14 +32,14 @@ logging.basicConfig(
 def save_steam_id_mapping(steam_id_mapping):
     try:
         existing_mapping = {}
-        if os.path.exists("steam_id_mapping.json"):
-            with open("steam_id_mapping.json", "r") as f:
+        if os.path.exists(STEAM_ID_MAPPING_FILE):
+            with open(STEAM_ID_MAPPING_FILE, "r") as f:
                 existing_mapping = json.load(f)
         
         if steam_id_mapping:
             existing_mapping.update(steam_id_mapping)
             
-            with open("steam_id_mapping.json", "w") as f:
+            with open(STEAM_ID_MAPPING_FILE, "w") as f:
                 json.dump(existing_mapping, f, indent=4)
             
             logging.info("Game-steam_id mapping updated in steam_id_mapping.json")
@@ -699,7 +699,7 @@ def add_games_to_shortcuts(games, user_id):
 
     return steam_id_mapping
 
-def main(json_file):
+def main(json_file = DEFAULT_GAMES_INFO_PATH):
     logging.info("Starting script...")
 
     if not os.path.exists(json_file):

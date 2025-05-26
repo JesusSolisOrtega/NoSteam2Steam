@@ -4,23 +4,14 @@ from typing import Dict, Any
 import logging
 import threading
 import time
+from config import DEFAULT_GAMES_INFO_PATH
 from identify_game import run_identification
 from lutris_search_enhancement import LutrisDataEnhancer
-
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    handlers=[
-        logging.FileHandler("no_steam_to_steam.log"),
-        logging.StreamHandler()
-    ]
-)
 
 logger = logging.getLogger("no_steam_to_steam.log")
 
 class GameDataManager:
-    def __init__(self, json_path: str = "games.json"):
+    def __init__(self, json_path: str = str(DEFAULT_GAMES_INFO_PATH)):
         self.json_path = Path(json_path)
         self.data = self._load_existing_data()
         self.lock = threading.Lock()
