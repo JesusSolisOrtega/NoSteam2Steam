@@ -67,6 +67,8 @@ También puedes simplemente descargar el archivo `.zip` y descomprimirlo.
 
 ### Instalación
 
+* Es posible que necesites activar el modo desarrollador. En modo juego -> parámetros -> sistema -> Activar modo desarrollador.
+
 Haz doble clic en el archivo `installer.sh` para instalar NoSteam2Steam.
 
 Si por alguna razón no se ejecuta, abre una terminal y ejecútalo manualmente:
