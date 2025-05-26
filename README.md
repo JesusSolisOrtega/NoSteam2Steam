@@ -58,6 +58,8 @@ Alternatively, you can simply download the `.zip` and extract it
 
 ### Installation:
 
+* You may need to activate developer mode. In game mode -> settings -> system -> developer mode.
+
 Double click on the `installer.sh` file to install noSteam2Steam
 
 If, for any reason, it doesn’t run, open a terminal and run it manually:
