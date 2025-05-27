@@ -14,13 +14,19 @@ def get_noSteam2Steam_dir():
     data_dir.mkdir(parents=True, exist_ok=True)
     return data_dir
 
+# Replace the original get_resource_path function with this one
+# to ensure compatibility with PyInstaller.
+'''
 def get_resource_path(relative_path):
-
     try:
         base_path = sys._MEIPASS
     except AttributeError:
-        # En desarrollo, el base_path es el directorio del script actual.
         base_path = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(base_path, relative_path)
+'''
+
+def get_resource_path(relative_path):
+    base_path = os.path.dirname(os.path.abspath(__file__))
     return os.path.join(base_path, relative_path)
 
 # main modules files paths

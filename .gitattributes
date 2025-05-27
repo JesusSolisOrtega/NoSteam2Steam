@@ -1,0 +1,2 @@
+# Forcibly treat all .sh files as LF (Unix line endings)
+*.sh text eol=lf

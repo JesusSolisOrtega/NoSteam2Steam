@@ -1,5 +1,6 @@
 # no_steam_2_steam.py
 import logging
+from pathlib import Path
 import subprocess
 import sys
 
@@ -40,6 +41,7 @@ def show_main_menu():
         return None
 
 def run_script(script_path, args=None):
+    script_path = Path(script_path)
     if not script_path.exists():
         logger.error(f"Error: Script not found {script_path}")
         return False
