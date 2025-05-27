@@ -81,6 +81,8 @@ After that, you can double-click it or run it from the terminal with:
 
 **Important**: After adding games with NoSteam2Steam, you need to restart Steam for it to recognize the changes and properly show the new games.
 
+noSteam2Steam uses ad default folder for games `~/Games`, and `~/Games/Heroic`, So it will find games on those folders. Backups are by default on `~/Backups`. You can add or delete folders to Sync.
+
 Available options include:
 
   * **Automatic Sync:** Adds games and syncs save files.
@@ -143,16 +145,6 @@ Additional repositories for Steam shortcut manipulation and ID calculations:
 * Heroic Games Launcher -> https://github.com/Heroic-Games-Launcher/HeroicGamesLauncher/tree/main
 
 * SteamGridDB -> https://github.com/SteamGridDB/steam-rom-manager/blob/master/src/lib/helpers/steam/generate-app-id.ts
-
-
-## Contributions
-
-Contributions are welcome! To collaborate:
-
-1.  Fork the repository.
-2.  Create a branch for your feature/fix.
-3.  Commit your changes.
-4.  Submit a pull request.
 
 ## License
 
