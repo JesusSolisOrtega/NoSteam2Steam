@@ -52,7 +52,7 @@ If you’re only interested in:
 Go to the following URL and download the latest release of noSteam2Steam:
 
 ```bash
-https://github.com/JesusSolisOrtega/NoSteam2Steam/releases/tag/v1.0.0
+https://github.com/JesusSolisOrtega/NoSteam2Steam/releases/tag/v1.1.0
 ```
 
 ### Install:
@@ -63,18 +63,18 @@ Place the downloaded file wherever you prefer — for example, in ~/Desktop.
 
 ### Launching noSteam2Steam
 
-Double-click the `noSteam2Steam` file to run the app.
+Double-click the `noSteam2Steam.bin` file to run the app.
 
 If it doesn't start, you may need to make it executable first. To do that, open a terminal in the same folder and run:
 
 ```bash
-chmod +x noSteam2Steam
+chmod +x noSteam2Steam.bin
 ```
 
 After that, you can double-click it or run it from the terminal with:
 
 ```bash
-./noSteam2Steam
+./noSteam2Steam.bin
 ```
 
 ### Main Menu
