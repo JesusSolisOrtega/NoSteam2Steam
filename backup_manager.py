@@ -11,7 +11,7 @@ from logging.handlers import RotatingFileHandler
 
 
 from config import ID_MAP_PATH, INVENTORY_FILE, SCRIPT_DIR, get_backups_directory
-from utils import select_backup_directory
+from utils import select_backup_directory, with_zenity_progress
 
 logger = logging.getLogger('GBM_Backup')
 
@@ -39,6 +39,7 @@ def config_logging():
     logger.addHandler(file_handler)
 #    logger.addHandler(console_handler)
 
+@with_zenity_progress("Processing", "Synchronizing saves...")
 def run_sync(id_map_path=ID_MAP_PATH, backups_path=get_backups_directory(), inventory_path=INVENTORY_FILE):
     config_logging()
 

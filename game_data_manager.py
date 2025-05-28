@@ -7,6 +7,7 @@ import time
 from config import DEFAULT_GAMES_INFO_PATH
 from identify_game import run_identification
 from lutris_search_enhancement import LutrisDataEnhancer
+from utils import with_zenity_progress
 
 logger = logging.getLogger("no_steam_to_steam.log")
 
@@ -80,6 +81,7 @@ class GameDataManager:
             return self.data.copy()
 
 
+@with_zenity_progress("Processing", "Identifying games...")
 def main():
     start_time = time.time()
     

@@ -1,7 +1,7 @@
 import re
 from pathlib import Path
 import logging
-from add2steam import get_current_user
+from config import get_current_user
 
 from config import STEAMDECK_PATH, ROOT_PATH
 

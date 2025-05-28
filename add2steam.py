@@ -7,6 +7,8 @@ import sys
 import struct
 import concurrent.futures
 import vdf
+
+from utils import with_zenity_progress
 '''
 from PySide6.QtWidgets import (QApplication, QDialog, QVBoxLayout, QPushButton, 
                               QLabel, QScrollArea, QWidget, QMessageBox)
@@ -699,6 +701,7 @@ def add_games_to_shortcuts(games, user_id):
 
     return steam_id_mapping
 
+@with_zenity_progress("Processing", "Adding games to Steam...")
 def main(json_file = DEFAULT_GAMES_INFO_PATH):
     logging.info("Starting script...")
 

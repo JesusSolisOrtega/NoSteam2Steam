@@ -1,9 +1,10 @@
+from functools import wraps
 import hashlib
 import logging
 import os
 from pathlib import Path
 from typing import List
-from add2steam import get_current_user
+from config import get_current_user
 import subprocess
 from concurrent.futures import ThreadPoolExecutor
 
@@ -397,3 +398,28 @@ def select_backup_directory():
                 
     except subprocess.CalledProcessError:
         logger.info("Operation cancelled by user")
+
+def with_zenity_progress(title, message):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            progress = subprocess.Popen([
+                'zenity', '--progress',
+                '--title=' + title,
+                '--text=' + (message(*args, **kwargs) if callable(message) else message),
+                '--no-cancel',
+                '--pulsate',
+                '--width=300'
+            ], stdin=subprocess.PIPE, text=True)
+            
+            try:
+                result = func(*args, **kwargs)
+                return result
+            except Exception as e:
+                progress.communicate("# Error occurred")
+                raise e
+            finally:
+                progress.terminate()
+                progress.wait()
+        return wrapper
+    return decorator

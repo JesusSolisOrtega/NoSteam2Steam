@@ -29,7 +29,7 @@ def show_main_menu():
     cmd = [
         'zenity', '--list',
         '--title=NoSteam2Steam - Non-Steam Games Management',
-        '--text=Select an option:',
+        '--text=Select an option:\n<span foreground="red">Note: Steam needs restart after adding games</span>',
         '--column=Option', '--column=Description',
         '--width=650', '--height=400',
     ] + menu
