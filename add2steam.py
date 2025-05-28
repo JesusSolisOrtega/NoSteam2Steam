@@ -690,7 +690,9 @@ def add_games_to_shortcuts(games, user_id):
 
             games_added += 1
 
-            set_proton_compat_tool(app_id_short, get_proton_version())
+            proton_version = get_proton_version()
+            if proton_version:
+                set_proton_compat_tool(app_id_short, proton_version)
 
         save_shortcuts(shortcuts_path, shortcuts)
             

@@ -262,11 +262,11 @@ def get_latest_proton(get_path=False):
                                 experimental_tool = os.path.join(proton_dir, dir_name)
 
     if latest_stable_tool:
-        tool_version = latest_stable_tool
+        return latest_stable_tool
     elif experimental_tool:
-        tool_version = experimental_tool
+        return experimental_tool
     else:
-        return tool_version
+        return None
     
 def get_proton_version(get_path=False):
     version = get_latest_proton_ge(get_path)
