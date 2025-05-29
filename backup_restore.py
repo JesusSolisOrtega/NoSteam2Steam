@@ -152,9 +152,9 @@ def show_backup_selection_dialog(backups_info):
         ] + zenity_list
 
         result = subprocess.run(cmd, 
-                              stdout=subprocess.PIPE,
-                              stderr=subprocess.PIPE,
-                              text=True)
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE,
+                            text=True)
 
         if result.returncode == 1:  
             return -1
@@ -493,9 +493,9 @@ def show_sync_conflict_dialog(game_name, backup_date, steamdeck_date,
         ]
 
         result = subprocess.run(cmd, 
-                              stdout=subprocess.PIPE,
-                              stderr=subprocess.PIPE,
-                              text=True)
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE,
+                            text=True)
 
         if result.stderr.strip() == "Cancel":
             return "cancel"

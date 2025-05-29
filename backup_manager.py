@@ -1,8 +1,8 @@
 # backup_manager.py
 import subprocess
 from backup_restore import (find_backups, load_games_backup_inventory, load_games_mapping,
-                          load_metadata_from_7z, load_sync_record, generate_games_inventory,
-                          save_sync_record, sync_game)
+                        load_metadata_from_7z, load_sync_record, generate_games_inventory,
+                        save_sync_record, sync_game)
 from create_backup import verify_and_create_missing_backup
 from path_converter import transform_path_from_windows_to_proton
 from restore_lost_saves import restore_lost_saves
@@ -104,16 +104,16 @@ def show_sync_options_dialog():
         script = """
         #!/bin/bash
         selection=$(zenity --list \
-                                 --title="Save Manager" \
-                                 --text="Select an option:" \
-                                 --column="Option" \
-                                 --hide-header \
-                                 --width=450 \
-                                 --height=300 \
-                                 "Synchronize Saves" \
-                                 "Restore Lost Saves" \
-                                 "Select backups folder" \
-                                 "Exit")
+                                --title="Save Manager" \
+                                --text="Select an option:" \
+                                --column="Option" \
+                                --hide-header \
+                                --width=450 \
+                                --height=300 \
+                                "Synchronize Saves" \
+                                "Restore Lost Saves" \
+                                "Select backups folder" \
+                                "Exit")
 
         case "$selection" in
             "Synchronize Saves") echo "0" ;;
@@ -124,9 +124,9 @@ def show_sync_options_dialog():
         """
 
         result = subprocess.run(['bash', '-c', script],
-                                 stdout=subprocess.PIPE,
-                                 stderr=subprocess.PIPE,
-                                 text=True)
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE,
+                                text=True)
 
         option = result.stdout.strip()
 
@@ -141,9 +141,9 @@ def show_sync_options_dialog():
     except Exception as e:
         logger.error(f"Error in options dialog: {e}")
         subprocess.run(['zenity', '--error',
-                          '--title=Error',
-                          f'--text=Error displaying options: {str(e)}'],
-                         check=True)
+                        '--title=Error',
+                        f'--text=Error displaying options: {str(e)}'],
+                        check=True)
 
 def main():
     show_sync_options_dialog()

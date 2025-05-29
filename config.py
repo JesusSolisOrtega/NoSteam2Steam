@@ -2,7 +2,8 @@ import os
 from pathlib import Path
 import binascii
 import re
-import sys
+import subprocess
+#import sys
 import vdf
 import logging
 
@@ -55,13 +56,57 @@ INDEX_DIR = os.path.join(SCRIPT_DIR, "indexes")
 XML_URL = "https://github.com/MikeMaximus/gbm-web/blob/gh-pages/GBM_Official.xml?raw=true"
 YAML_URL = "https://raw.githubusercontent.com/mtkennerly/ludusavi-manifest/refs/heads/master/data/manifest.yaml"
 
+def get_steam_path():
+    #SteamOS (Steam Deck)
+    steamdeck_path = Path.home() / ".local/share/Steam"
+    if steamdeck_path.exists() and (steamdeck_path / "steamapps").exists():
+        return str(steamdeck_path)
+
+    steam_paths = [
+        # Debian/Ubuntu (Pop!_OS, Mint, etc.)
+        Path.home() / ".steam/steam",
+        Path.home() / ".steam/root",
+        # Flatpak (universal)
+        Path.home() / ".var/app/com.valvesoftware.Steam/data/Steam",
+        #(Arch, Fedora, etc.)
+        Path.home() / ".steam/steam/steam",
+        Path("/opt/steam"),
+        # Snap
+        Path.home() / "snap/steam/common/.local/share/Steam",
+    ]
+
+    for path in steam_paths:
+        if path.exists() and (path / "steamapps").exists():
+            return str(path)
+
+    try:
+        steam_exec = subprocess.check_output(["which", "steam"], text=True).strip()
+        if steam_exec:
+            steam_dir = Path(steam_exec).resolve().parent.parent
+            if (steam_dir / "steamapps").exists():
+                return str(steam_dir)
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        pass
+
+    try:
+        find_cmd = ['find', str(Path.home()), '-type', 'd', '-name', 'steamapps', '-printf', '%h\n', '2>/dev/null']
+        found_dir = subprocess.check_output(find_cmd, text=True).strip().split('\n')[0]
+        if found_dir and Path(found_dir).exists():
+            return found_dir
+    except (subprocess.CalledProcessError, IndexError):
+        pass
+
+    return None
+
+STEAM_PATH = get_steam_path()
+
 # Saves related paths
-STEAMDECK_PATH = Path("/home/deck/.local/share/Steam/steamapps/compatdata")
-DEFAULT_BACKUPS_PATH = Path("/home/deck/Backups")
+COMPATDATA_PATH = Path(STEAM_PATH) / "steamapps/compatdata"
+DEFAULT_BACKUPS_PATH = Path.home() / "Backups"
 ALTERNATIVE_BACKUPS_PATH_FILE = SCRIPT_DIR / "alternative_backups_path.txt"
 ID_MAP_PATH = SCRIPT_DIR / "steam_id_mapping.json"
 SYNC_RECORD_FILE = str(SCRIPT_DIR / "sync_record.json")
-ROOT_PATH = Path("/home/deck/.local/share/Steam/steamapps")
+ROOT_PATH = Path(STEAM_PATH) / "steamapps"
 
 def get_backups_directory():
     try:
@@ -109,16 +154,16 @@ IGNORED_DIRS = {
     }
 
 HEROIC_PATHS = [
-        os.path.join(Path("/home/deck/.var/app/com.heroicgameslauncher.hgl/config/heroic"),"config.json"),  # Steam Deck
-        os.path.join(Path.home(), ".config", "heroic", "gamesConfig.json"),  # Linux config
-        os.path.join(os.getenv("APPDATA", ""), "heroic", "gamesConfig.json"),  # Windows
-        os.path.join(Path.home(), "Library", "Application Support", "heroic", "gamesConfig.json")  # macOS
-    ]
+    Path.home() / ".var/app/com.heroicgameslauncher.hgl/config/heroic/config.json",  # Flatpak
+    Path.home() / ".config/heroic/config.json",  # Linux nativo
+    Path.home() / "Library/Application Support/heroic/config.json",  # macOS
+    Path(os.getenv("APPDATA", "")) / "heroic/config.json"  # Windows
+]
 
 GOG_PATHS = [
     os.path.join(os.getenv("PROGRAMFILES", ""), "GOG Galaxy", "Games"),  # Windows
     os.path.join(os.getenv("LOCALAPPDATA", ""), "GOG.com", "Galaxy", "Configuration", "config.json")  # Windows config
-    ]
+]
 
 # utils.py
 SERVICE_FILE = Path("~/.config/systemd/user/syncthingy.service").expanduser()
@@ -191,27 +236,34 @@ def get_current_user():
         return None
 
 # add2Steam.py
-STEAM_USERDATA_DIR = os.path.expanduser("~/.local/share/Steam/userdata")
+
+STEAM_USERDATA_DIR = os.path.expanduser(STEAM_PATH + "/userdata")
 SHORTCUTS_FILE = "shortcuts.vdf"
 DEFAULT_GAMES_INFO_PATH = os.path.join(SCRIPT_DIR, "games.json")
 USER_MAPPING_PATH = os.path.join(SCRIPT_DIR, "user_mapping.json")
-CONFIG_VDF_PATH = os.path.expanduser("~/.steam/steam/config/config.vdf")
-LOGINUSERS_PATH = os.path.expanduser("~/.local/share/Steam/config/loginusers.vdf")
+STEAM_CONFIG_PATH = os.path.expanduser(STEAM_PATH + "/config")
+CONFIG_VDF_PATH = STEAM_CONFIG_PATH + "/config.vdf"
+LOGINUSERS_PATH = STEAM_CONFIG_PATH + "/loginusers.vdf"
 
 USER_CONFIG_DIR = os.path.join(STEAM_USERDATA_DIR, get_current_user(), "config")
 shortcuts_path = os.path.join(USER_CONFIG_DIR, SHORTCUTS_FILE)
 LOCALCONFIG_PATH = os.path.join(STEAM_USERDATA_DIR, get_current_user(), "config", "localconfig.vdf")
 
-# Proton
-PROTON_DIRS = [
-    os.path.expanduser("~/.steam/root/steamapps/common"),
-    os.path.expanduser("~/.local/share/Steam/steamapps/common")
-]
+def unique_resolved_paths(paths):
+    return list({str(Path(p).expanduser().resolve()) for p in paths})
 
-PROTON_GE_DIRS = [
-    os.path.expanduser("~/.steam/root/compatibilitytools.d"),
-    os.path.expanduser("~/.local/share/Steam/compatibilitytools.d")
-]
+# Proton
+PROTON_DIRS = unique_resolved_paths([
+    Path(STEAM_PATH) / "steamapps/common",
+    "~/.steam/root/steamapps/common",
+    "~/.local/share/Steam/steamapps/common"
+])
+
+PROTON_GE_DIRS = unique_resolved_paths([
+    Path(STEAM_PATH).parent / "compatibilitytools.d",
+    "~/.steam/root/compatibilitytools.d",
+    "~/.local/share/Steam/compatibilitytools.d"
+])
 
 def get_latest_proton_ge(get_path=False):
     
@@ -273,4 +325,3 @@ def get_proton_version(get_path=False):
     if not version:
         version = get_latest_proton(get_path)
     return version
-

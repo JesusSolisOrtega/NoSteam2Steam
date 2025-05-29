@@ -9,7 +9,7 @@ from path_converter import PathConverter, transform_path_from_windows_to_proton
 import py7zr
 import xml.etree.ElementTree as ET
 
-from config import ID_MAP_PATH, SCRIPT_DIR, STEAMDECK_PATH, get_backups_directory
+from config import ID_MAP_PATH, SCRIPT_DIR, COMPATDATA_PATH, get_backups_directory
 from utils import compute_hash
 
 import logging
@@ -297,7 +297,7 @@ def create_backup_from_gbm(game_name, gbm_config, backup_root_dir, game_data=Non
         proton_path = transform_path_from_windows_to_proton(
             gbm_config['windows_path'],
             game_data,
-            STEAMDECK_PATH
+            COMPATDATA_PATH
         )
 
         is_folder = gbm_config.get('is_folder', False)

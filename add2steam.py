@@ -11,7 +11,7 @@ import vdf
 from utils import with_zenity_progress
 '''
 from PySide6.QtWidgets import (QApplication, QDialog, QVBoxLayout, QPushButton, 
-                              QLabel, QScrollArea, QWidget, QMessageBox)
+                            QLabel, QScrollArea, QWidget, QMessageBox)
 from PySide6.QtCore import Qt
 '''
 from urllib.parse import quote
@@ -112,9 +112,9 @@ def select_steam_user():
 
         if not user_folders:
             subprocess.run(['zenity', '--error', 
-                          '--title=Error', 
-                          '--text=Steam user folder not found.'],
-                          check=True)
+                        '--title=Error', 
+                        '--text=Steam user folder not found.'],
+                        check=True)
             return None
 
         current_user = get_current_user()
@@ -145,9 +145,9 @@ def select_steam_user():
         save_user_mapping(user_mapping)
 
         result = subprocess.run(zenity_args, 
-                              stdout=subprocess.PIPE,
-                              stderr=subprocess.PIPE,
-                              text=True)
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE,
+                            text=True)
 
         if result.returncode == 1:
             return None
@@ -163,9 +163,9 @@ def select_steam_user():
     except Exception as e:
         logging.error(f"Error selecting user: {e}")
         subprocess.run(['zenity', '--error',
-                       '--title=Error',
-                       f'--text=Error selecting user: {str(e)}'],
-                       check=True)
+                    '--title=Error',
+                    f'--text=Error selecting user: {str(e)}'],
+                    check=True)
         return None
 
 '''

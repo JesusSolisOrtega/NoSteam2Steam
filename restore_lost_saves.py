@@ -1,7 +1,7 @@
 from backup_restore import load_games_backup_inventory, generate_games_inventory
 from create_backup import load_games_mapping, verify_and_create_missing_backup
 
-from config import DEFAULT_BACKUPS_PATH, ID_MAP_PATH, INVENTORY_FILE, STEAMDECK_PATH
+from config import DEFAULT_BACKUPS_PATH, ID_MAP_PATH, INVENTORY_FILE, COMPATDATA_PATH
 from utils import with_zenity_progress
 
 def restore_game_saves(game_name, games_mapping, inventory, backups_path=DEFAULT_BACKUPS_PATH):
@@ -17,7 +17,7 @@ def _get_alternative_appids(current_appid, games_mapping):
     unknown_folders = []
     known_folders = []
 
-    for appid_dir in (STEAMDECK_PATH).iterdir():
+    for appid_dir in (COMPATDATA_PATH).iterdir():
         if not appid_dir.is_dir() or appid_dir.name == current_appid:
             continue
         (known_folders if appid_dir.name in known_appids else unknown_folders).append(appid_dir.name)

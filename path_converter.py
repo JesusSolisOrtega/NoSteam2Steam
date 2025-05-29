@@ -3,7 +3,7 @@ from pathlib import Path
 import logging
 from config import get_current_user
 
-from config import STEAMDECK_PATH, ROOT_PATH
+from config import COMPATDATA_PATH, ROOT_PATH
 
 logger = logging.getLogger('GBM_Backup')
 
@@ -70,7 +70,7 @@ class PathConverter:
         if not game_id:
             logger.warning("Attempt to get Proton path without game_id")
             return None
-        return STEAMDECK_PATH / str(game_id) / 'pfx' / 'drive_c'
+        return COMPATDATA_PATH / str(game_id) / 'pfx' / 'drive_c'
 
     @staticmethod
     def expand_path(original_path, game_data=None, system='auto'):
@@ -288,7 +288,7 @@ def _expand_placeholders_to_windows(path, game_data):
 
     placeholders = {
         '<base>': str(base_path) if base_path else '',
-        '<root>': str(STEAMDECK_PATH.parent),  # ../compatdata
+        '<root>': str(COMPATDATA_PATH.parent),  # ../compatdata
         '<game>': install_dir if install_dir else Path(exe_path).stem if exe_path else '',
         '<storeGameId>': str(game_id) if game_id else '',
         '<storeUserId>': str(store_user_id) if store_user_id else '*',
@@ -303,7 +303,7 @@ def _expand_placeholders_to_windows(path, game_data):
     return path
 
 
-def transform_path_from_windows_to_proton(windows_path, game_data, steamdeck_path=STEAMDECK_PATH):
+def transform_path_from_windows_to_proton(windows_path, game_data, compatdata_path=COMPATDATA_PATH):
     expanded_path = _expand_placeholders_to_windows(windows_path, game_data)
 
     if 'steam_app_id' in game_data:
@@ -336,7 +336,7 @@ def transform_path_from_windows_to_proton(windows_path, game_data, steamdeck_pat
     )
 
     if needs_proton and game_data.get("app_id_short"):
-        final_path = steamdeck_path / game_data["app_id_short"] / "pfx" / "drive_c" / relative_path
+        final_path = compatdata_path / game_data["app_id_short"] / "pfx" / "drive_c" / relative_path
     else:
         final_path = relative_path
 

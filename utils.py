@@ -4,7 +4,7 @@ import logging
 import os
 from pathlib import Path
 from typing import List
-from config import get_current_user
+from config import DEFAULT_BACKUPS_PATH, USER_CONFIG_DIR, get_current_user
 import subprocess
 from concurrent.futures import ThreadPoolExecutor
 
@@ -137,13 +137,13 @@ def delete_games_images() -> bool:
         logger.info("Could not determine current user")
         return False
     
-    steam_config_path = Path(f"/home/deck/.steam/steam/userdata/{user}/config")
+    steam_user_config_path = USER_CONFIG_DIR
     folders_to_clear = ["grid", "icons"]
     
     success = True
     
     for folder in folders_to_clear:
-        folder_path = steam_config_path / folder
+        folder_path = steam_user_config_path / folder
         try:
             if folder_path.exists():
                 for item in folder_path.iterdir():
@@ -368,12 +368,13 @@ def select_backup_directory():
     logger = logging.getLogger('GBM_Backup')
     
     config_file = ALTERNATIVE_BACKUPS_PATH_FILE
+    backups_path = DEFAULT_BACKUPS_PATH
 
     zenity_command = [
         'zenity', '--list', '--title=Backup Directory Selection',
         '--text=Select an option:', '--column=Option',
         'Select custom directory',
-        'Use default directory (/home/deck/Backups)',
+        'Use default directory ({backups_path})',
         '--height=200', '--width=400'
     ]
 
@@ -382,7 +383,7 @@ def select_backup_directory():
         
         if option == 'Select custom directory':
             dir_dialog = ['zenity', '--file-selection', '--directory', 
-                         '--title=Select backup directory']
+                        '--title=Select backup directory']
             selected_dir = subprocess.check_output(dir_dialog, text=True).strip()
             
             with open(config_file, 'w') as f:
