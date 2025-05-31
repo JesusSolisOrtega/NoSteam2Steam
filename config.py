@@ -82,6 +82,10 @@ def get_backups_directory():
                             return str(resolved_path)
                         logger.warning(f"Configured path is not valid: {custom_path}")
         
+        if not default_directory.exists():
+            logger.info(f"Creating default backups directory at: {default_directory}")
+            default_directory.mkdir(parents=True)
+
         return default_directory
     except Exception as e:
         logger.error(f"Error reading configuration: {e}")

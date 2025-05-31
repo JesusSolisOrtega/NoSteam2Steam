@@ -58,7 +58,12 @@ class GameDataManager:
         with self.lock:
             for game_key, game_data in new_data.items():
                 if game_key in self.data:
-                    self.data[game_key] = self._merge_game_data(self.data[game_key], game_data)
+                    prev_exe = self.data[game_key].get("exe_path")
+                    new_exe = game_data.get("exe_path")
+                    if prev_exe and new_exe and prev_exe != new_exe:
+                        self.data[game_key] = game_data
+                    else:
+                        self.data[game_key] = self._merge_game_data(self.data[game_key], game_data)
                 else:
                     self.data[game_key] = game_data
 

@@ -582,16 +582,25 @@ def input_preparation(args, entry_index):
             var_shortcut_path, var_launch_options, var_is_hidden, var_allow_desk_conf,
             var_allow_overlay, var_open_vr, var_last_play_time, var_tags, entry_index)
 
-def game_exists(shortcuts_path, exe_path):
-    normalized_exe_path = os.path.normcase(os.path.normpath(exe_path)).encode('utf-8')
-    if os.path.exists(shortcuts_path):
-        try:
-            with open(shortcuts_path, 'rb') as f:
-                content = f.read()
-                return normalized_exe_path in content
-        except Exception as e:
-            logging.error(f"Error reading shortcuts.vdf file: {e}")
-            return False
+def game_exists(shortcuts_path, exe_path, game_name):
+
+    if not os.path.exists(shortcuts_path):
+        return False
+    try:
+        with open(shortcuts_path, 'rb') as f:
+            shortcuts = load_shortcuts(shortcuts_path)
+            for shortcut in shortcuts.values():
+                shortcut_exe = shortcut.get('Exe', '').strip('"')
+                shortcut_name = shortcut.get('appname', '')
+                if (
+                    os.path.normcase(os.path.normpath(shortcut_exe)) == os.path.normcase(os.path.normpath(exe_path))
+                    and shortcut_name == game_name
+                ):
+                    return True
+        return False
+    except Exception as e:
+        logging.error(f"Error reading shortcuts.vdf file: {e}")
+        return False
 
 def find_entry_index(shortcuts):
     if not shortcuts:
@@ -648,13 +657,13 @@ def add_games_to_shortcuts(games, user_id):
             exe_path = game_data.get("exe_path", "")
             if not os.path.exists(exe_path):
                 continue
-            
+
             game_name = game_data["name"]
             steam_app_id = next((p["id"] for p in game_data.get("providers", []) if p["service"] == "steam"), None)
             app_id_long = generate_app_id(game_data["exe_path"], game_name)
             app_id_short = generate_short_app_id(game_data["exe_path"], game_name)
             shortcut_id = generate_shortcut_id(game_data["exe_path"], game_name)
-            
+
             steam_id_mapping[game_name] = {
                 "app_id_long": app_id_long,
                 "app_id_short": app_id_short,
@@ -669,7 +678,7 @@ def add_games_to_shortcuts(games, user_id):
             if image_updated:
                 games_updated += 1
 
-            if game_exists(shortcuts_path, game_data["exe_path"]):
+            if game_exists(shortcuts_path, game_data["exe_path"], game_name):
                 continue
 
             entry_index = find_entry_index(shortcuts)
@@ -695,7 +704,7 @@ def add_games_to_shortcuts(games, user_id):
                 set_proton_compat_tool(app_id_short, proton_version)
 
         save_shortcuts(shortcuts_path, shortcuts)
-            
+
         logging.info(f"Summary: {games_added} games added, {games_updated} games updated (images), {removed_count} games removed (executables not found)")
     except Exception as e:
         logging.error(f"Error processing shortcuts.vdf file: {e}")

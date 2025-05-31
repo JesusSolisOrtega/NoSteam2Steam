@@ -138,6 +138,7 @@ ENV/
 env.bak/
 venv.bak/
 venv_linux/
+noSteam2Steam/
 
 # Spyder project settings
 .spyderproject
