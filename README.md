@@ -52,7 +52,7 @@ If you’re only interested in:
 Go to the following URL and download the latest release of noSteam2Steam:
 
 ```bash
-https://github.com/JesusSolisOrtega/NoSteam2Steam/releases/tag/v1.1.0
+https://github.com/JesusSolisOrtega/NoSteam2Steam/releases/tag/v1.1.2
 ```
 
 ### Install:
