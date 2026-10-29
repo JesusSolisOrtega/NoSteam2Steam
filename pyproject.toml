@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nosteam2steam"
+version = "1.2.0"
+description = "Non-Steam games manager and save game synchronization tool for Steam Deck and Linux"
+authors = [
+    { name = "Jesús Solís Ortega" }
+]
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Custom - Educational and Personal Use" }
+dependencies = [
+    "requests>=2.31.0",
+    "vdf>=3.4",
+    "py7zr>=0.20.5",
+    "pefile>=2023.2.7",
+    "lxml>=4.9.3",
+    "PyYAML>=6.0",
+]
+
+[project.scripts]
+nosteam2steam = "nosteam2steam.app:main"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "ruff>=0.4.0",
+    "mypy>=1.10.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    "F",    # Pyflakes logic errors, undefined names
+    "E9",   # Syntax errors
+    "W6",   # Deprecated features
+]
+ignore = [
+    "E501", # Line length
+    "E402", # Module level import placement (dynamic Zenity CLI)
+]
+
+[tool.mypy]
+python_version = "3.10"
+ignore_missing_imports = true
+warn_unused_configs = true
+

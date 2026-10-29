@@ -1,171 +1,199 @@
 # NoSteam2Steam
 
-**NoSteam2Steam** is a tool designed to manage non-Steam games by allowing users to:
+<p align="center">
+  <a href="https://github.com/JesusSolisOrtega/NoSteam2Steam/releases/latest">
+    <img src="https://img.shields.io/github/v/release/JesusSolisOrtega/NoSteam2Steam?color=blue&style=flat-square" alt="Latest Release">
+  </a>
+  <img src="https://img.shields.io/badge/Platform-SteamOS%20%7C%20Linux-informational?style=flat-square" alt="Platform">
+  <img src="https://img.shields.io/badge/Python-3.10%2B-blue?style=flat-square" alt="Python Version">
+  <img src="https://img.shields.io/badge/License-Personal%20%26%20Educational-green?style=flat-square" alt="License">
+  <a href="https://ko-fi.com/F1F51F88U3">
+    <img src="https://img.shields.io/badge/Donate-Ko--fi-FF5E5B?style=flat-square&logo=ko-fi&logoColor=white" alt="Donate on Ko-fi">
+  </a>
+  <a href="https://www.paypal.com/donate/?hosted_button_id=VVRC7ZTVFJWDU">
+    <img src="https://img.shields.io/badge/Donate-PayPal-00457C?style=flat-square&logo=paypal&logoColor=white" alt="Donate on PayPal">
+  </a>
+</p>
 
-* Automatically detect and add non-Steam games to the Steam library (with artwork, icons, and the best available compatibility tool)
+**NoSteam2Steam** is an automated utility for Linux distributions (SteamOS, Arch, Fedora, Debian, Ubuntu, openSUSE) that discovers non-Steam games across native, Flatpak, and Snap package environments, registers them into Steam with official artwork and optimal compatibility settings, and synchronizes save game backups adhering to the **Game Backup Monitor (GBM)** standard.
 
-* Sync and back up save files
+---
 
-* Restore lost saves from previously added games
+## Key Features
 
-While it's optimized for the **Steam Deck**, it can also be used on other platforms with some adjustments—particularly related to OS-specific path conversions.
+- **Multi-Distribution & Multi-Package Support:** Native package systems (Pacman, DNF, APT, Zypper), Flatpak Steam (`com.valvesoftware.Steam`), Snap, and custom installations via `$STEAM_DIR`.
+- **Automated Game Discovery:** Scans game directories (e.g., `~/Games`, Heroic, Lutris, Bottles, and external mounts under `/run/media`, `/media`, and `/mnt`), matching metadata from GOG, Steam, and Lutris catalogs.
+- **Steam Integration:**
+  - Automatically updates `shortcuts.vdf` with generated entries and alphabetical reindexing.
+  - Generates 32-bit shortcut IDs and 64-bit AppIDs for Steam Grid artwork.
+  - Automatically extracts application icons from Windows `.exe` headers and fetches cover art, banners, and logos.
+  - Detects and assigns the highest available Proton or GE-Proton compatibility layer across system-wide and user directories.
+- **Save Game Backup and Synchronization:**
+  - Full compatibility with the Game Backup Monitor (GBM) `.7z` archive format.
+  - Bidirectional synchronization between local save directories and a centralized backup folder.
+  - Discovers save prefixes across all storage drives and secondary Steam libraries registered in `libraryfolders.vdf`.
+  - Translates Windows environment paths (`<winAppData>`, `<winDocuments>`, etc.) and Linux native paths (`<xdgDataHome>`, `<xdgConfigHome>`) using case-insensitive path resolution on *ext4*.
+  - Windows registry save support (`<winRegistry>`) via extraction and merge of Proton prefix `user.reg` and `system.reg` hives.
+  - Archive block decompression and CRC integrity verification prior to rotating and committing `.7z` backups.
+  - Atomic archive writes and backup rotation (`.7z.bak`) to prevent file corruption.
+- **Dual Dialog Backend & Headless Operation:** Native `zenity` with automatic fallback to `kdialog` on KDE Plasma desktops, and full CLI flag support for cron/systemd automation.
+- **Self-Contained Standalone Executable:** Distributed as a single binary with zero external package dependencies.
 
-This project uses **Game Backup Monitor (GBM)** as the main reference/tool for creating backups on Windows. However, **NoSteam2Steam** can be used as a standalone tool on the Steam Deck.
+---
 
-Backups are expected to follow the same folder structure as GBM. To sync save files between local Steam Deck data and Windows saves, we use **Syncthing** (known as Syncthingy on the Steam Deck). That said, any folder synchronization tool with similar functionality can be used.
+## Installation & Quick Start
 
-If you’re only interested in:
+### Option 1: Standalone Binary (Recommended)
 
-* Adding non-Steam games to Steam with artwork, or
+No installation or configuration of Python packages is required. The standalone executable bundles all runtime dependencies (`py7zr`, `vdf`, `pefile`, etc.):
 
-* Backing up and restoring save files locally on the Steam Deck, including restoring saves from previously added games
+1. Download the latest `noSteam2Steam.bin` from the [Releases](https://github.com/JesusSolisOrtega/NoSteam2Steam/releases/latest) page.
+2. Place the file in your preferred directory (for example, on your `~/Desktop`).
+3. Grant execution permissions:
+   ```bash
+   chmod +x noSteam2Steam.bin
+   ```
+4. Run the application by double-clicking the file in Desktop Mode or launching it from the terminal:
+   ```bash
+   ./noSteam2Steam.bin
+   ```
 
-...then **NoSteam2Steam** can handle it all on its own — no additional tools required.
+*(Note: A graphical dialog provider (`zenity` or `kdialog`) is required for interactive menus. `zenity` is pre-installed on SteamOS by default; `kdialog` is used automatically on KDE Plasma systems where `zenity` is absent.)*
 
-## Features
+---
 
-* **Save file synchronization:** Automatically syncs save files in the backups folder.
-* **Non-Steam game management:** Adds games from other platforms (e.g., GOG, Heroic, etc.) to the Steam library.
-* **Save file backups:** Creates automatic backups of save files in \`.7z\` format.
-* **Lost saves restoration:** Detects and restores lost save files.
-* **Compatibility tool auto-selection**: Automatically chooses the best available compatibility layer (e.g., Proton-ge) based on your system setup.
+### Option 2: Automated Desktop Installer
 
-### Dependencies:
-
-(They are already bundled in the executable (released version))
-
-* Python 3.11 or higher
-* `py7zr` for `.7z` file manipulation
-* `zenity` for the graphical user interface
-* `requests` for external API queries
-* `vdf` for handling Steam configuration files
-
-### Supported OS:
-
-* Steam Deck (Linux)
-* Other Linux distributions (untested/may require minor adjustments)
-
-## Installation
-
-### Download noSteam2Steam:
-
-Go to the following URL and download the latest release of noSteam2Steam:
+If you prefer an automated setup that copies files to `~/Games/noSteam2Steam` and creates a `.desktop` shortcut on your Desktop:
 
 ```bash
-https://github.com/JesusSolisOrtega/NoSteam2Steam/releases/tag/v1.1.2
+git clone https://github.com/JesusSolisOrtega/NoSteam2Steam.git
+cd NoSteam2Steam
+chmod +x installer.sh
+./installer.sh
 ```
 
-### Install:
+---
 
-Place the downloaded file wherever you prefer — for example, in ~/Desktop.
+### Option 3: From Source (For Developers)
+
+```bash
+git clone https://github.com/JesusSolisOrtega/NoSteam2Steam.git
+cd NoSteam2Steam
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
+python3 -m nosteam2steam
+```
+
+To compile a standalone binary locally, run:
+```bash
+./build_standalone.sh
+```
+
+---
 
 ## Usage
 
-### Launching noSteam2Steam
+When executed, NoSteam2Steam displays the main graphical menu with the following operations:
 
-Double-click the `noSteam2Steam.bin` file to run the app.
+| Option | Action | Description |
+| :--- | :--- | :--- |
+| **1** | **Automatic Sync** | Full automated pipeline: discovers games, adds them to Steam with artwork, and synchronizes save backups. |
+| **2** | **Add Games to Steam Automatically** | Runs the identification and Steam shortcut registration passes without performing save synchronization. |
+| **3** | **Game Saves Synchronization** | Synchronizes local Proton save files with the backup folder (restores missing saves or updates backups). |
+| **4** | **Manually Add a Game to Steam** | Prompts you to browse for an executable, search metadata, and register a custom game entry. |
+| **5** | **Clean NoSteam2Steam Configuration** | Selective maintenance utility to clear configuration mappings, cached inventories, or downloaded artwork. |
+| **6** | **Enable / Disable Syncthing** | Toggles the background synchronization service for multi-device save replication. |
+| **7** | **Change Synchronized Game Folders** | Adds or removes monitored directories where games and saves are discovered (defaults: `~/Games`, `~/Games/Heroic`). |
+| **8** | **Exit** | Closes the application. |
 
-If it doesn't start, you may need to make it executable first. To do that, open a terminal in the same folder and run:
+### Command-Line Interface (CLI / Headless Mode)
+
+For automated tasks, headless execution, or scheduling via `cron` or `systemd`, NoSteam2Steam supports direct CLI parameters:
 
 ```bash
-chmod +x noSteam2Steam.bin
+# Run full automated scan, shortcut registration, and save sync without GUI prompts
+./noSteam2Steam.bin --sync --quiet
+
+# Add games and artwork to Steam without syncing saves
+./noSteam2Steam.bin --add-games
+
+# Sync save backups without scanning for new games
+./noSteam2Steam.bin --sync-saves
+
+# Reset configuration caches non-interactively
+./noSteam2Steam.bin --clean-config
 ```
 
-After that, you can double-click it or run it from the terminal with:
+| Flag | Description |
+| :--- | :--- |
+| `--sync`, `--auto` | Executes full pipeline: discovers games, updates shortcuts, and synchronizes saves. |
+| `--add-games` | Scans directories and registers shortcuts and artwork without touching save backups. |
+| `--sync-saves` | Synchronizes save files with the backup folder without directory scanning. |
+| `--clean-config` | Clears local game configurations non-interactively. |
+| `-q`, `--quiet` | Suppresses graphical dialog notifications, logging progress directly to standard output. |
 
-```bash
-./noSteam2Steam.bin
-```
+> [!IMPORTANT]
+> Steam must be completely closed before modifying `shortcuts.vdf`. NoSteam2Steam detects if Steam is currently running and provides a prompt to close it gracefully to avoid file-locking conflicts.
 
-### Main Menu
+---
 
-**Important**: After adding games with NoSteam2Steam, you need to restart Steam for it to recognize the changes and properly show the new games.
+## Save Synchronization and Multi-Device Setup
 
-noSteam2Steam uses ad default folder for games `~/Games`, and `~/Games/Heroic`, So it will find games on those folders. Backups are by default on `~/Backups`. You can add or delete folders to Sync.
+NoSteam2Steam uses **Game Backup Monitor (GBM)** archive specifications for save game backups:
 
-Available options include:
+- **Default Backup Directory:** `~/Backups` (configurable via `alternative_backups_path.txt` or via menu).
+- **Format:** Standard `.7z` archives containing save files and a JSON metadata header describing original paths and timestamps.
+- **Cross-Platform Sync:** Save archives can be synced seamlessly between your Steam Deck and a Windows PC using tools such as **Syncthing** (Syncthingy on Steam Deck), cloud storage, or local network transfers.
 
-  * **Automatic Sync:** Adds games and syncs save files.
-  * **Automatically Add Games to Steam:** Detects and adds non-Steam games.
-  * **Game saves synchronization:** Options to sync save files (sync gamesaves/restore old saves).
-  * **Manually Add a Game to Steam:** Allows adding specific games.
-  * **Reset NoSteam2Steam Configuration:** Clears settings and temporary data.
-  * **Enable/Disable Syncthing:** Manages the background sync service.
-  * **Change Synced Game Folders:** Modifies folders where games and saves are searched.
-  * **Exit:** Closes the application.
+---
 
+## Support and Donations
 
-### Technical Overview (Brief Explanation)
+NoSteam2Steam is an independent, free, and open-source project created and maintained for the Linux and Steam Deck gaming community.
 
-The program consists of three (actually four) main modules, each handling a specific task: 
+If this tool has saved you time or improved your experience on the Steam Deck, please consider supporting continued development, hardware testing, and maintenance:
 
-1. Game Identification: Searches the designated sync folder for game executables and supplements this with Lutris data. It also auto-select the best available launcher if it have x86, x64 and/or Vulkan executables.
+<div align="center">
 
-2. Steam Integration: Steam Integration: Adds games to Steam, associates images, calculates game IDs, and automatically selects the most suitable compatibility tool available on the system.
+[![Donate on Ko-fi](https://img.shields.io/badge/Ko--fi-Support%20the%20Project-FF5E5B?style=for-the-badge&logo=ko-fi&logoColor=white)](https://ko-fi.com/F1F51F88U3)
+&nbsp;&nbsp;&nbsp;&nbsp;
+[![Donate on PayPal](https://img.shields.io/badge/PayPal-Donate-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://www.paypal.com/donate/?hosted_button_id=VVRC7ZTVFJWDU)
 
-3. Save File Sync: The core feature—reads backups from the designated folder and syncs them with local save files of Steam-added games. It relies on the backup structure from Game Backup Monitor (GBM) and configuration files from GBM and Ludusavi.
+<br>
 
-*The fourth module is manual game detection, which functions similarly to the first module but allows user selection and overwrites previous entries if a game was already associated with an executable. Automatic detection respects manual selections.
+<a href="https://ko-fi.com/F1F51F88U3" target="_blank">
+  <img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Buy Me A Coffee" height="38">
+</a>
 
-*Additional functionalities include resetting configurations for troubleshooting or clean setups. The program prioritizes reliability (e.g., avoiding overwriting saves if uncertain) while minimizing user prompts for efficiency. Once a file is synced or manually entered, it assumes this behavior for future runs.
+<p><i>Every contribution, no matter the size, is sincerely appreciated. Thank you!</i></p>
 
-Both the first and second modules update data if changes are detected (except for images, which are not redownloaded once found).
+</div>
 
-Most menu options are self-explanatory:
+---
 
-1. Automatic Sync → Full process: identifies, adds, and syncs saves.
+## Technical Documentation & Contributing
 
-2. Automatically Add Games to Steam → Runs the first two modules (identification + Steam integration).
+- For in-depth technical documentation covering filesystem pruning algorithms, Steam AppID mathematical calculations, and Proton prefix conversion mechanics, see the [Technical Architecture Specification](docs/architecture.md).
+- For coding conventions, static analysis guidelines, and test execution standards, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
-3. Manual Save Sync → Syncs saves.
+---
 
-4. Reset Configuration → Options to clear game/sync settings.
+## Credits and References
 
-5. Enable/Disable Syncthing → Toggles Syncthing for sync folder management in Steam Game Mode (Note: Syncthing works well for saves but struggles with large game files—consider alternatives for game transfers).
+- **Game Backup Monitor (GBM):** Specification for save backups and metadata structure ([mikemaximus.github.io/gbm-web](https://mikemaximus.github.io/gbm-web/)).
+- **Ludusavi Manifest:** Multi-platform save file directory specifications ([github.com/mtkennerly/ludusavi-manifest](https://github.com/mtkennerly/ludusavi-manifest)).
+- **Lutris:** Metadata provider and runner data ([lutris.net](https://lutris.net/)).
+- **Valve Python VDF:** KeyValues parsing and serialization implementation.
+- **Steam Shortcut Manager & SteamRomManager:** Reference implementations for AppID derivation and binary shortcut structures.
 
-6. Change Synced Game Folders → Adjusts folders for synced games (default: $HOME/games).
-
-
-** Based on tests, SyncThing works well for backups of saved games, but it has caused problems with games for large files, so other methods or programs are recommended to transfer games to the device from Windows (or do it manually).
-
-## Credits & References
-
-Key projects used as references for game/save file identification:
-
-* **GBM** -> https://mikemaximus.github.io/gbm-web/
-
-* **Ludusavi Manifest** -> https://github.com/mtkennerly/ludusavi-manifest
-
-* **Lutris**
-
-Additional repositories for Steam shortcut manipulation and ID calculations:
-
-* Steam Shortcut Manager -> https://github.com/CorporalQuesadilla/Steam-Shortcut-Manager
-
-* Heroic Games Launcher -> https://github.com/Heroic-Games-Launcher/HeroicGamesLauncher/tree/main
-
-* SteamGridDB -> https://github.com/SteamGridDB/steam-rom-manager/blob/master/src/lib/helpers/steam/generate-app-id.ts
+---
 
 ## License
 
-Copyright (c) 2025 Jesús Solís Ortega
+Copyright (c) 2025 Jesús Solís Ortega.
 
-This software is distributed for **educational and personal use only**.
-**Commercial use**, distribution, sublicensing, sale, or integration into for-profit products/services is **prohibited** without the copyright holder's consent.
-Non-commercial use, copying, and modification are permitted, provided this copyright notice remains intact.
+This software is distributed for **educational and personal use only**. Commercial use, distribution, sublicensing, sale, or integration into for-profit products or services is prohibited without prior written consent from the author. Non-commercial use, copying, and modification are permitted provided that this copyright notice remains intact.
 
-For commercial inquiries, contact the author.
-
-**NO WARRANTIES, EXPRESS OR IMPLIED, ARE PROVIDED**.
-
-## Contact
-
-For questions or suggestions, open an issue in the repository or contact me directly.
-For commercial integration projects, reach out—I’m likely open to collaboration. Thanks for using NoSteam2Steam!
-
-## Donations
-
-If you find NoSteam2Steam useful and wish to support my work:
-
-* [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/F1F51F88U3)
-* Or donate via [PayPal](https://www.paypal.com/donate/?hosted_button_id=VVRC7ZTVFJWDU)
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED.

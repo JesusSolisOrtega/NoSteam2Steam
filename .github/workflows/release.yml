@@ -1,0 +1,64 @@
+name: Build Standalone Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies and build tools
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          pip install -r requirements.txt
+          pip install pyinstaller pytest ruff mypy pyright
+
+      - name: Run verification test suite and static analysis
+        run: |
+          pytest
+          ruff check nosteam2steam tests
+          mypy nosteam2steam tests
+          pyright nosteam2steam tests
+
+      - name: Compile standalone executable
+        run: |
+          python -m PyInstaller \
+            --onefile \
+            --name "noSteam2Steam.bin" \
+            --collect-all "nosteam2steam" \
+            --add-data "assets:assets" \
+            --clean \
+            noSteam2Steam.py
+
+      - name: Compute SHA-256 Checksum
+        run: |
+          cd dist
+          sha256sum noSteam2Steam.bin > noSteam2Steam.bin.sha256
+
+      - name: Publish Release Assets
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            dist/noSteam2Steam.bin
+            dist/noSteam2Steam.bin.sha256
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+
