@@ -6,6 +6,7 @@ from typing import Dict
 import vdf
 
 from nosteam2steam.steam.environment import CONFIG_VDF_PATH
+from nosteam2steam.atomic import atomic_write
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +36,7 @@ def set_proton_compat_tools(mapping: Dict[str, str]) -> None:
                 "priority": "250",
             }
 
-        with open(CONFIG_VDF_PATH, "w", encoding="utf-8") as f:
+        with atomic_write(CONFIG_VDF_PATH, mode="w", encoding="utf-8", backup=True) as f:
             vdf.dump(config_data, f, pretty=True)
 
         logger.info(f"Proton configuration updated for {len(mapping)} games in config.vdf.")

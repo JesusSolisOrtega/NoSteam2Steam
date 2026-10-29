@@ -1,9 +1,16 @@
 """System service management and systemd integration across Linux distributions."""
 
+import logging
 from pathlib import Path
 import subprocess
+
+import requests
+
 from nosteam2steam.config import SERVICE_FILE
+from nosteam2steam.i18n import _
 from nosteam2steam import ui
+
+logger = logging.getLogger(__name__)
 
 
 def get_syncthing_service_name() -> str:
@@ -56,14 +63,24 @@ def manage_syncthingy_service() -> bool:
     def show_dialog():
         active = is_active()
         display_label = "SyncThingy" if "syncthingy" in service_name else "Syncthing"
+        status_text = _("ACTIVE") if active else _("INACTIVE")
+        toggle_label = (
+            _("Deactivate {service}", service=display_label)
+            if active
+            else _("Activate {service}", service=display_label)
+        )
         return ui.show_radiolist(
-            title=f"{display_label} Control",
-            text=f"Service: {service_name}\nStatus: {'ACTIVE' if active else 'INACTIVE'}\nRestart required for full changes",
+            title=_("{service} Service Control", service=display_label),
+            text=_(
+                "Service: {name}\nStatus: {status}\nSystem restart required for complete application.",
+                name=service_name,
+                status=status_text,
+            ),
             items=[
-                (f"{'Deactivate' if active else 'Activate'} {display_label}", "", True),
-                ("Exit", "", False),
+                (toggle_label, "", True),
+                (_("Exit"), "", False),
             ],
-            width=350,
+            width=380,
             height=250,
         )
 
@@ -78,34 +95,45 @@ def manage_syncthingy_service() -> bool:
 
     if not has_service:
         install = ui.ask_question(
-            title="Service Not Found",
-            text="Neither Syncthing nor SyncThingy service was detected.\nInstall SyncThingy in background?",
-            ok_label="Install",
-            cancel_label="Cancel",
+            title=_("Service Not Found"),
+            text=_(
+                "Neither Syncthing nor SyncThingy service was detected.\nInstall SyncThingy user service in background?"
+            ),
+            ok_label=_("Install"),
+            cancel_label=_("Cancel"),
         )
 
         if install:
-            SERVICE_FILE.parent.mkdir(parents=True, exist_ok=True)
-            subprocess.run(
-                [
-                    "wget",
-                    "-qO",
-                    str(SERVICE_FILE),
+            try:
+                SERVICE_FILE.parent.mkdir(parents=True, exist_ok=True)
+                resp = requests.get(
                     "https://raw.githubusercontent.com/zocker-160/SyncThingy/master/linux_packaging/syncthingy.service",
-                ],
-                check=True,
-            )
-            subprocess.run(["systemctl", "--user", "daemon-reload"], check=True)
-            ui.show_info(title="Service Installed", text="Service installed. Run again to control.", timeout=2)
+                    timeout=10,
+                )
+                resp.raise_for_status()
+                SERVICE_FILE.write_text(resp.text, encoding="utf-8")
+                subprocess.run(["systemctl", "--user", "daemon-reload"], check=True, timeout=10)
+                ui.show_info(
+                    title=_("Service Installed"),
+                    text=_("Service installed. Run again to manage its state."),
+                    timeout=2,
+                )
+            except Exception as e:
+                logger.error(f"Failed to install service: {e}")
+                ui.show_error(
+                    title=_("Service Error"),
+                    text=f"{e}",
+                )
         return False
 
     choice = show_dialog()
-    if not choice or "Exit" in choice:
+    if not choice or choice == _("Exit") or "Exit" in choice:
         return False
 
-    if "Activate" in choice or "Deactivate" in choice:
+    display_label = "SyncThingy" if "syncthingy" in service_name else "Syncthing"
+    toggle_pattern = ("Deactivate", "Activate", _("Deactivate {service}", service=display_label), _("Activate {service}", service=display_label))
+    if any(pat in choice for pat in toggle_pattern):
         active = is_active()
-        display_label = "SyncThingy" if "syncthingy" in service_name else "Syncthing"
         try:
             if active:
                 subprocess.run(["systemctl", "--user", "stop", service_name], check=True)
@@ -114,13 +142,22 @@ def manage_syncthingy_service() -> bool:
                 subprocess.run(["systemctl", "--user", "enable", service_name], check=True)
                 subprocess.run(["systemctl", "--user", "start", service_name], check=True)
 
+            action_text = _("deactivated") if active else _("activated")
             ui.show_info(
-                title="Service Updated",
-                text=f"{display_label} ({service_name}) {'activated' if not active else 'deactivated'}.\nRestart recommended.",
+                title=_("Service Updated"),
+                text=_(
+                    "{service} ({name}) {action}.\nRestart recommended.",
+                    service=display_label,
+                    name=service_name,
+                    action=action_text,
+                ),
                 timeout=2,
             )
             return True
         except subprocess.CalledProcessError:
-            ui.show_error(title="Service Error", text=f"Error changing status for {service_name}")
+            ui.show_error(
+                title=_("Service Error"),
+                text=_("Error changing status for {service}.", service=service_name),
+            )
 
     return False

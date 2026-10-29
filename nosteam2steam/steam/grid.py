@@ -15,8 +15,11 @@ def download_image(url: str, path: str) -> bool:
     try:
         response = requests.get(url, timeout=10, headers={"User-Agent": "NoSteam2Steam/1.0"})
         if response.status_code == 200 and len(response.content) > 0:
-            with open(path, "wb") as f:
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            temp_path = f"{path}.tmp_{os.getpid()}"
+            with open(temp_path, "wb") as f:
                 f.write(response.content)
+            os.replace(temp_path, path)
             return True
         else:
             logger.debug(f"Could not download image from {url}. Status code: {response.status_code}")
@@ -104,6 +107,34 @@ def save_grid_images(
     os.makedirs(grid_path, exist_ok=True)
     os.makedirs(icons_path, exist_ok=True)
 
+    image_files = {
+        "header": os.path.join(grid_path, f"{app_id_short}.jpg"),
+        "library_hero": os.path.join(grid_path, f"{app_id_short}_hero.jpg"),
+        "logo": os.path.join(grid_path, f"{app_id_short}_logo.png"),
+        "library_600x900": os.path.join(grid_path, f"{app_id_short}p.jpg"),
+    }
+
+    # Fast path: If all personalized artwork and icon already exist on disk, return without network overhead
+    icon_ico = os.path.join(icons_path, f"{app_id_short}.ico")
+    icon_png = os.path.join(icons_path, f"{app_id_short}.png")
+    all_grid_exist = all(os.path.exists(p) for p in image_files.values())
+    icon_exists = os.path.exists(icon_ico) or os.path.exists(icon_png)
+
+    if all_grid_exist and icon_exists:
+        if bigpicture_appid:
+            bigpicture_image_path = os.path.join(grid_path, f"{bigpicture_appid}.jpg")
+            header_file = image_files.get("header")
+            if header_file and not os.path.exists(bigpicture_image_path) and os.path.exists(header_file):
+                try:
+                    import shutil
+
+                    shutil.copyfile(header_file, bigpicture_image_path)
+                except Exception as e:
+                    logger.debug(f"Error copying image for Big Picture: {e}")
+        fast_result = dict(image_files)
+        fast_result["icon"] = icon_ico if os.path.exists(icon_ico) else icon_png
+        return fast_result
+
     providers = game_data.get("providers", [])
     steam_appid = next((p["id"] for p in providers if p.get("service") == "steam"), None)
     gog_id = next((p["id"] for p in providers if p.get("service") == "gog"), None)
@@ -131,13 +162,6 @@ def save_grid_images(
         ],
         "logo": [steam_images.get("logo"), gog_images.get("logo"), lutris_images.get("logo")],
         "library_600x900": [steam_images.get("library_600x900"), lutris_images.get("library_600x900")],
-    }
-
-    image_files = {
-        "header": os.path.join(grid_path, f"{app_id_short}.jpg"),
-        "library_hero": os.path.join(grid_path, f"{app_id_short}_hero.jpg"),
-        "logo": os.path.join(grid_path, f"{app_id_short}_logo.png"),
-        "library_600x900": os.path.join(grid_path, f"{app_id_short}p.jpg"),
     }
 
     result_mapping: Dict[str, str] = {}

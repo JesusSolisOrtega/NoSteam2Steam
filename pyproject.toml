@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nosteam2steam"
-version = "1.2.0"
+version = "1.3.0"
 description = "Non-Steam games manager and save game synchronization tool for Steam Deck and Linux"
 authors = [
     { name = "Jesús Solís Ortega" }
@@ -49,6 +49,13 @@ ignore = [
     "E501", # Line length
     "E402", # Module level import placement (dynamic Zenity CLI)
 ]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["nosteam2steam*"]
+
+[tool.setuptools.package-data]
+nosteam2steam = ["locales/*.json"]
 
 [tool.mypy]
 python_version = "3.10"

@@ -1,6 +1,7 @@
 # backup_manager.py
 import logging
 from logging.handlers import RotatingFileHandler
+from pathlib import Path
 
 from nosteam2steam.backup.restore import (
     find_backups,
@@ -11,12 +12,14 @@ from nosteam2steam.backup.restore import (
     generate_games_inventory,
     save_sync_record,
     sync_game,
+    rollback_backup,
 )
 from nosteam2steam.backup.creator import load_gbm_configs, verify_and_create_missing_backup
 from nosteam2steam.backup.path_converter import transform_path_from_windows_to_proton
 from nosteam2steam.backup.lost_saves import restore_lost_saves
 
 from nosteam2steam.config import ID_MAP_PATH, INVENTORY_FILE, SCRIPT_DIR, get_backups_directory
+from nosteam2steam.i18n import _
 from nosteam2steam.utils import select_backup_directory
 from nosteam2steam import ui
 
@@ -60,7 +63,7 @@ def run_sync(id_map_path=ID_MAP_PATH, backups_path=None, inventory_path=INVENTOR
         logger.error("Could not load the game mapping file")
         return {"synced": 0, "created": 0, "total": 0}
 
-    with ui.progress_dialog("NoSteam2Steam", "Iniciando sincronización de partidas guardadas...") as progress:
+    with ui.progress_dialog("NoSteam2Steam", _("Starting save synchronization...")) as progress:
         inventory = load_games_backup_inventory(inventory_path)
         if not inventory:
             logger.error("Could not load or generate the inventory file")
@@ -75,7 +78,7 @@ def run_sync(id_map_path=ID_MAP_PATH, backups_path=None, inventory_path=INVENTOR
 
         total_games = len(games_mapping)
         for idx, (game_name, game_data) in enumerate(games_mapping.items(), 1):
-            progress.update(f"Sincronizando partidas ({idx}/{total_games}): {game_name}")
+            progress.update(_("Synchronizing saves ({current}/{total}): {name}", current=idx, total=total_games, name=game_name))
             logger.info(f"► Processing {game_name}")
             if game_name not in inventory:
                 if gbm_configs is None:
@@ -135,17 +138,62 @@ def run_sync(id_map_path=ID_MAP_PATH, backups_path=None, inventory_path=INVENTOR
         return {"synced": synced_count, "created": created_count, "total": total_games}
 
 
+def handle_rollback_dialog() -> None:
+    """Prompts user to select an existing backup snapshot (.bak) to revert."""
+    backups_path = Path(get_backups_directory())
+    rollback_candidates = []
+    if backups_path.exists():
+        for sub in backups_path.iterdir():
+            if sub.is_dir():
+                for f in sub.glob("*.7z"):
+                    bak = f.with_name(f"{f.name}.bak")
+                    if bak.exists():
+                        rollback_candidates.append(f)
+
+    if not rollback_candidates:
+        ui.show_info(
+            title=_("Rollback"),
+            text=_("No rollback snapshots (.bak) were found in your backups directory."),
+            timeout=3,
+        )
+        return
+
+    menu_items = [(str(i + 1), f"{c.parent.name} - {c.name}") for i, c in enumerate(rollback_candidates)]
+    choice = ui.show_menu(
+        title=_("Rollback Backup"),
+        text=_("Select a backup to restore to its previous version (.bak):"),
+        menu_items=menu_items,
+        width=550,
+        height=320,
+    )
+    if choice and choice.isdigit():
+        idx = int(choice) - 1
+        if 0 <= idx < len(rollback_candidates):
+            target = rollback_candidates[idx]
+            if rollback_backup(target):
+                ui.show_info(
+                    title=_("Rollback Succeeded"),
+                    text=_("Successfully restored {name} to its previous snapshot.", name=target.name),
+                    timeout=3,
+                )
+
+
 def show_sync_options_dialog():
     try:
         menu_items = [
-            ("1", "Synchronize Saves"),
-            ("2", "Restore Lost Saves"),
-            ("3", "Select backups folder"),
-            ("4", "Exit"),
+            ("1", _("Synchronize Saves")),
+            ("2", _("Restore Lost Saves")),
+            ("3", _("Select backup directory")),
+            ("4", _("Rollback backup to previous snapshot (.bak)")),
+            ("5", _("Exit")),
         ]
 
         option = ui.show_menu(
-            title="Save Manager", text="Select an option:", menu_items=menu_items, width=450, height=300
+            title=_("Save Manager"),
+            text=_("Select an option:"),
+            menu_items=menu_items,
+            width=500,
+            height=320,
         )
 
         if option == "1":
@@ -154,10 +202,12 @@ def show_sync_options_dialog():
             restore_lost_saves()
         elif option == "3":
             select_backup_directory()
+        elif option == "4":
+            handle_rollback_dialog()
 
     except Exception as e:
         logger.error(f"Error in options dialog: {e}")
-        ui.show_error("Error", f"Error displaying options: {str(e)}")
+        ui.show_error(_("Error"), _("An error occurred while displaying options: {error}", error=str(e)))
 
 
 def main():

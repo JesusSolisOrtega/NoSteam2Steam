@@ -133,6 +133,38 @@ class TestGrid(unittest.TestCase):
             self.assertIn("icon", result)
             self.assertTrue(result["icon"].endswith("9999.ico"))
 
+    @patch("nosteam2steam.steam.grid.download_image")
+    @patch("nosteam2steam.steam.grid.search_steam_app_id")
+    def test_save_grid_images_fast_path_avoids_network(self, mock_search, mock_download):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            grid_dir = Path(tmp_dir) / "grid"
+            icons_dir = Path(tmp_dir) / "icons"
+            grid_dir.mkdir()
+            icons_dir.mkdir()
+
+            app_id = "5555"
+            # Pre-create all images
+            (grid_dir / f"{app_id}.jpg").write_bytes(b"header")
+            (grid_dir / f"{app_id}_hero.jpg").write_bytes(b"hero")
+            (grid_dir / f"{app_id}_logo.png").write_bytes(b"logo")
+            (grid_dir / f"{app_id}p.jpg").write_bytes(b"poster")
+            (icons_dir / f"{app_id}.ico").write_bytes(b"icon")
+
+            game_data = {"name": "Cached Game", "providers": []}
+
+            result = save_grid_images(
+                app_id_short=app_id,
+                user_config_dir=tmp_dir,
+                game_data=game_data,
+                exe_path=None,
+            )
+
+            # Assert fast path was taken without any network lookups or downloads
+            mock_search.assert_not_called()
+            mock_download.assert_not_called()
+            self.assertEqual(len(result), 5)
+            self.assertIn("icon", result)
+
 
 if __name__ == "__main__":
     unittest.main()

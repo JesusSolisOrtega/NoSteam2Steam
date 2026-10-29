@@ -136,29 +136,56 @@ def get_excluded_folders(sync_folder: str, user_selected_games: Dict[str, Dict[s
 def main():
     from nosteam2steam.identification.identifier import run_identification
     from nosteam2steam import ui
+    from nosteam2steam.i18n import _
 
-    with ui.progress_dialog("NoSteam2Steam", "Buscando juegos en el sistema...") as progress:
+    with ui.progress_dialog("NoSteam2Steam", _("Searching for games on the system...")) as progress:
         start_time = time.time()
 
         logger.info("Retrieving initial data...")
-        progress.update("Identificando títulos instalados...")
+        progress.update(_("Identifying installed titles..."))
         associate_data = run_identification()
 
-        logger.info("Enhancing data with Lutris information...")
-        progress.update("Consultando metadatos y catálogo...")
-        enhancer = LutrisDataEnhancer(associate_data)
-        enhanced_data = enhancer.enhance_with_lutris_data()
+        manager = GameDataManager()
+        existing_data = manager.data
+
+        to_enhance = {}
+        cached_enhanced = {}
+        for folder, gdata in associate_data.items():
+            gname = gdata.get("game_name", "")
+            existing_entry = existing_data.get(folder) or next(
+                (v for v in existing_data.values() if v.get("name") == gname), None
+            )
+            if (
+                existing_entry
+                and existing_entry.get("banner_url")
+                and existing_entry.get("coverart")
+                and existing_entry.get("providers")
+            ):
+                merged = existing_entry.copy()
+                merged["exe_path"] = gdata.get("exe_path", merged.get("exe_path", ""))
+                merged["files"] = gdata.get("files", merged.get("files", {}))
+                cached_enhanced[folder] = merged
+            else:
+                to_enhance[folder] = gdata
+
+        if to_enhance:
+            logger.info(f"Enhancing {len(to_enhance)} new/unindexed games with Lutris information...")
+            progress.update(_("Consulting catalog and metadata..."))
+            enhancer = LutrisDataEnhancer(to_enhance)
+            newly_enhanced = enhancer.enhance_with_lutris_data()
+            cached_enhanced.update(newly_enhanced)
+        else:
+            logger.info("All discovered games already possess complete cached metadata.")
 
         logger.info("Updating database...")
-        progress.update("Guardando catálogo de juegos...")
-        manager = GameDataManager()
-        manager.update_data(enhanced_data)
+        progress.update(_("Saving game catalog..."))
+        manager.update_data(cached_enhanced)
         manager.save_data()
 
         elapsed = time.time() - start_time
         logger.info(f"Process completed in {elapsed:.2f} seconds")
-        logger.info(f"Total games processed: {len(enhanced_data)}")
-        return {"identified": len(enhanced_data)}
+        logger.info(f"Total games processed: {len(cached_enhanced)}")
+        return {"identified": len(cached_enhanced)}
 
 
 if __name__ == "__main__":

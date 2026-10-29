@@ -64,12 +64,54 @@ def verify_archive_integrity(archive_path: Path | str) -> bool:
         return False
 
 
+def calculate_source_size(source_paths) -> int:
+    """Calculates cumulative byte size of source files and directories."""
+    total = 0
+    for sp in source_paths:
+        p = Path(sp)
+        if p.is_file():
+            try:
+                total += p.stat().st_size
+            except OSError:
+                pass
+        elif p.is_dir():
+            for item in p.rglob("*"):
+                if item.is_file():
+                    try:
+                        total += item.stat().st_size
+                    except OSError:
+                        pass
+    return total
+
+
+def check_available_disk_space(target_path: Path, required_bytes: int, safety_margin_mb: int = 50) -> bool:
+    """Verifies that the target filesystem has sufficient free capacity for staging and compression."""
+    try:
+        dir_to_check = target_path if target_path.is_dir() else target_path.parent
+        usage = shutil.disk_usage(dir_to_check)
+        min_required = required_bytes + (safety_margin_mb * 1024 * 1024)
+        if usage.free < min_required:
+            logger.error(
+                f"Insufficient disk space in {dir_to_check}. Free: {usage.free // (1024*1024)} MB, Required: {min_required // (1024*1024)} MB"
+            )
+            return False
+        return True
+    except OSError as e:
+        logger.warning(f"Could not verify disk usage on {target_path}: {e}")
+        return True
+
+
 def create_file_7z_gbm(source_paths, metadata, target_dir, file_name):
     """
     Creates a .7z archive containing game saves and a Game Backup Monitor XML manifest.
     """
     target_dir = Path(target_dir)
     target_dir.mkdir(parents=True, exist_ok=True)
+
+    source_bytes = calculate_source_size(source_paths)
+    if not check_available_disk_space(target_dir, required_bytes=source_bytes):
+        raise OSError(f"Insufficient free storage in {target_dir} for creating backup archive")
+
     file_7z = target_dir / file_name
 
     root = ET.Element("GBM_Backup")
@@ -136,7 +178,7 @@ def create_file_7z_gbm(source_paths, metadata, target_dir, file_name):
 
     indent(root)
 
-    temp_xml_path = Path(f"temp_gbm_meta_{uuid.uuid4().hex}.xml")
+    temp_xml_path = target_dir / f".temp_gbm_meta_{uuid.uuid4().hex}.xml"
     temp_7z_file = target_dir / f".{file_name}.tmp_{uuid.uuid4().hex}"
     try:
         with open(temp_xml_path, "wb") as f:
@@ -222,8 +264,12 @@ def load_metadata_from_7z(file_path_7z):
                 metadata = {
                     "game_name": game_name,
                     "original_path": original_path,
-                    "folder_save": root.findtext(".//GameData/FolderSave"),
-                    "process_name": root.findtext(".//GameData/ProcessName"),
+                    "folder_save": root.findtext(".//GameData/FolderSave") or "true",
+                    "process_name": root.findtext(".//GameData/ProcessName") or "",
+                    "config_id": root.findtext(".//GameData/ID") or "",
+                    "FileType": root.findtext(".//GameData/FileType") or "",
+                    "ExcludeList": root.findtext(".//GameData/ExcludeList") or "",
+                    "os_code": root.findtext(".//GameData/OS") or "",
                 }
                 return metadata
     except Exception as e:
@@ -311,8 +357,11 @@ def update_archive(file_path_7z, source_path, metadata=None):
     """
     file_7z_path = Path(file_path_7z)
     source_path = Path(source_path)
-    temp_dir = Path("temp_steamdeck")
-    temp_dir.mkdir(parents=True, exist_ok=True)
+
+    source_bytes = calculate_source_size([source_path])
+    if not check_available_disk_space(file_7z_path.parent, required_bytes=source_bytes):
+        logger.error(f"Insufficient free storage to update backup archive {file_7z_path}")
+        return False
 
     # Preserve .bak copy of archive before modifying
     if file_7z_path.exists():
@@ -323,41 +372,47 @@ def update_archive(file_path_7z, source_path, metadata=None):
             logger.warning(f"Could not copy backup to .bak: {e}")
 
     try:
-        is_folder = metadata.get("folder_save", True) if metadata else True
-        file_type = metadata.get("FileType", "") if metadata else ""
-
-        if is_folder:
-            if not source_path.exists():
-                raise ValueError(f"Path not found: {source_path}")
-
-            for file in source_path.rglob("*"):
-                if file.is_file():
-                    relative_path = file.relative_to(source_path)
-                    destination_path = temp_dir / relative_path
-                    destination_path.parent.mkdir(parents=True, exist_ok=True)
-                    shutil.copy2(file, destination_path)
-        else:
-            if file_type:
-                files_to_copy = process_filetype(source_path, file_type)
-                if not files_to_copy:
-                    raise ValueError(f"No files matching: {file_type}")
-
-                for file in files_to_copy:
-                    rel_base = source_path.parent if source_path.is_dir() else source_path
-                    relative_path = file.relative_to(rel_base)
-                    destination_path = temp_dir / relative_path
-                    destination_path.parent.mkdir(parents=True, exist_ok=True)
-                    shutil.copy2(file, destination_path)
+        with tempfile.TemporaryDirectory() as tmp_str:
+            temp_dir = Path(tmp_str)
+            folder_val = metadata.get("folder_save", True) if metadata else True
+            if isinstance(folder_val, str):
+                is_folder = folder_val.strip().lower() not in ("false", "0", "no")
             else:
-                if not source_path.is_file():
-                    raise ValueError(f"File not found: {source_path}")
-                shutil.copy2(source_path, temp_dir / source_path.name)
+                is_folder = bool(folder_val)
+            file_type = metadata.get("FileType", "") if metadata else ""
 
-        with py7zr.SevenZipFile(file_path_7z, mode="a") as file_7z:
-            for file in temp_dir.rglob("*"):
-                if file.is_file():
-                    path_7z = file.relative_to(temp_dir)
-                    file_7z.write(file, str(path_7z).replace("\\", "/"))
+            if is_folder:
+                if not source_path.exists():
+                    raise ValueError(f"Path not found: {source_path}")
+
+                for file in source_path.rglob("*"):
+                    if file.is_file():
+                        relative_path = file.relative_to(source_path)
+                        destination_path = temp_dir / relative_path
+                        destination_path.parent.mkdir(parents=True, exist_ok=True)
+                        shutil.copy2(file, destination_path)
+            else:
+                if file_type:
+                    files_to_copy = process_filetype(source_path, file_type)
+                    if not files_to_copy:
+                        raise ValueError(f"No files matching: {file_type}")
+
+                    for file in files_to_copy:
+                        rel_base = source_path.parent if source_path.is_dir() else source_path
+                        relative_path = file.relative_to(rel_base)
+                        destination_path = temp_dir / relative_path
+                        destination_path.parent.mkdir(parents=True, exist_ok=True)
+                        shutil.copy2(file, destination_path)
+                else:
+                    if not source_path.is_file():
+                        raise ValueError(f"File not found: {source_path}")
+                    shutil.copy2(source_path, temp_dir / source_path.name)
+
+            with py7zr.SevenZipFile(file_path_7z, mode="a") as file_7z:
+                for file in temp_dir.rglob("*"):
+                    if file.is_file():
+                        path_7z = file.relative_to(temp_dir)
+                        file_7z.write(file, str(path_7z).replace("\\", "/"))
 
         # Verify archive integrity after modification
         if not verify_archive_integrity(file_path_7z):
@@ -373,9 +428,6 @@ def update_archive(file_path_7z, source_path, metadata=None):
     except Exception as e:
         logger.error(f"Error updating backup: {str(e)}")
         return False
-    finally:
-        if temp_dir.exists():
-            shutil.rmtree(temp_dir, ignore_errors=True)
 
 
 update_backup = update_archive

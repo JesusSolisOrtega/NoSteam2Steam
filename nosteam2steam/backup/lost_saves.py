@@ -6,11 +6,18 @@ from nosteam2steam.utils import with_zenity_progress
 
 
 def _get_alternative_appids(current_appid, games_mapping):
+    if not STEAMDECK_PATH.exists():
+        return []
     known_appids = {j.get("app_id_short") for j in games_mapping.values() if j.get("app_id_short")}
     unknown_folders = []
     known_folders = []
 
-    for appid_dir in (STEAMDECK_PATH).iterdir():
+    try:
+        entries = list(STEAMDECK_PATH.iterdir())
+    except OSError:
+        return []
+
+    for appid_dir in entries:
         if not appid_dir.is_dir() or appid_dir.name == current_appid:
             continue
         (known_folders if appid_dir.name in known_appids else unknown_folders).append(appid_dir.name)

@@ -6,6 +6,8 @@ VENV_NAME="venv"
 LAUNCHER_SCRIPT="launch.sh"
 ICON_PATH="$INSTALL_DIR/assets/icon.png"
 DESKTOP_FILE="$HOME/Desktop/noSteam2Steam.desktop"
+APP_MENU_DIR="$HOME/.local/share/applications"
+APP_MENU_FILE="$APP_MENU_DIR/noSteam2Steam.desktop"
 
 detect_python() {
 
@@ -108,20 +110,26 @@ chmod +x "$LAUNCHER_SCRIPT"
 cat > "$DESKTOP_FILE" <<EOL
 [Desktop Entry]
 Name=noSteam2Steam
-Comment=Run noSteam2Steam in Desktop Mode
+Comment=Non-Steam game manager and save synchronizer
 Exec=$INSTALL_DIR/$LAUNCHER_SCRIPT
 Icon=$ICON_PATH
-Terminal=true
+Terminal=false
 Type=Application
-Categories=Game;
+Categories=Game;Utility;
+StartupNotify=true
 EOL
 
 chmod +x "$DESKTOP_FILE"
+
+mkdir -p "$APP_MENU_DIR"
+cp "$DESKTOP_FILE" "$APP_MENU_FILE"
+chmod +x "$APP_MENU_FILE"
 
 echo "Installation completed!"
 echo "1. Directory: $INSTALL_DIR"
 echo "2. Launcher: $INSTALL_DIR/$LAUNCHER_SCRIPT"
 echo "3. Desktop shortcut created: $DESKTOP_FILE"
+echo "4. Application menu launcher created: $APP_MENU_FILE"
 
 chmod +x ~/Games/noSteam2Steam/noSteam2Steam.py
 chmod +x ~/Games/noSteam2Steam/launch.sh

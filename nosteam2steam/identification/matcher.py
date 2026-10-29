@@ -1,14 +1,19 @@
 """Fuzzy title matching and executable heuristic detection subsystem."""
 
+import json
 import logging
 import os
+from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
+from nosteam2steam.atomic import atomic_write
 from nosteam2steam.config import (
+    ASSET_DIRS,
     DEFAULT_SYNC_FOLDER,
     IGNORED_DIRS,
     INDEX_DIR,
+    UNMATCHED_CANDIDATES_FILE,
     XML_FILE,
     YAML_FILE,
 )
@@ -42,9 +47,14 @@ class GameMatcher:
         self.dir_cache = DirectoryCache()
         self.matches: Dict[str, Dict[str, Any]] = {}
 
-        self.repository = (
-            indexes if isinstance(indexes, ManifestRepository) else ManifestRepository(INDEX_DIR, preloaded=indexes)
-        )
+        if isinstance(indexes, ManifestRepository):
+            self.repository = indexes
+        elif indexes is not None:
+            self.repository = ManifestRepository(INDEX_DIR, preloaded=indexes)
+        else:
+            from nosteam2steam.identification.manifests import get_manifest_repository
+
+            self.repository = get_manifest_repository(INDEX_DIR)
         self.platform_resolver = PlatformResolver(
             repository=self.repository,
             dir_cache=self.dir_cache,
@@ -126,4 +136,48 @@ class GameMatcher:
                     logger.error(f"Error processing candidate for {folder}: {e}")
 
         logger.info(f"Final matches found: {len(self.matches)}")
+
+        unmatched = [(f, p) for f, p in folders_to_process if f not in self.matches]
+        if unmatched:
+            self._record_unmatched_candidates(unmatched)
+
         return self.matches
+
+    def _record_unmatched_candidates(self, unmatched_folders: List[Tuple[str, str]]) -> None:
+        """Records folders and executable candidates that could not be automatically matched."""
+        candidates = []
+        for folder, folder_path in unmatched_folders:
+            exes = []
+            try:
+                for root, dirs, files in os.walk(folder_path):
+                    dirs[:] = [d for d in dirs if not d.startswith(".") and d.lower() not in ASSET_DIRS]
+                    rel_parts = Path(root).relative_to(folder_path).parts
+                    if len(rel_parts) > 3:
+                        dirs.clear()
+                        continue
+                    for f in files:
+                        if f.lower().endswith(".exe") and not any(
+                            p in f.lower() for p in ["unins", "setup", "crash", "unitycrash", "redist"]
+                        ):
+                            exes.append(os.path.join(root, f))
+            except OSError:
+                pass
+
+            if exes:
+                exes.sort(key=lambda p: (len(Path(p).parts), len(Path(p).name)))
+                candidates.append(
+                    {
+                        "folder_name": folder,
+                        "folder_path": folder_path,
+                        "exe_path": exes[0],
+                        "all_exes": exes,
+                    }
+                )
+
+        if candidates:
+            try:
+                with atomic_write(UNMATCHED_CANDIDATES_FILE, mode="w", encoding="utf-8") as out_file:
+                    json.dump(candidates, out_file, indent=4)
+                logger.info(f"Recorded {len(candidates)} unmatched candidate titles to {UNMATCHED_CANDIDATES_FILE}")
+            except Exception as e:
+                logger.debug(f"Could not save unmatched candidates: {e}")

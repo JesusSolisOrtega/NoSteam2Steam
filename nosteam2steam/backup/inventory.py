@@ -4,7 +4,7 @@ from datetime import datetime
 import json
 import logging
 from pathlib import Path
-from typing import Any, Dict, Union
+from typing import Any, Dict, Optional, Union
 
 from nosteam2steam.config import (
     ID_MAP_PATH,
@@ -13,6 +13,7 @@ from nosteam2steam.config import (
     get_backups_directory,
 )
 from nosteam2steam.backup.archive import load_metadata_from_7z
+from nosteam2steam.atomic import atomic_write
 
 logger = logging.getLogger(__name__)
 
@@ -43,16 +44,28 @@ def load_sync_record(record_path: Union[str, Path] = SYNC_RECORD_FILE) -> Dict[s
 def save_sync_record(record: Dict[str, Any], record_path: Union[str, Path] = SYNC_RECORD_FILE) -> None:
     """Persists synchronization audit record to JSON file."""
     try:
-        with open(record_path, "w", encoding="utf-8") as file:
+        with atomic_write(record_path, mode="w", encoding="utf-8") as file:
             json.dump(record, file, indent=4)
     except Exception as e:
         logger.info(f"Error saving sync record: {e}")
 
 
-def file_needs_update(file_path, days_threshold=7):
-    """Checks whether the file modification age exceeds the specified threshold."""
+def file_needs_update(file_path, backups_path=None, days_threshold=7):
+    """Checks whether the file is missing, older than backup archives, or exceeds days threshold."""
     try:
-        modification_date = datetime.fromtimestamp(Path(file_path).stat().st_mtime)
+        p = Path(file_path)
+        if not p.exists():
+            return True
+        inv_mtime = p.stat().st_mtime
+        if backups_path:
+            bp = Path(backups_path)
+            if bp.exists():
+                for sub in bp.iterdir():
+                    if sub.is_dir():
+                        for f in sub.glob("*.7z"):
+                            if f.stat().st_mtime > inv_mtime:
+                                return True
+        modification_date = datetime.fromtimestamp(inv_mtime)
         current_date = datetime.now()
         days_diff = (current_date - modification_date).days
         return days_diff > days_threshold
@@ -82,16 +95,35 @@ def get_files_date(path):
     return most_recent_date
 
 
-def generate_games_inventory(backups_path=None, inventory_path=INVENTORY_FILE):
+def generate_games_inventory(
+    backups_path: Optional[Union[str, Path]] = None,
+    inventory_path: Union[str, Path] = INVENTORY_FILE,
+) -> Optional[Dict[str, Any]]:
     """
     Scans the backups directory, extracts metadata from .7z archives,
-    and updates the games inventory JSON catalog.
+    and updates the games inventory JSON catalog with incremental caching.
     """
-    inventory = {}
+    inventory: Dict[str, Any] = {}
     if backups_path is None:
         backups_path = get_backups_directory()
     backups_path = Path(backups_path)
     backups_path.mkdir(parents=True, exist_ok=True)
+
+    # Load existing inventory cache to avoid decompressing unchanged archives
+    existing_cache: Dict[str, Dict[str, Any]] = {}
+    if Path(inventory_path).exists():
+        try:
+            with open(inventory_path, "r", encoding="utf-8") as f:
+                raw_inv = json.load(f)
+                for g_name, entries in raw_inv.items():
+                    for entry in entries:
+                        f_name = entry.get("folder")
+                        if f_name:
+                            entry_copy = dict(entry)
+                            entry_copy["game_name"] = g_name
+                            existing_cache[f_name] = entry_copy
+        except Exception:
+            existing_cache = {}
 
     for folder in backups_path.iterdir():
         if not folder.is_dir():
@@ -103,15 +135,52 @@ def generate_games_inventory(backups_path=None, inventory_path=INVENTORY_FILE):
             logger.warning(f"Warning: No .7z files found in {folder.name}")
             continue
 
+        cached_folder_entry = existing_cache.get(folder.name)
+        cached_files = cached_folder_entry.get("7z_files", {}) if cached_folder_entry else {}
+
         backups_metadata = []
         for file_7z in files_7z:
+            file_stat = file_7z.stat()
+            current_mtime = file_stat.st_mtime
+            current_size = file_stat.st_size
+            cached_file_meta = cached_files.get(file_7z.name)
+
+            # Fast path: if archive mtime has not changed, reuse cached metadata directly
+            if cached_folder_entry and cached_file_meta and "original_path" in cached_file_meta:
+                try:
+                    cached_dt = datetime.fromisoformat(cached_file_meta["modification_date"])
+                    if abs(cached_dt.timestamp() - current_mtime) < 1.0:
+                        backups_metadata.append(
+                            {
+                                "file": file_7z.name,
+                                "metadata": {
+                                    "game_name": cached_folder_entry.get("game_name", folder.name),
+                                    "original_path": cached_file_meta["original_path"],
+                                    "folder_save": cached_file_meta.get("folder_save", "true"),
+                                    "process_name": cached_folder_entry.get("executable", ""),
+                                },
+                                "timestamp": current_mtime,
+                                "size_bytes": cached_file_meta.get("size_bytes", current_size),
+                                "has_registry": cached_file_meta.get(
+                                    "has_registry",
+                                    "<winreg" in str(cached_file_meta.get("original_path", "")).lower(),
+                                ),
+                            }
+                        )
+                        continue
+                except (ValueError, KeyError):
+                    pass
+
+            # Slow path: decompress and read manifest XML
             metadata = load_metadata_from_7z(file_7z)
             if metadata and "game_name" in metadata and "original_path" in metadata:
                 backups_metadata.append(
                     {
                         "file": file_7z.name,
                         "metadata": metadata,
-                        "timestamp": file_7z.stat().st_mtime,
+                        "timestamp": current_mtime,
+                        "size_bytes": current_size,
+                        "has_registry": "<winreg" in str(metadata.get("original_path", "")).lower(),
                     }
                 )
 
@@ -131,6 +200,8 @@ def generate_games_inventory(backups_path=None, inventory_path=INVENTORY_FILE):
                     "original_path": b["metadata"]["original_path"],
                     "folder_save": b["metadata"].get("folder_save", "true"),
                     "modification_date": datetime.fromtimestamp(b["timestamp"]).isoformat(),
+                    "size_bytes": b.get("size_bytes", 0),
+                    "has_registry": b.get("has_registry", False),
                 }
                 for b in backups_metadata
             },
@@ -142,13 +213,13 @@ def generate_games_inventory(backups_path=None, inventory_path=INVENTORY_FILE):
         inventory[game_name].append(game_entry)
 
     try:
-        with open(inventory_path, "w", encoding="utf-8") as file:
+        with atomic_write(inventory_path, mode="w", encoding="utf-8") as file:
             json.dump(inventory, file, indent=4, ensure_ascii=False)
         logger.info(f"Inventory generated and saved to {inventory_path}")
         return inventory
     except Exception as e:
         logger.error(f"Error saving inventory: {str(e)}")
-        return False
+        return None
 
 
 def load_games_backup_inventory(inventory_path=INVENTORY_FILE):
@@ -158,7 +229,7 @@ def load_games_backup_inventory(inventory_path=INVENTORY_FILE):
     backups_path = Path(get_backups_directory())
     backups_path.mkdir(parents=True, exist_ok=True)
     try:
-        if not Path(inventory_path).exists() or file_needs_update(inventory_path):
+        if not Path(inventory_path).exists() or file_needs_update(inventory_path, backups_path=backups_path):
             logger.info("Inventory file does not exist or is outdated. Generating inventory...")
             if not generate_games_inventory(backups_path=backups_path, inventory_path=inventory_path):
                 return None

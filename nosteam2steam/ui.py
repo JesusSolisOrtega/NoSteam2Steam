@@ -1,4 +1,5 @@
 import logging
+import os
 import shutil
 import subprocess
 from typing import List, Optional, Tuple
@@ -17,7 +18,24 @@ def is_kdialog_available() -> bool:
 
 
 def get_dialog_backend() -> str:
-    """Returns 'zenity' if available, falls back to 'kdialog', or 'none' if headless/unavailable."""
+    """
+    Returns the dialog backend:
+    1. Respects environment override NOSTEAM2STEAM_DIALOG or NOSTEAM2STEAM_UI_BACKEND ('zenity', 'kdialog', 'none').
+    2. Defaults to 'zenity' if available.
+    3. Falls back to 'kdialog' if available.
+    4. Returns 'none' for headless environments without dialog tools.
+    """
+    custom = os.getenv("NOSTEAM2STEAM_DIALOG") or os.getenv("NOSTEAM2STEAM_UI_BACKEND")
+    if custom:
+        normalized = custom.lower().strip()
+        if normalized in ("zenity", "kdialog", "none"):
+            if normalized == "zenity" and is_zenity_available():
+                return "zenity"
+            if normalized == "kdialog" and is_kdialog_available():
+                return "kdialog"
+            if normalized == "none":
+                return "none"
+
     if is_zenity_available():
         return "zenity"
     if is_kdialog_available():

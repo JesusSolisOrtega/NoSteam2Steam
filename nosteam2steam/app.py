@@ -21,6 +21,7 @@ if missing_deps:
     sys.exit(1)
 
 from nosteam2steam import ui
+from nosteam2steam.i18n import _, select_language_dialog, set_language
 from nosteam2steam.steam import shortcuts
 from nosteam2steam.backup import manager as backup_manager, run_sync
 from nosteam2steam.identification import manual_adder
@@ -58,36 +59,56 @@ def parse_arguments(argv=None):
         help="Clear detected games configuration non-interactively.",
     )
     parser.add_argument(
+        "--install-desktop",
+        action="store_true",
+        help="Install standard XDG desktop entry to application launcher and desktop.",
+    )
+    parser.add_argument(
+        "--uninstall-desktop",
+        action="store_true",
+        help="Remove installed XDG desktop entries.",
+    )
+    parser.add_argument(
         "-q",
         "--quiet",
         action="store_true",
         help="Suppress graphical dialog notifications and progress prompts.",
+    )
+    parser.add_argument(
+        "--lang",
+        "--language",
+        type=str,
+        help="Specify interface language code (e.g. en, es, gl, eu, ca, de, fr, it, pt, ru, tr, ko, ar, id, sw, hi, ur, zh, ja).",
     )
     return parser.parse_args(argv)
 
 
 def show_main_menu():
     menu_items = [
-        ("1", "Automatic sync (add games and sync saves)"),
-        ("2", "Add games to Steam automatically"),
-        ("3", "Game saves synchronization"),
-        ("4", "Manually add a game to Steam"),
-        ("5", "Clean NoSteam2Steam configuration"),
-        ("6", "Enable/disable Syncthing"),
-        ("7", "Change synchronized game folders"),
-        ("8", "Exit"),
+        ("1", _("Automatic sync (add games and sync saves)")),
+        ("2", _("Add games to Steam automatically")),
+        ("3", _("Game saves synchronization")),
+        ("4", _("Manually add a game to Steam")),
+        ("5", _("Clean NoSteam2Steam configuration")),
+        ("6", _("Enable/disable Syncthing")),
+        ("7", _("Change synchronized game folders")),
+        ("8", _("Change interface language")),
+        ("9", _("Exit")),
     ]
     return ui.show_menu(
-        title="NoSteam2Steam - Non-Steam Games Management",
-        text='Select an option:\n<span foreground="red">Note: Steam needs restart after adding games</span>',
+        title=_("NoSteam2Steam - Non-Steam Games Management"),
+        text=_('Select an option:\n<span foreground="red">Note: Steam needs restart after adding games</span>'),
         menu_items=menu_items,
         width=650,
-        height=400,
+        height=430,
     )
 
 
 def main(argv=None):
     args = parse_arguments(argv)
+
+    if args.lang:
+        set_language(args.lang, persist=False)
 
     # CLI Headless execution
     if args.sync:
@@ -118,6 +139,20 @@ def main(argv=None):
         logger.info("Configuration cleared via CLI.")
         return
 
+    if args.install_desktop:
+        from nosteam2steam.desktop import install_desktop_entry
+
+        success = install_desktop_entry()
+        print("Desktop entry installation " + ("succeeded." if success else "failed."))
+        return
+
+    if args.uninstall_desktop:
+        from nosteam2steam.desktop import uninstall_desktop_entry
+
+        success = uninstall_desktop_entry()
+        print("Desktop entry uninstallation " + ("succeeded." if success else "failed."))
+        return
+
     # Interactive GUI mode
     backend = ui.get_dialog_backend()
     if backend == "none":
@@ -130,7 +165,7 @@ def main(argv=None):
     while True:
         option = show_main_menu()
 
-        if not option or option == "8":
+        if not option or option == "9":
             break
 
         if option == "1":
@@ -143,18 +178,23 @@ def main(argv=None):
                 logger.error(f"Sync error: {e}")
 
             if not args.quiet:
-                summary_lines = [
-                    "Sincronización automática finalizada con éxito:\n",
-                    f"• Títulos identificados: {res_ident.get('identified', 0)}",
-                    f"• Accesos directos añadidos a Steam: {res_shortcuts.get('added', 0)}",
-                    f"• Carátulas e iconos actualizados: {res_shortcuts.get('updated', 0)}",
-                    f"• Partidas sincronizadas / verificadas: {res_sync.get('synced', 0)}",
-                    f"• Nuevos respaldos creados: {res_sync.get('created', 0)}",
-                    "\nNota: Si Steam estaba abierto, reinícielo para visualizar los nuevos títulos en la biblioteca.",
-                ]
+                summary_text = _(
+                    "Automatic sync finished successfully:\n\n"
+                    "• Identified titles: {identified}\n"
+                    "• Added Steam shortcuts: {added}\n"
+                    "• Updated artwork & icons: {updated}\n"
+                    "• Synchronized/verified saves: {synced}\n"
+                    "• New backups created: {created}\n\n"
+                    "Note: If Steam was running, please restart it to display the new games in your library.",
+                    identified=res_ident.get("identified", 0),
+                    added=res_shortcuts.get("added", 0),
+                    updated=res_shortcuts.get("updated", 0),
+                    synced=res_sync.get("synced", 0),
+                    created=res_sync.get("created", 0),
+                )
                 ui.show_info(
-                    title="Sincronización Completada",
-                    text="\n".join(summary_lines),
+                    title=_("Synchronization Completed"),
+                    text=summary_text,
                     width=460,
                 )
 
@@ -162,16 +202,19 @@ def main(argv=None):
             res_ident = data_manager.main() or {}
             res_shortcuts = shortcuts.main() or {}
             if not args.quiet:
-                summary_lines = [
-                    "Adición de juegos a Steam finalizada con éxito:\n",
-                    f"• Títulos identificados: {res_ident.get('identified', 0)}",
-                    f"• Nuevos accesos directos creados: {res_shortcuts.get('added', 0)}",
-                    f"• Carátulas e iconos actualizados: {res_shortcuts.get('updated', 0)}",
-                    "\nNota: Recuerde reiniciar Steam para que aparezcan en su biblioteca.",
-                ]
+                summary_text = _(
+                    "Steam shortcut addition finished successfully:\n\n"
+                    "• Identified titles: {identified}\n"
+                    "• New shortcuts created: {added}\n"
+                    "• Updated artwork & icons: {updated}\n\n"
+                    "Note: Please restart Steam to display the new shortcuts in your library.",
+                    identified=res_ident.get("identified", 0),
+                    added=res_shortcuts.get("added", 0),
+                    updated=res_shortcuts.get("updated", 0),
+                )
                 ui.show_info(
-                    title="Juegos añadidos a Steam",
-                    text="\n".join(summary_lines),
+                    title=_("Games added to Steam"),
+                    text=summary_text,
                     width=440,
                 )
 
@@ -200,6 +243,9 @@ def main(argv=None):
             except Exception as e:
                 logger.error(f"Error: {e}")
                 continue
+
+        elif option == "8":
+            select_language_dialog()
 
 
 if __name__ == "__main__":

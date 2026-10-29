@@ -73,6 +73,8 @@ USER_MAPPING_PATH = os.path.join(SCRIPT_DIR, "user_mapping.json")
 XML_FILE = os.path.join(SCRIPT_DIR, "GBM_Official.xml")
 YAML_FILE = os.path.join(SCRIPT_DIR, "manifest.yaml")
 INDEX_DIR = os.path.join(SCRIPT_DIR, "indexes")
+LANGUAGE_FILE = os.path.join(SCRIPT_DIR, "language.txt")
+UNMATCHED_CANDIDATES_FILE = os.path.join(SCRIPT_DIR, "unmatched_candidates.json")
 XML_URL = "https://github.com/MikeMaximus/gbm-web/blob/gh-pages/GBM_Official.xml?raw=true"
 YAML_URL = "https://raw.githubusercontent.com/mtkennerly/ludusavi-manifest/refs/heads/master/data/manifest.yaml"
 
@@ -420,6 +422,7 @@ __all__ = [
     "DEFAULT_SYNC_FOLDER",
     "SYNC_FOLDERS_FILE",
     "INVENTORY_FILE",
+    "UNMATCHED_CANDIDATES_FILE",
     "STEAM_ID_MAPPING_FILE",
     "XML_FILE",
     "YAML_FILE",

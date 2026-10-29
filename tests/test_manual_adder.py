@@ -116,6 +116,69 @@ class TestManualAdder(unittest.TestCase):
                 self.assertTrue(data["SubFolder"]["user_selected"])
                 self.assertEqual(data["SubFolder"]["files"], {"saves": ["AppData/save.dat"]})
 
+    def test_load_unmatched_candidates(self):
+        import json
+        from pathlib import Path
+        from nosteam2steam.identification.manual_adder import load_unmatched_candidates
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            cand_file = Path(tmp_dir) / "unmatched.json"
+            real_exe = Path(tmp_dir) / "game.exe"
+            real_exe.touch()
+
+            cand_data = [
+                {"folder_name": "GameA", "exe_path": str(real_exe)},
+                {"folder_name": "GameB", "exe_path": str(Path(tmp_dir) / "nonexistent.exe")},
+            ]
+            cand_file.write_text(json.dumps(cand_data))
+
+            with patch("nosteam2steam.identification.manual_adder.UNMATCHED_CANDIDATES_FILE", cand_file):
+                loaded = load_unmatched_candidates()
+                self.assertEqual(len(loaded), 1)
+                self.assertEqual(loaded[0]["folder_name"], "GameA")
+
+    @patch("nosteam2steam.identification.manual_adder.ui")
+    @patch("nosteam2steam.identification.manual_adder.search_lutris_games")
+    @patch("nosteam2steam.identification.manual_adder.ManifestRepository")
+    def test_manual_add_game_unmatched_cleanup(self, mock_repo_cls, mock_search, mock_ui):
+        import json
+        from pathlib import Path
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            game_folder = Path(tmp_dir) / "MyGame"
+            game_folder.mkdir()
+            exe_path = str(game_folder / "game.exe")
+            Path(exe_path).touch()
+
+            cand_file = Path(tmp_dir) / "unmatched.json"
+            cand_data = [
+                {"folder_name": "MyGame", "exe_path": exe_path},
+                {"folder_name": "OtherGame", "exe_path": "/some/other/game.exe"},
+            ]
+            cand_file.write_text(json.dumps(cand_data))
+
+            # Menu choice '1' selects the candidate
+            mock_ui.show_menu.side_effect = ["1", None]
+            mock_ui.show_entry.return_value = "MyGame"
+            mock_search.return_value = []
+            mock_ui.ask_question.return_value = False
+
+            mock_repo = MagicMock()
+            mock_repo.get_by_name.return_value = None
+            mock_repo.get_by_exe.return_value = None
+            mock_repo_cls.return_value = mock_repo
+
+            with patch("nosteam2steam.identification.manual_adder.DEFAULT_GAMES_INFO_PATH", f"{tmp_dir}/games.json"), \
+                 patch("nosteam2steam.identification.manual_adder.UNMATCHED_CANDIDATES_FILE", cand_file):
+                success = manual_add_game()
+                self.assertTrue(success)
+
+                # Verify cand_file removed MyGame
+                remaining = json.loads(cand_file.read_text())
+                self.assertEqual(len(remaining), 1)
+                self.assertEqual(remaining[0]["folder_name"], "OtherGame")
+
+
 
 if __name__ == "__main__":
     unittest.main()

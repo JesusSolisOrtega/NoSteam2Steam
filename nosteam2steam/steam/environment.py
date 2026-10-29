@@ -190,7 +190,12 @@ def get_latest_proton_ge(get_path: bool = False) -> Optional[str]:
     ge_dirs = getattr(_get_config(), "PROTON_GE_DIRS", PROTON_GE_DIRS)
 
     for proton_dir in _unique_dirs(ge_dirs):
-        for dir_name in os.listdir(proton_dir):
+        try:
+            entries = os.listdir(proton_dir)
+        except OSError as e:
+            logger.debug(f"Could not list directory {proton_dir}: {e}")
+            continue
+        for dir_name in entries:
             if dir_name.startswith("GE-Proton"):
                 match = re.search(r"GE-Proton(\d+)[-_](\d+)", dir_name)
                 if match:
@@ -222,7 +227,12 @@ def get_latest_proton(get_path: bool = False) -> Optional[str]:
             pass
 
     for proton_dir in _unique_dirs(all_dirs):
-        for dir_name in os.listdir(proton_dir):
+        try:
+            entries = os.listdir(proton_dir)
+        except OSError as e:
+            logger.debug(f"Could not list directory {proton_dir}: {e}")
+            continue
+        for dir_name in entries:
             if dir_name in ("Proton Experimental", "Proton - Experimental"):
                 if not experimental_tool:
                     experimental_tool = os.path.join(proton_dir, dir_name) if get_path else dir_name

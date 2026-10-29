@@ -241,6 +241,54 @@ class TestIdentificationComponents(unittest.TestCase):
             self.assertEqual(match["game_name"], "My Custom RPG")
             self.assertEqual(match["steam_id"], "")
 
+    def test_download_file_ttl_freshness(self):
+        from unittest.mock import patch
+        from nosteam2steam.identification.manifests import download_file
+
+        with tempfile.NamedTemporaryFile(delete=False) as tf:
+            tf.write(b"existing manifest data")
+            tf_path = tf.name
+
+        with patch("requests.head") as mock_head:
+            # File is brand new (well within 24h TTL)
+            result = download_file("https://example.com/manifest.yaml", tf_path, force=False)
+            self.assertFalse(result)
+            mock_head.assert_not_called()
+
+    def test_manifest_views_pickle_caching(self):
+        import json
+        from nosteam2steam.identification.manifests import ManifestRepository
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            index_dir = Path(tmp_dir)
+            # Create dummy JSON indexes
+            (index_dir / "xml_index.json").write_text(json.dumps({"testgame": "Test Game"}))
+            (index_dir / "yaml_index.json").write_text(
+                json.dumps({
+                    "_metadata": [{"game_name": "Test Game", "steam_id": "111", "gog_id": "222", "lutris_id": "tg", "files": {}}],
+                    "by_exe": {"test.exe": 0},
+                    "by_path": {},
+                    "by_install_dir": {},
+                    "by_steam_id": {"111": 0},
+                    "by_gog_id": {"222": 0},
+                    "by_name": {"test game": 0},
+                    "by_name_fuzzy": {},
+                })
+            )
+
+            # First load should generate manifest_views.pkl
+            ManifestRepository(index_dir=str(index_dir))
+            pickle_path = index_dir / "manifest_views.pkl"
+            self.assertTrue(pickle_path.exists())
+
+            # Delete the JSON index to prove that subsequent loads resolve from the binary pickle cache
+            (index_dir / "yaml_index.json").unlink()
+            repo2 = ManifestRepository(index_dir=str(index_dir))
+            entry = repo2.get_by_steam_id("111")
+            self.assertIsNotNone(entry)
+            assert entry is not None
+            self.assertEqual(entry["game_name"], "Test Game")
+
 
 if __name__ == "__main__":
     unittest.main()

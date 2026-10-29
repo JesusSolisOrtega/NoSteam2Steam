@@ -9,21 +9,12 @@ from pathlib import Path
 import subprocess
 import time
 
+from nosteam2steam.atomic import atomic_write
 from nosteam2steam import ui
-from nosteam2steam.services import (
-    is_service_active,
-    is_service_enabled,
-    manage_syncthingy_service,
-)
-from nosteam2steam.dialogs import (
-    delete_current_config,
-    delete_games_images,
-    manage_sync_folders,
-    select_backup_directory,
-    show_cleanup_dialog,
-)
+from nosteam2steam.i18n import _
 
 logger = logging.getLogger(__name__)
+
 
 
 def compute_hash(path, max_workers=None, size_threshold=100 * 1024 * 1024):
@@ -70,7 +61,7 @@ def _hash_dir(dir_path, max_workers=None, size_threshold=150 * 1024 * 1024):
     hasher = hashlib.blake2b(digest_size=32)
     files = []
 
-    for root, _, filenames in os.walk(dir_path):
+    for root, _subdirs, filenames in os.walk(dir_path):
         for fname in filenames:
             full_path = Path(root) / fname
             try:
@@ -138,18 +129,20 @@ def ensure_steam_closed() -> bool:
         res = subprocess.run(["pgrep", "-x", "steam"], capture_output=True, text=True)
         if res.returncode == 0:
             should_close = ui.ask_question(
-                title="Steam is running",
-                text="Steam is currently running in the background.\n\n"
-                "To ensure new games are saved properly to shortcuts.vdf, Steam should be closed.\n\n"
-                "Do you want to close Steam now?",
-                ok_label="Close Steam",
-                cancel_label="Continue anyway",
+                title=_("Steam is running"),
+                text=_(
+                    "Steam is currently running in the background.\n\n"
+                    "To ensure new games are saved properly to shortcuts.vdf, Steam should be closed.\n\n"
+                    "Do you want to close Steam now?"
+                ),
+                ok_label=_("Close Steam"),
+                cancel_label=_("Continue anyway"),
                 width=400,
             )
             if should_close:
-                with ui.progress_dialog(title="Steam", text="Cerrando cliente Steam de forma ordenada..."):
+                with ui.progress_dialog(title=_("Steam"), text=_("Closing Steam client gracefully...")):
                     subprocess.run(["steam", "-shutdown"])
-                    for _ in range(8):
+                    for _attempt in range(8):
                         time.sleep(1)
                         if subprocess.run(["pgrep", "-x", "steam"], capture_output=True).returncode != 0:
                             break
@@ -176,10 +169,23 @@ def with_zenity_progress(title, message):
 
     return decorator
 
-    return decorator
 
+# Re-exports for backward compatibility
+from nosteam2steam.services import (  # noqa: E402
+    is_service_active,
+    is_service_enabled,
+    manage_syncthingy_service,
+)
+from nosteam2steam.dialogs import (  # noqa: E402
+    delete_current_config,
+    delete_games_images,
+    manage_sync_folders,
+    select_backup_directory,
+    show_cleanup_dialog,
+)
 
 __all__ = [
+    "atomic_write",
     "compute_hash",
     "ensure_steam_closed",
     "with_zenity_progress",

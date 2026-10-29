@@ -7,6 +7,8 @@ import sys
 from typing import Dict, Any, Tuple, Union, Optional, Callable
 
 from nosteam2steam import ui
+from nosteam2steam.i18n import _
+from nosteam2steam.atomic import atomic_write
 from nosteam2steam.utils import ensure_steam_closed
 from nosteam2steam.steam.vdf_binary import (
     load_shortcuts,
@@ -47,7 +49,7 @@ def save_steam_id_mapping(steam_id_mapping: Dict[str, Any]) -> None:
         if steam_id_mapping:
             existing_mapping.update(steam_id_mapping)
 
-            with open(STEAM_ID_MAPPING_FILE, "w") as f:
+            with atomic_write(STEAM_ID_MAPPING_FILE, mode="w", encoding="utf-8") as f:
                 json.dump(existing_mapping, f, indent=4)
 
             logger.info("Game-steam_id mapping updated in steam_id_mapping.json")
@@ -70,7 +72,7 @@ def process_user_selected_games(json_file: str) -> None:
             logger.info("Processing user-selected games...")
             games_data = add_files_to_user_selected(games_data)
 
-            with open(json_file, "w", encoding="utf-8") as f:
+            with atomic_write(json_file, mode="w", encoding="utf-8") as f:
                 json.dump(games_data, f, indent=4)
             logger.info("Updated games.json with user-selected games files.")
 
@@ -95,7 +97,7 @@ def load_games(json_file: str) -> Dict[str, Any]:
 
 def save_user_mapping(user_mapping: Dict[str, Any]) -> None:
     try:
-        with open(USER_MAPPING_PATH, "w") as f:
+        with atomic_write(USER_MAPPING_PATH, mode="w", encoding="utf-8") as f:
             json.dump(user_mapping, f, indent=4)
         logger.info(f"User mapping saved to {USER_MAPPING_PATH}")
     except Exception as e:
@@ -215,7 +217,9 @@ def add_games_to_shortcuts(
 
             game_name = game_data["name"]
             if progress_callback:
-                progress_callback(f"Configurando arte y acceso directo ({idx}/{total}): {game_name}")
+                progress_callback(
+                    _("Configuring artwork and shortcut ({current}/{total}): {name}", current=idx, total=total, name=game_name)
+                )
 
             steam_app_id = next((p["id"] for p in game_data.get("providers", []) if p["service"] == "steam"), None)
             app_id_long = generate_app_id(game_data["exe_path"], game_name)
@@ -281,7 +285,7 @@ def add_games_to_shortcuts(
         logger.info(f"Summary: {games_added} games added, {games_updated} games updated, {removed_count} games removed")
     except Exception as e:
         logger.error(f"Error processing shortcuts.vdf file: {e}")
-        sys.exit(1)
+        return steam_id_mapping, games_added, games_updated
 
     return steam_id_mapping, games_added, games_updated
 
@@ -290,8 +294,8 @@ def _add_games_to_steam(json_file: str = DEFAULT_GAMES_INFO_PATH) -> Dict[str, A
     logger.info("Starting script...")
 
     if not os.path.exists(json_file):
-        logger.error(f"JSON file does not exist: {json_file}")
-        sys.exit(1)
+        logger.warning(f"JSON file does not exist: {json_file}")
+        return {"added": 0, "updated": 0, "total": 0}
 
     process_user_selected_games(json_file)
 
@@ -302,8 +306,8 @@ def _add_games_to_steam(json_file: str = DEFAULT_GAMES_INFO_PATH) -> Dict[str, A
     if not selected_user:
         logger.error("Could not find an active Steam user.")
         ui.show_error(
-            title="Steam User Not Found",
-            text="Could not determine active Steam user.\nPlease ensure Steam has been launched and logged in at least once.",
+            title=_("Steam User Not Found"),
+            text=_("Could not determine active Steam user.\nPlease ensure Steam has been launched and logged in at least once."),
             width=350,
         )
         return {"added": 0, "updated": 0, "total": 0}
@@ -319,7 +323,7 @@ def _add_games_to_steam(json_file: str = DEFAULT_GAMES_INFO_PATH) -> Dict[str, A
     total_added = 0
     total_updated = 0
 
-    with ui.progress_dialog("NoSteam2Steam", "Preparando accesos directos de Steam...") as progress:
+    with ui.progress_dialog("NoSteam2Steam", _("Preparing Steam shortcuts...")) as progress:
         for user_id in user_folders:
             logger.info(f"Processing user: {user_id}")
             user_steam_id_mapping, added, updated = add_games_to_shortcuts(
@@ -329,7 +333,7 @@ def _add_games_to_steam(json_file: str = DEFAULT_GAMES_INFO_PATH) -> Dict[str, A
             total_added += added
             total_updated += updated
 
-        progress.update("Guardando catálogo de accesos directos...")
+        progress.update(_("Saving shortcuts catalog..."))
         save_steam_id_mapping(steam_id_mapping)
 
     logger.info("Script finished successfully.")

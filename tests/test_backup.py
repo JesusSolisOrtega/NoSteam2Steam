@@ -277,6 +277,131 @@ class TestBackup(unittest.TestCase):
             merged_content = (target_pfx / "user.reg").read_text(encoding="utf-8")
             self.assertIn('"PlayerName"="Hero"', merged_content)
 
+    def test_insufficient_disk_space_guard(self):
+        from unittest.mock import Mock, patch
+        from nosteam2steam.backup.archive import check_available_disk_space
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            # Mock usage to return free space less than required
+            with patch("shutil.disk_usage") as mock_usage:
+                mock_usage.return_value = Mock(free=10 * 1024 * 1024)  # 10 MB free
+                has_space = check_available_disk_space(Path(tmp_dir), required_bytes=20 * 1024 * 1024, safety_margin_mb=50)
+                self.assertFalse(has_space)
+
+                mock_usage.return_value = Mock(free=500 * 1024 * 1024)  # 500 MB free
+                has_space_ok = check_available_disk_space(Path(tmp_dir), required_bytes=10 * 1024 * 1024, safety_margin_mb=50)
+                self.assertTrue(has_space_ok)
+
+    def test_delete_current_config_purges_bak_files(self):
+        from unittest.mock import patch
+        from nosteam2steam.dialogs import delete_current_config
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            test_dir = Path(tmp_dir)
+            (test_dir / "games.json").write_text("{}")
+            (test_dir / "games.json.bak").write_text("{}")
+            (test_dir / "sync_folders.txt").write_text("dummy")
+            (test_dir / "sync_folders.txt.bak").write_text("dummy")
+
+            with patch("nosteam2steam.dialogs.SCRIPT_DIR", test_dir):
+                success = delete_current_config(game_data=True, saves=False)
+                self.assertTrue(success)
+                self.assertFalse((test_dir / "games.json").exists())
+                self.assertFalse((test_dir / "games.json.bak").exists())
+                self.assertFalse((test_dir / "sync_folders.txt").exists())
+                self.assertFalse((test_dir / "sync_folders.txt.bak").exists())
+
+    def test_rollback_backup_success_and_failure(self):
+        from nosteam2steam.backup.restore import rollback_backup
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            archive_path = Path(tmp_dir) / "game_save.7z"
+            bak_path = Path(tmp_dir) / "game_save.7z.bak"
+
+            archive_path.write_bytes(b"corrupted or newer content")
+            bak_path.write_bytes(b"pristine snapshot content")
+
+            # Rollback succeeds
+            success = rollback_backup(archive_path)
+            self.assertTrue(success)
+            self.assertEqual(archive_path.read_bytes(), b"pristine snapshot content")
+
+            # Rollback fails when .bak missing
+            bak_path.unlink()
+            success_missing = rollback_backup(archive_path)
+            self.assertFalse(success_missing)
+
+    def test_generate_games_inventory_metrics(self):
+        from nosteam2steam.backup.inventory import generate_games_inventory
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_path = Path(tmp_dir)
+            source_dir = tmp_path / "save_data"
+            source_dir.mkdir()
+            (source_dir / "savegame.sav").write_bytes(b"Sample save binary data for metrics")
+
+            backup_folder = tmp_path / "backups" / "HollowKnight"
+            backup_folder.mkdir(parents=True)
+
+            archive_path = create_file_7z_gbm(
+                source_paths=[source_dir],
+                metadata={
+                    "config_id": "metrics-test-123",
+                    "game_name": "Hollow Knight",
+                    "process_name": "hollow_knight.exe",
+                    "original_path": "<winRegistry>/HKEY_CURRENT_USER/Software/Team Cherry",
+                    "meta_path": "<winRegistry>/HKEY_CURRENT_USER/Software/Team Cherry",
+                    "is_folder": True,
+                    "os_code": 1,
+                    "tags": ["Ludusavi"],
+                    "ExcludeList": "",
+                    "FileType": "",
+                },
+                target_dir=backup_folder,
+                file_name="Hollow Knight [metrics-test-123].7z",
+            )
+
+            inv_file = tmp_path / "inventory.json"
+            inv = generate_games_inventory(backups_path=tmp_path / "backups", inventory_path=inv_file)
+
+            self.assertIsNotNone(inv)
+            assert inv is not None
+            self.assertIn("Hollow Knight", inv)
+            entry = inv["Hollow Knight"][0]
+            file_meta = entry["7z_files"][archive_path.name]
+
+            self.assertGreater(file_meta["size_bytes"], 0)
+            self.assertTrue(file_meta["has_registry"])
+
+    def test_show_sync_conflict_dialog_direction_and_details(self):
+        from datetime import datetime
+        from unittest.mock import Mock, patch
+        from nosteam2steam.backup.conflict import show_sync_conflict_dialog
+
+        d1 = datetime(2026, 1, 1, 12, 0, 0)
+        d2 = datetime(2026, 1, 2, 12, 0, 0)
+
+        with patch("subprocess.run") as mock_run:
+            mock_run.return_value = Mock(returncode=0, stderr="")
+            choice = show_sync_conflict_dialog(
+                game_name="Celeste",
+                backup_date=d1,
+                steamdeck_date=d2,
+                hash_backup="hash_b",
+                hash_local="hash_l",
+                hash_backup_record="hash_b",
+                hash_local_record="hash_old",
+                last_action="local",
+                last_sync_date="2026-01-01T12:00:00",
+            )
+            self.assertEqual(choice, "backup")
+            mock_run.assert_called_once()
+            cmd_args = mock_run.call_args[0][0]
+            cmd_str = " ".join(cmd_args)
+            self.assertIn("Local save -&gt; Backup repository", cmd_str.replace("->", "-&gt;"))
+            self.assertIn("Celeste", cmd_str)
+
+
 
 if __name__ == "__main__":
     unittest.main()

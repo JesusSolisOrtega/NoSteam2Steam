@@ -37,6 +37,7 @@
   - Archive block decompression and CRC integrity verification prior to rotating and committing `.7z` backups.
   - Atomic archive writes and backup rotation (`.7z.bak`) to prevent file corruption.
 - **Dual Dialog Backend & Headless Operation:** Native `zenity` with automatic fallback to `kdialog` on KDE Plasma desktops, and full CLI flag support for cron/systemd automation.
+- **Multi-Language Localization:** Automatic detection of host system locale with translations for 19 languages (English, Spanish, Galician, Basque, Valencian, German, French, Italian, Portuguese, Russian, Turkish, Korean, Arabic, Indonesian, Swahili, Hindi, Urdu, Simplified Chinese, Japanese), runtime manual language switcher, and persistence.
 - **Self-Contained Standalone Executable:** Distributed as a single binary with zero external package dependencies.
 
 ---
@@ -106,7 +107,8 @@ When executed, NoSteam2Steam displays the main graphical menu with the following
 | **5** | **Clean NoSteam2Steam Configuration** | Selective maintenance utility to clear configuration mappings, cached inventories, or downloaded artwork. |
 | **6** | **Enable / Disable Syncthing** | Toggles the background synchronization service for multi-device save replication. |
 | **7** | **Change Synchronized Game Folders** | Adds or removes monitored directories where games and saves are discovered (defaults: `~/Games`, `~/Games/Heroic`). |
-| **8** | **Exit** | Closes the application. |
+| **8** | **Change Interface Language** | Selects and persists the interface language across 19 languages (English, Spanish, Galician, Basque, Valencian, German, French, Italian, Portuguese, Russian, Turkish, Korean, Arabic, Indonesian, Swahili, Hindi, Urdu, Simplified Chinese, and Japanese). |
+| **9** | **Exit** | Closes the application. |
 
 ### Command-Line Interface (CLI / Headless Mode)
 
@@ -132,7 +134,10 @@ For automated tasks, headless execution, or scheduling via `cron` or `systemd`, 
 | `--add-games` | Scans directories and registers shortcuts and artwork without touching save backups. |
 | `--sync-saves` | Synchronizes save files with the backup folder without directory scanning. |
 | `--clean-config` | Clears local game configurations non-interactively. |
+| `--install-desktop` | Installs standard XDG desktop entry to application launcher and desktop. |
+| `--uninstall-desktop` | Removes installed XDG desktop entries. |
 | `-q`, `--quiet` | Suppresses graphical dialog notifications, logging progress directly to standard output. |
+| `--lang`, `--language` | Specifies interface language (`en`, `es`, `gl`, `eu`, `ca`, `de`, `fr`, `it`, `pt`, `ru`, `tr`, `ko`, `ar`, `id`, `sw`, `hi`, `ur`, `zh`, `ja`). |
 
 > [!IMPORTANT]
 > Steam must be completely closed before modifying `shortcuts.vdf`. NoSteam2Steam detects if Steam is currently running and provides a prompt to close it gracefully to avoid file-locking conflicts.

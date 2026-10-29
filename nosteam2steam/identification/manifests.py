@@ -4,6 +4,7 @@ import os
 import io
 import time
 import json
+import pickle
 import logging
 import requests
 import xml.etree.ElementTree as ET
@@ -16,9 +17,17 @@ from nosteam2steam.config import XML_FILE, YAML_FILE, XML_URL, YAML_URL, INDEX_D
 
 logger = logging.getLogger(__name__)
 
+MANIFEST_TTL_SECONDS = 86400  # 24 hours
 
-def download_file(url: str, destination: str) -> bool:
+
+def download_file(url: str, destination: str, force: bool = False) -> bool:
     try:
+        if not force and os.path.exists(destination):
+            file_age = time.time() - os.path.getmtime(destination)
+            if file_age < MANIFEST_TTL_SECONDS:
+                logger.debug(f"File {destination} is within TTL ({int(file_age)}s old); skipping remote checks.")
+                return False
+
         response = requests.head(url, allow_redirects=True, timeout=10)
         response.raise_for_status()
 
@@ -251,6 +260,30 @@ class ManifestRepository:
         self._load(preloaded)
 
     def _load(self, preloaded: Optional[Dict[str, Any]] = None, first_attempt: bool = True) -> None:
+        pickle_views_path = os.path.join(self.index_dir, "manifest_views.pkl")
+        yaml_index_path = self.index_files["yaml"]
+
+        # Fast path: check if binary views cache is present and up-to-date
+        is_pickle_fresh = os.path.exists(pickle_views_path) and (
+            not os.path.exists(yaml_index_path) or os.path.getmtime(pickle_views_path) >= os.path.getmtime(yaml_index_path)
+        )
+        if preloaded is None and is_pickle_fresh:
+            try:
+                with open(pickle_views_path, "rb") as pf:
+                    cached = pickle.load(pf)
+                self.xml_index = cached.get("xml_index", {})
+                self.by_exe = cached.get("by_exe", {})
+                self.by_path = cached.get("by_path", {})
+                self.by_install_dir = cached.get("by_install_dir", {})
+                self.by_gog_id = cached.get("by_gog_id", {})
+                self.by_steam_id = cached.get("by_steam_id", {})
+                self.by_name = cached.get("by_name", {})
+                self.by_name_fuzzy = cached.get("by_name_fuzzy", {})
+                logger.debug("Loaded pre-computed manifest views from binary cache (manifest_views.pkl).")
+                return
+            except Exception as e:
+                logger.debug(f"Could not load binary manifest views cache: {e}")
+
         idx = preloaded or {k: load_index_from_file(v) for k, v in self.index_files.items()}
         if not all(idx.values()):
             if first_attempt:
@@ -278,6 +311,23 @@ class ManifestRepository:
                 k: [meta[i] for i in list(dict.fromkeys(ids)) if valid(i)]
                 for k, ids in yaml_data.get("by_name_fuzzy", {}).items()
             }
+
+            try:
+                views_data = {
+                    "xml_index": self.xml_index,
+                    "by_exe": self.by_exe,
+                    "by_path": self.by_path,
+                    "by_install_dir": self.by_install_dir,
+                    "by_gog_id": self.by_gog_id,
+                    "by_steam_id": self.by_steam_id,
+                    "by_name": self.by_name,
+                    "by_name_fuzzy": self.by_name_fuzzy,
+                }
+                with open(pickle_views_path, "wb") as pf:
+                    pickle.dump(views_data, pf, protocol=pickle.HIGHEST_PROTOCOL)
+                logger.debug("Saved pre-computed manifest views to manifest_views.pkl.")
+            except Exception as e:
+                logger.debug(f"Could not save binary manifest views cache: {e}")
 
     def get_by_steam_id(self, steam_id: str) -> Optional[Dict[str, Any]]:
         return self.by_steam_id.get(steam_id)
@@ -318,3 +368,14 @@ class ManifestRepository:
 
     def __getitem__(self, key: str) -> Any:
         return self._views[key]
+
+
+_default_manifest_repository: Optional[ManifestRepository] = None
+
+
+def get_manifest_repository(index_dir: str = INDEX_DIR, force_reload: bool = False) -> ManifestRepository:
+    """Returns a memoized, process-wide ManifestRepository instance."""
+    global _default_manifest_repository
+    if _default_manifest_repository is None or force_reload:
+        _default_manifest_repository = ManifestRepository(index_dir=index_dir)
+    return _default_manifest_repository

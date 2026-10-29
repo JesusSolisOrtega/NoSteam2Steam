@@ -3,6 +3,7 @@
 from datetime import datetime
 import logging
 from pathlib import Path
+from typing import Union
 
 from nosteam2steam.config import DEFAULT_BACKUPS_PATH
 from nosteam2steam.utils import compute_hash
@@ -61,6 +62,8 @@ def find_backups(game_name, inventory, record, backups_path=DEFAULT_BACKUPS_PATH
                         "original_path": metadata["original_path"],
                         "modification_date": metadata["modification_date"],
                         "timestamp": datetime.fromisoformat(metadata["modification_date"]).timestamp(),
+                        "size_bytes": metadata.get("size_bytes", file_path.stat().st_size if file_path.exists() else 0),
+                        "has_registry": metadata.get("has_registry", False),
                     }
                 )
 
@@ -165,6 +168,8 @@ def sync_game(game_name, game_backup_path, steamdeck_path, record, metadata):
         hash_local,
         backup_record.get("hash_backup"),
         backup_record.get("hash_local"),
+        last_action=backup_record.get("updated_from"),
+        last_sync_date=backup_record.get("last_sync"),
     )
 
     if action == "backup":
@@ -174,26 +179,57 @@ def sync_game(game_name, game_backup_path, steamdeck_path, record, metadata):
         new_backup_hash = hash_backup
     elif action == "local":
         logger.info("Updating backup...")
-        update_archive(game_backup_path, steamdeck_path, metadata)
+        result = update_archive(game_backup_path, steamdeck_path, metadata)
         new_backup_hash = compute_hash(game_backup_path)
         new_local_hash = hash_local
     else:
         logger.info(f"Sync canceled for {game_name}.")
         return result
 
+    history = list(backup_record.get("history", []))
+    history.append({
+        "timestamp": datetime.now().isoformat(),
+        "action": action,
+        "hash_backup": new_backup_hash,
+        "hash_local": new_local_hash,
+    })
+    if len(history) > 10:
+        history = history[-10:]
+
     game_record[backup_key] = {
         "last_sync": datetime.now().isoformat(),
         "updated_from": action,
         "hash_backup": new_backup_hash,
         "hash_local": new_local_hash,
+        "has_rollback": action == "local" or Path(f"{game_backup_path}.bak").exists(),
+        "history": history,
     }
 
     return result
 
 
+def rollback_backup(game_backup_path: Union[str, Path]) -> bool:
+    """Reverts a .7z backup archive to its preserved .bak snapshot."""
+    target = Path(game_backup_path)
+    bak_file = target.with_name(f"{target.name}.bak")
+    if not bak_file.exists():
+        logger.warning(f"No rollback snapshot found for {target.name}")
+        return False
+
+    try:
+        import shutil
+        shutil.copy2(bak_file, target)
+        logger.info(f"Successfully rolled back {target.name} from {bak_file.name}")
+        return True
+    except OSError as e:
+        logger.error(f"Error rolling back {target.name}: {e}")
+        return False
+
+
 __all__ = [
     "find_backups",
     "sync_game",
+    "rollback_backup",
     "copy_saves",
     "extract_archive",
     "update_backup",

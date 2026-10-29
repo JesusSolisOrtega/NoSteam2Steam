@@ -1,10 +1,11 @@
 """Binary VDF serialization and deserialization for Steam shortcuts.vdf."""
 
+import logging
 import os
 import struct
-import sys
-import logging
-from typing import Dict, Any, Tuple
+from typing import Any, Dict, Tuple
+
+from nosteam2steam.atomic import atomic_write
 
 logger = logging.getLogger(__name__)
 
@@ -112,20 +113,10 @@ def reindex_shortcuts_alphabetically(shortcuts: Dict[str, Any]) -> Dict[str, Any
 
 
 def save_shortcuts(path: str, shortcuts: Dict[str, Any]) -> None:
-    backup_path = path + "_old"
     try:
-        if os.path.exists(path):
-            os.rename(path, backup_path)
-
-        with open(path, "wb") as f:
+        with atomic_write(path, mode="wb", backup=True) as f:
             write_object(f, {"shortcuts": shortcuts})
-        logger.info("shortcuts.vdf file updated successfully")
-
-        if os.path.exists(backup_path):
-            os.remove(backup_path)
-
+        logger.info(f"shortcuts.vdf file updated successfully at {path}")
     except Exception as e:
-        logger.error(f"Error saving shortcuts: {e}")
-        if os.path.exists(backup_path):
-            os.rename(backup_path, path)
-        sys.exit(1)
+        logger.error(f"Error saving shortcuts to {path}: {e}")
+        raise

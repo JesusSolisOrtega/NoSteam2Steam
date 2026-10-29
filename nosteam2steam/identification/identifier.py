@@ -2,14 +2,14 @@
 
 import logging
 import time
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 
 from nosteam2steam.config import (
     DEFAULT_SYNC_FOLDER,
     XML_FILE,
     YAML_FILE,
 )
-from nosteam2steam.identification.manifests import verify_and_download_files
+from nosteam2steam.identification.manifests import verify_and_download_files, get_manifest_repository, ManifestRepository
 from nosteam2steam.identification.matcher import GameMatcher
 from nosteam2steam.identification.scanner import get_sync_folders
 
@@ -20,7 +20,7 @@ def associate_exes_with_ids(
     sync_folder: str = DEFAULT_SYNC_FOLDER,
     xml_file: str = XML_FILE,
     yaml_file: str = YAML_FILE,
-    indexes: Optional[Dict] = None,
+    indexes: Optional[Union[Dict[str, Any], ManifestRepository]] = None,
     max_depth: int = 7,
 ) -> Dict[str, Dict]:
     matcher = GameMatcher(sync_folder, xml_file, yaml_file, indexes, max_depth)
@@ -28,14 +28,15 @@ def associate_exes_with_ids(
 
 
 def run_identification() -> Dict[str, Any]:
-    indexes = verify_and_download_files()
+    verify_and_download_files()
+    repo = get_manifest_repository()
     sync_folders = get_sync_folders()
     max_depth = 8
 
     all_matches = {}
     for folder in sync_folders:
         logger.info(f"\nProcessing folder: {folder}")
-        matches = associate_exes_with_ids(folder, XML_FILE, YAML_FILE, indexes, max_depth)
+        matches = associate_exes_with_ids(folder, XML_FILE, YAML_FILE, indexes=repo, max_depth=max_depth)
         all_matches.update(matches)
 
     return all_matches

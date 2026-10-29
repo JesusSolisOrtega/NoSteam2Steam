@@ -90,6 +90,26 @@ $$\text{Rank}(E) = w_{\text{arch}} + w_{\text{api}} - w_{\text{demote}}$$
 - **Graphics API Weight ($w_{\text{api}}$):** Prioritizes explicit Vulkan targets (`vk`, `vulkan`) over standard DirectX targets.
 - **Demotion Penalty ($w_{\text{demote}}$):** Penalizes secondary tools (`crashreport`, `unins000`, `helper`, `setup`, `config`).
 
+### 2.6 Unmatched Candidate Cataloging and Guided Manual Registration
+
+When a game directory is traversed but fails to achieve an automated catalog match, `nosteam2steam.identification.matcher.GameMatcher` inspects the directory structure up to a bounded depth ($D \le 3$) to identify prospective executable binaries, filtering out setup, uninstaller, and engine crash handlers.
+
+Discovered candidates are serialized atomically into `unmatched_candidates.json`:
+```json
+[
+  {
+    "folder_name": "HollowKnight",
+    "folder_path": "/home/user/Games/HollowKnight",
+    "exe_path": "/home/user/Games/HollowKnight/hollow_knight.exe",
+    "all_exes": ["/home/user/Games/HollowKnight/hollow_knight.exe"]
+  }
+]
+```
+
+The manual addition assistant (`nosteam2steam.identification.manual_adder.manual_add_game`) ingests this catalog at launch:
+1. **Interactive Candidate Selection:** Presents detected unassigned titles directly to the user in a graphical menu prior to prompting for file-browser navigation.
+2. **Atomic Catalog Eviction:** Upon successful registration and persistence of the game into `games.json`, the corresponding executable entry is purged from `unmatched_candidates.json` using atomic replacement to prevent stale queue accumulation.
+
 ---
 
 ## 3. Steam Integration Subsystem
@@ -162,37 +182,136 @@ Windows file systems (NTFS) are case-preserving and case-insensitive, whereas Li
 
 The `PathConverter.search_paths` method executes case-insensitive path traversal using directory entry normalization, locating the correct path regardless of letter casing discrepancies across the virtual prefix.
 
-### 4.3 Atomic File Writing and Rotation Protocol
+### 4.3 Pre-flight Storage Verification, Atomic Writing, and Snapshot Rollback
 
-To prevent archive corruption caused by unexpected power loss or process interruption during compression:
+To prevent archive corruption, filesystem exhaustion, or catastrophic data loss during compression:
 
 ```
+[Pre-flight Verification]
+Calculate Source Bytes ───> Free Space Check (Required + 50 MB Margin) ───> Proceed / Raise OSError
+
 [Staging Phase]
-Source Save Data ───> Compress ───> .[ArchiveName].tmp.7z
+Source Save Data ───> Compress & Embed XML ───> Test Archive Blocks (testzip) ───> .[Archive].tmp.7z
 
 [Rotation Phase]
-Existing [ArchiveName].7z ───> Rename (os.replace) ───> [ArchiveName].7z.bak
+Existing [Archive].7z ───> Atomic Rotate (os.replace) ───> [Archive].7z.bak
 
 [Commit Phase]
-.[ArchiveName].tmp.7z ───> Atomic Replace (os.replace) ───> [ArchiveName].7z
+.[Archive].tmp.7z ───> Atomic Replace (os.replace) ───> [Archive].7z
+
+[Rollback Phase (On Demand)]
+[Archive].7z.bak ───> Atomic Restore (rollback_backup) ───> [Archive].7z
 ```
 
-1. **Staging:** The `.7z` archive is written to a hidden temporary file `.[name].tmp.7z`.
-2. **Rotation:** If an existing archive exists at the destination, it is renamed to `[name].7z.bak`, preserving the prior state.
-3. **Commit:** The staged temporary file is committed to the target destination via POSIX `os.replace`, guaranteeing an atomic filesystem transaction.
+1. **Pre-flight Quota Guards:** Before executing 7-Zip compression routines in `nosteam2steam.backup.archive`, source directories and files are evaluated using `calculate_source_size`. The storage capacity of the destination mount point is verified via `shutil.disk_usage`. If free capacity fails to satisfy `required_bytes + 50 MB`, an `OSError` is raised immediately, avoiding partial archive creation.
+2. **Staging & Integrity Verification:** The `.7z` container is generated in a staging file `.[name].tmp.7z`. Prior to committing, `verify_archive_integrity` extracts archive blocks in memory (`py7zr.testzip()`). Corrupted archives fail fast without touching production data.
+3. **Snapshot Rotation:** The prior archive is rotated to `[name].7z.bak` via POSIX `os.replace`.
+4. **Atomic Commit:** The staged temporary archive replaces the target path atomically on the filesystem.
+5. **Snapshot Recovery Protocol (Rollback):** Should a sync operation overwrite valid save data or if archive regression occurs, `nosteam2steam.backup.restore.rollback_backup` restores `[name].7z` from `[name].7z.bak`. This recovery operation is exposed interactively in the Save Manager via `handle_rollback_dialog`.
+
+### 4.4 Audit Trail, Conflict Resolution, and Synchronization History
+
+Save synchronization state is tracked persistently in `sync_record.json`. To enable auditability and informed user conflict resolution:
+
+```json
+{
+  "GameName": {
+    "last_sync": "2026-10-30T00:15:00.000000",
+    "updated_from": "local",
+    "hash_backup": "a8f3...b291",
+    "hash_local": "a8f3...b291",
+    "has_rollback": true,
+    "history": [
+      {
+        "timestamp": "2026-10-30T00:15:00.000000",
+        "action": "local",
+        "hash_backup": "a8f3...b291",
+        "hash_local": "a8f3...b291"
+      }
+    ]
+  }
+}
+```
+
+1. **Sliding Audit Window:** Each game record maintains a rolling 10-event transaction history recording timestamps, transfer directions (`"local"` for local save $\rightarrow$ backup, or `"backup"` for backup $\rightarrow$ local), and computed SHA-256 hashes.
+2. **Direction-Aware Conflict Disambiguation:** When local and remote save states diverge, `nosteam2steam.backup.conflict.show_sync_conflict_dialog` presents timestamps, hash divergence, and explicitly indicates the direction of the previous transfer (*Local save $\rightarrow$ Backup repository* or *Backup repository $\rightarrow$ Local save*).
+3. **Dual Dialog Backend Integration:** Conflict prompts dynamically route through Zenity or KDialog (`--warningyesnocancel`), preserving three-state resolution (*Use Backup*, *Use Local*, or *Cancel*) across GNOME, KDE Plasma, and SteamOS Game Mode.
+
+### 4.5 Inventory Metadata, Registry Preservation, and Incremental Caching
+
+The cataloging engine (`nosteam2steam.backup.inventory`) indexes existing save archives in `games_backups_inventory.json`:
+
+```json
+{
+  "Hollow Knight": [
+    {
+      "folder": "Hollow Knight [uuid-1234]",
+      "executable": "hollow_knight.exe",
+      "most_recent_7z_file": "Hollow Knight [uuid-1234].7z",
+      "7z_files": {
+        "Hollow Knight [uuid-1234].7z": {
+          "original_path": "<winRegistry>/HKEY_CURRENT_USER/Software/Team Cherry",
+          "folder_save": "true",
+          "modification_date": "2026-10-30T00:10:00.000000",
+          "size_bytes": 1048576,
+          "has_registry": true
+        }
+      }
+    }
+  ]
+}
+```
+
+1. **Size and Registry Metrics:** Each archive entry records `size_bytes` and a boolean `has_registry` flag, displayed in backup selection dialogs (`[REGISTRY]` marker and formatted metric strings).
+2. **Windows Registry Preservation:** When save paths target `<winRegistry>`, `nosteam2steam.backup.registry` parses Proton `user.reg` and `system.reg` hives, serializes relevant subkeys into an isolated `_registry_backup.reg` text stream, and embeds it inside the `.7z` container. On restoration, keys are merged cleanly into the destination prefix.
+3. **Incremental Cache Optimization:** Scanning dozens of multi-megabyte archives would introduce significant CPU overhead if XML manifests were decompressed on every run. `generate_games_inventory` inspects archive filesystem modification times (`st_mtime`). If the timestamp matches the cached `modification_date`, metadata is ingested from disk cache in $O(1)$ time, skipping 7-Zip decompressor instantiation.
 
 ---
 
-## 5. Verification and Quality Assurance Standards
+## 5. System Resiliency and Localization Subsystems
 
-### 5.1 Test Execution Architecture
+### 5.1 Atomic File Writing Context Manager (`nosteam2steam.atomic`)
+
+To protect configuration and state files (`shortcuts.vdf`, `games.json`, `sync_folders.txt`, `games_backups_inventory.json`, `sync_record.json`, `unmatched_candidates.json`) against truncation during unexpected process termination or system reboot, the codebase utilizes an independent atomic writer:
+
+```python
+with atomic_write(filepath, mode="w", encoding="utf-8") as f:
+    json.dump(data, f, indent=4)
+```
+
+- **Colocated Staging:** Writes to a sibling staging file (`.{filename}.[pid].tmp`) within the identical parent directory, ensuring that staging and destination reside on the same filesystem mount point.
+- **Physical Sync:** Executes `f.flush()` followed by `os.fsync(f.fileno())` before closure to force disk cache commit.
+- **Pre-Commit Snapshot:** Generates a `.bak` copy of the destination prior to replacement.
+- **POSIX Replace:** Commits the staging file via `os.replace`, guaranteeing an atomic directory entry switch.
+
+### 5.2 Localization and Internationalization Engine (`nosteam2steam.i18n`)
+
+The i18n subsystem provides comprehensive internationalization across 20 language variants:
+
+1. **System Locale Detection:** Evaluates environment variables in order (`LANGUAGE`, `LC_ALL`, `LC_MESSAGES`, `LANG`), with heuristic resolution for dialects such as Valencian (`@valencia` or `val_*` $\rightarrow$ `ca`) and Pakistani Urdu (`ur_*` $\rightarrow$ `ur`).
+2. **Lazy-Loaded JSON Catalogs:** Translation dictionaries in `nosteam2steam/locales/<lang>.json` are loaded on demand and cached in memory.
+3. **String Interpolation & Fallback:** The translation macro `_("String {param}", param=value)` resolves against the active catalog. If a key is missing or formatting fails, it degrades gracefully to the English default template without raising exceptions.
+4. **Token Consistency Enforcement:** AST and regular expression validators verify that format tokens (`{name}`, `{game}`, `{date}`, `{status}`) match identically between source English strings and all 20 translation catalogs.
+
+### 5.3 XDG Desktop Integration (`nosteam2steam.desktop`)
+
+Automates installation and maintenance of standard Freedesktop XDG desktop entries:
+- Generates compliant `.desktop` configuration referencing `launch.sh` or the active Python interpreter.
+- Deploys executable desktop files to `~/.local/share/applications/nosteam2steam.desktop` (Application Menu) and `~/Desktop/nosteam2steam.desktop`.
+- Managed via programmatic API and dedicated CLI switches (`--install-desktop`, `--uninstall-desktop`).
+
+---
+
+## 6. Verification and Quality Assurance Standards
+
+### 6.1 Test Execution Architecture
 
 All automated tests in `tests/` operate under isolated headless conditions:
 - **Display Server Decoupling:** `DISPLAY` and `WAYLAND_DISPLAY` environment variables are unset during test initialization (`tests/__init__.py`), preventing processes from attempting graphical display connections.
 - **Subprocess Interception:** Invocations of `zenity` via `subprocess.run` or `subprocess.Popen` are intercepted by test hooks in `tests/conftest.py` and `tests/__init__.py`, returning synthetic responses in memory (`MagicMock`) without launching external operating system processes.
 - **Temporary Filesystem Sandboxing:** All file generation and archive manipulation tests execute within transient `tempfile.TemporaryDirectory` instances, ensuring that no host system or Steam client configuration files are altered during testing.
 
-### 5.2 Static Analysis and Typing Verification
+### 6.2 Static Analysis and Typing Verification
 
 Code quality and interface soundness are validated through static analysis tooling:
 - **Static Type Checking:** Enforces explicit type annotations conforming to PEP 484 and PEP 526 across all module interfaces. Code must achieve 0 errors and 0 warnings under both `mypy` and `pyright`:
@@ -207,9 +326,9 @@ Code quality and interface soundness are validated through static analysis tooli
 
 ---
 
-## 6. Codebase Architecture & Implementation Guidelines
+## 7. Codebase Architecture & Implementation Guidelines
 
-### 6.1 Package Organization and Module Responsibilities
+### 7.1 Package Organization and Module Responsibilities
 
 The codebase follows a modular design isolating functional domains into dedicated subpackages:
 
@@ -217,14 +336,16 @@ The codebase follows a modular design isolating functional domains into dedicate
 nosteam2steam/
 ├── backup/              # Game Backup Monitor archive generation, restoration, path translation
 │   ├── archive.py       # .7z compression, metadata packing, integrity testing, atomic replacement
-│   ├── conflict.py      # Timestamp and SHA-256 evaluation, interactive conflict resolution
-│   ├── manager.py       # High-level backup synchronization workflow controller
+│   ├── conflict.py      # Timestamp, hash evaluation, and direction-aware conflict resolution
+│   ├── inventory.py     # Backup cataloging, size metric calculation, and mtime incremental caching
+│   ├── manager.py       # High-level backup synchronization and rollback workflow controller
 │   ├── path_converter.py# Windows path variable translation to Proton prefix filesystem paths
 │   ├── registry.py      # Proton prefix Windows registry (<winRegistry>) export and merge
-│   └── restore.py       # Archive extraction, save restoration, and synchronization engine
+│   └── restore.py       # Archive extraction, save restoration, rollback, and sync engine
 ├── identification/      # Discovery and heuristic classification of game binaries
 │   ├── candidates.py    # Manifest parsing, XML/YAML definitions, and candidate scoring
 │   ├── heuristics.py    # Executable naming rules, suffix stripping, and architecture ranking
+│   ├── manual_adder.py  # Unmatched candidate picker and manual Lutris/Steam registration
 │   ├── matcher.py       # Directory tree coordination and candidate matching pipeline
 │   ├── platform.py      # Root-level fast probe for GOG and Steam configuration files
 │   └── scanner.py       # Inode traversal with asset directory pruning and directory caching
@@ -234,13 +355,17 @@ nosteam2steam/
 │   ├── icon_extractor.py# Windows PE icon extraction and ICO file generation
 │   ├── ids.py           # CRC32 and FNV AppID / shortcut ID mathematical generation
 │   └── shortcuts.py     # Binary VDF parsing, serialization, and alphabetical reindexing
+├── locales/             # Compiled JSON translation catalogs for 20 language variants
+├── atomic.py            # Zero-dependency atomic file writing and .bak creation context manager
+├── desktop.py           # XDG desktop entry specification generator and system installer
+├── i18n.py              # Internationalization engine, environment locale detection, and fallback
 ├── config.py            # Global configuration constants, environment detection, and path discovery
 ├── dialogs.py           # Wizard dialogs and user maintenance options
 ├── ui.py                # Abstraction layer for Zenity and KDialog dialogs
 └── app.py               # Main menu controller and headless CLI entry point
 ```
 
-### 6.2 Architectural Invariants and Recommendations
+### 7.2 Architectural Invariants and Recommendations
 
 When extending or modifying the codebase, the following architectural invariants should be preserved:
 

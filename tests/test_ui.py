@@ -174,6 +174,15 @@ class TestUI(unittest.TestCase):
             progress.update("Silent update")
         self.assertIsNone(progress.process)
 
+    @patch.dict("os.environ", {"NOSTEAM2STEAM_DIALOG": "kdialog"})
+    @patch("nosteam2steam.ui.is_kdialog_available", return_value=True)
+    def test_get_dialog_backend_env_override(self, mock_kdialog):
+        self.assertEqual(ui.get_dialog_backend(), "kdialog")
+
+    @patch.dict("os.environ", {"NOSTEAM2STEAM_UI_BACKEND": "none"})
+    def test_get_dialog_backend_env_override_none(self):
+        self.assertEqual(ui.get_dialog_backend(), "none")
+
 
 if __name__ == "__main__":
     unittest.main()

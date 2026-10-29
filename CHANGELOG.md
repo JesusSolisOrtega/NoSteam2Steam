@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.0] - 2026-10-30
+
+### Added
+- **Multi-Language Localization Engine:** Full internationalization (`nosteam2steam.i18n`) with automatic environment locale detection and fallback, manual language switcher, and complete translation catalogs for 20 language variants: English, Spanish, Galician, Basque, Valencian, German, French, Italian, Portuguese, Russian, Turkish, Korean, Arabic, Indonesian, Swahili, Hindi, Urdu, Simplified Chinese, and Japanese.
+- **Persistent Atomic Context Manager:** Dedicated zero-dependency module (`nosteam2steam.atomic`) implementing atomic commits across configuration files (`shortcuts.vdf`, `games.json`, `sync_folders.txt`, `games_backups_inventory.json`, `sync_record.json`, `unmatched_candidates.json`) using colocated temporary staging, `fsync()`, automatic `.bak` snapshot generation, and POSIX `os.replace()`.
+- **Pre-flight Storage Verification & Quota Guards:** Added `calculate_source_size` and `check_available_disk_space` enforcing a 50 MB safety margin prior to archive creation or compression in `nosteam2steam.backup.archive`.
+- **Save Backup Snapshot Rollback:** Added `rollback_backup` and the interactive `handle_rollback_dialog` in the Save Manager to restore `.7z` backup archives from preserved `.bak` snapshots.
+- **Direction-Aware Conflict Resolution & Audit Trail:** Recorded a sliding 10-event transaction history in `sync_record.json` and enhanced `show_sync_conflict_dialog` to explicitly indicate transfer directions (*Local save -> Backup repository* or *Backup repository -> Local save*) with native support for both Zenity and KDialog (`--warningyesnocancel`).
+- **Inventory Metrics & Incremental Caching:** Added `size_bytes` calculation, Windows registry markers (`has_registry`), and $O(1)$ fast-path timestamp cache validation (`st_mtime`) in `nosteam2steam.backup.inventory`.
+- **Unmatched Candidate Cataloging & Guided Assistant:** Cataloged unassigned game folders and executables in `unmatched_candidates.json` with an interactive selection picker in `manual_add_game()` and atomic eviction upon successful registration.
+- **XDG Desktop Integration:** Added `nosteam2steam.desktop` and CLI switches `--install-desktop` / `--uninstall-desktop` to generate and deploy Freedesktop standard desktop entries.
+- **Root Launcher Script:** Added executable root launcher `launch.sh` with automatic virtual environment resolution.
+
+### Changed
+- Decoupled process lifecycles in `vdf_binary.py` and `shortcuts.py`, eliminating unconditional `sys.exit(1)` in favor of structured error dictionaries and graceful exception handling.
+- Configured explicit package discovery in `pyproject.toml` to support clean editable installations alongside root asset directories.
+- Expanded automated unit test suite from 77 to 150 test cases with 100% pass rate.
+
+---
+
 ## [1.2.0] - 2026-10-29
 
 ### Added
