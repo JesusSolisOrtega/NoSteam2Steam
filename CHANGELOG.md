@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.2.0] - Unreleased
+## [1.2.0] - 2026-10-29
 
 ### Added
 - **Modular Package Structure:** Refactored codebase into the `nosteam2steam` package, isolating functional domains (`backup`, `identification`, `steam`, `ui`).
