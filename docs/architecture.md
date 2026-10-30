@@ -296,9 +296,10 @@ The i18n subsystem provides comprehensive internationalization across 20 languag
 ### 5.3 XDG Desktop Integration (`nosteam2steam.desktop`)
 
 Automates installation, state inspection, and maintenance of standard Freedesktop XDG desktop entries:
-- Generates compliant `.desktop` configuration referencing `launch.sh` or the active Python interpreter.
+- Generates compliant `.desktop` configuration referencing the standalone binary (`sys.frozen`), `launch.sh`, or the active Python interpreter.
+- Preserves the application icon in a persistent user directory (`~/.local/share/noSteam2Steam/assets/icon.png`) to avoid resource invalidation upon PyInstaller runtime teardown.
 - Dynamically resolves localized desktop directories via `xdg-user-dir DESKTOP` with home directory boundary validation and internationalized directory fallbacks (`Escritorio`, `Schreibtisch`, `Bureau`, `Desktop`).
-- Deploys executable desktop files to `~/.local/share/applications/nosteam2steam.desktop` (Application Menu) and the localized desktop path.
+- Deploys executable desktop files to `~/.local/share/applications/nosteam2steam.desktop` (Application Menu) and the localized desktop path, configuring `metadata::trusted true` attributes for seamless execution on KDE Plasma and SteamOS.
 - Provides status detection (`is_desktop_entry_installed`), interactive toggle management via graphical UI dialogs, and programmatic control through CLI switches (`--install-desktop`, `--uninstall-desktop`).
 
 ---

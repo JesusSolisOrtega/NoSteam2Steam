@@ -2,6 +2,7 @@
 
 import logging
 from pathlib import Path
+import shutil
 import stat
 import subprocess
 import sys
@@ -37,15 +38,45 @@ def is_desktop_entry_installed() -> bool:
     return desktop_file.exists()
 
 
-def get_desktop_entry_content(exec_path: str, icon_path: str) -> str:
+def get_persistent_icon_path() -> str:
+    """Ensures a persistent copy of the application icon exists in user space and returns its path."""
+    dest_dir = Path.home() / ".local" / "share" / "noSteam2Steam" / "assets"
+    dest_icon = dest_dir / "icon.png"
+
+    candidates = []
+    meipass = getattr(sys, "_MEIPASS", None)
+    if getattr(sys, "frozen", False) and meipass:
+        candidates.append(Path(str(meipass)) / "assets" / "icon.png")
+
+    repo_root = Path(__file__).resolve().parent.parent
+    candidates.append(repo_root / "assets" / "icon.png")
+
+    for src in candidates:
+        if src.exists() and src.is_file():
+            try:
+                dest_dir.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(src, dest_icon)
+                return str(dest_icon)
+            except Exception as e:
+                logger.warning(f"Could not persist icon to {dest_icon}: {e}")
+                return str(src)
+
+    if dest_icon.exists():
+        return str(dest_icon)
+
+    return str(repo_root / "assets" / "icon.png")
+
+
+def get_desktop_entry_content(exec_path: str, icon_path: str, working_dir: str | None = None) -> str:
     """Generates standard XDG desktop entry specification content."""
+    path_clause = f"Path={working_dir}\n" if working_dir else ""
     return f"""[Desktop Entry]
 Type=Application
 Name=NoSteam2Steam
 Comment=Non-Steam game manager and save synchronizer for Linux & SteamOS
 Exec={exec_path}
 Icon={icon_path}
-Terminal=false
+{path_clause}Terminal=false
 Categories=Game;Utility;
 StartupNotify=true
 """
@@ -54,16 +85,25 @@ StartupNotify=true
 def install_desktop_entry(target_desktop: bool = True, target_menu: bool = True) -> bool:
     """Installs .desktop launcher into ~/.local/share/applications and the Desktop directory."""
     try:
-        repo_root = Path(__file__).resolve().parent.parent
-        icon_path = repo_root / "assets" / "icon.png"
-        launch_script = repo_root / "launch.sh"
+        icon_path = get_persistent_icon_path()
 
-        if launch_script.exists():
-            exec_path = str(launch_script)
+        # Determine binary/script path and working directory
+        if getattr(sys, "frozen", False):
+            binary_path = Path(sys.executable).resolve()
+            exec_path = f'"{binary_path}"'
+            working_dir = str(binary_path.parent)
         else:
-            exec_path = f"{sys.executable} {repo_root / 'noSteam2Steam.py'}"
+            repo_root = Path(__file__).resolve().parent.parent
+            launch_script = repo_root / "launch.sh"
+            if launch_script.exists():
+                exec_path = f'"{launch_script.resolve()}"'
+                working_dir = str(repo_root)
+            else:
+                entry_py = repo_root / "noSteam2Steam.py"
+                exec_path = f'"{sys.executable}" "{entry_py.resolve()}"'
+                working_dir = str(repo_root)
 
-        content = get_desktop_entry_content(exec_path, str(icon_path))
+        content = get_desktop_entry_content(exec_path, icon_path, working_dir)
         installed = []
 
         if target_menu:
@@ -71,7 +111,7 @@ def install_desktop_entry(target_desktop: bool = True, target_menu: bool = True)
             menu_dir.mkdir(parents=True, exist_ok=True)
             menu_file = menu_dir / "nosteam2steam.desktop"
             menu_file.write_text(content, encoding="utf-8")
-            menu_file.chmod(menu_file.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP)
+            menu_file.chmod(menu_file.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
             installed.append(str(menu_file))
 
         if target_desktop:
@@ -79,8 +119,18 @@ def install_desktop_entry(target_desktop: bool = True, target_menu: bool = True)
             desktop_dir.mkdir(parents=True, exist_ok=True)
             desktop_file = desktop_dir / "nosteam2steam.desktop"
             desktop_file.write_text(content, encoding="utf-8")
-            desktop_file.chmod(desktop_file.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP)
+            desktop_file.chmod(desktop_file.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
             installed.append(str(desktop_file))
+
+            # Register as trusted in KDE Plasma / GNOME via gio when available
+            try:
+                subprocess.run(
+                    ["gio", "set", str(desktop_file), "metadata::trusted", "true"],
+                    capture_output=True,
+                    check=False,
+                )
+            except Exception:
+                pass
 
         logger.info(f"Desktop entry installed: {', '.join(installed)}")
         return True
@@ -92,10 +142,17 @@ def install_desktop_entry(target_desktop: bool = True, target_menu: bool = True)
 def uninstall_desktop_entry() -> bool:
     """Removes .desktop entries from ~/.local/share/applications and the Desktop directory."""
     success = True
-    for path in [
-        Path.home() / ".local" / "share" / "applications" / "nosteam2steam.desktop",
-        get_desktop_dir() / "nosteam2steam.desktop",
-    ]:
+    desktop_dir = get_desktop_dir()
+    menu_dir = Path.home() / ".local" / "share" / "applications"
+
+    target_files = [
+        menu_dir / "nosteam2steam.desktop",
+        menu_dir / "noSteam2Steam.desktop",
+        desktop_dir / "nosteam2steam.desktop",
+        desktop_dir / "noSteam2Steam.desktop",
+    ]
+
+    for path in target_files:
         if path.exists():
             try:
                 path.unlink()
@@ -140,9 +197,9 @@ def manage_desktop_shortcut() -> bool:
 __all__ = [
     "get_desktop_dir",
     "is_desktop_entry_installed",
+    "get_persistent_icon_path",
     "get_desktop_entry_content",
     "install_desktop_entry",
     "uninstall_desktop_entry",
     "manage_desktop_shortcut",
 ]
-

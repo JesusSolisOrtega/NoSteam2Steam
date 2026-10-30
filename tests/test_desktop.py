@@ -1,6 +1,7 @@
 """Unit tests for XDG Desktop Entry creation and removal."""
 
 from pathlib import Path
+import sys
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -8,6 +9,7 @@ from unittest.mock import patch
 from nosteam2steam.desktop import (
     get_desktop_dir,
     get_desktop_entry_content,
+    get_persistent_icon_path,
     install_desktop_entry,
     is_desktop_entry_installed,
     manage_desktop_shortcut,
@@ -17,13 +19,21 @@ from nosteam2steam.desktop import (
 
 class TestDesktopIntegration(unittest.TestCase):
     def test_get_desktop_entry_content(self):
-        content = get_desktop_entry_content("/usr/bin/launch.sh", "/usr/share/icon.png")
+        content = get_desktop_entry_content("/usr/bin/launch.sh", "/usr/share/icon.png", "/usr/bin")
         self.assertIn("[Desktop Entry]", content)
         self.assertIn("Name=NoSteam2Steam", content)
         self.assertIn("Exec=/usr/bin/launch.sh", content)
         self.assertIn("Icon=/usr/share/icon.png", content)
+        self.assertIn("Path=/usr/bin", content)
         self.assertIn("Categories=Game;Utility;", content)
         self.assertIn("StartupNotify=true", content)
+
+    def test_get_persistent_icon_path(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            fake_home = Path(tmp_dir)
+            with patch("pathlib.Path.home", return_value=fake_home):
+                p = get_persistent_icon_path()
+                self.assertTrue(Path(p).name.endswith("icon.png"))
 
     def test_install_and_uninstall_desktop_entry(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -47,6 +57,30 @@ class TestDesktopIntegration(unittest.TestCase):
                 self.assertTrue(del_success)
                 self.assertFalse(menu_entry.exists())
                 self.assertFalse(desktop_entry.exists())
+
+    def test_install_desktop_entry_frozen_mode(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            fake_home = Path(tmp_dir)
+            (fake_home / "Desktop").mkdir(parents=True)
+            (fake_home / ".local/share/applications").mkdir(parents=True)
+
+            fake_bin = fake_home / "Games" / "noSteam2Steam.bin"
+            fake_bin.parent.mkdir(parents=True, exist_ok=True)
+            fake_bin.touch()
+
+            with patch("pathlib.Path.home", return_value=fake_home), \
+                 patch.object(sys, "frozen", True, create=True), \
+                 patch.object(sys, "executable", str(fake_bin)):
+                success = install_desktop_entry(target_desktop=True, target_menu=True)
+                self.assertTrue(success)
+
+                desktop_entry = fake_home / "Desktop/nosteam2steam.desktop"
+                self.assertTrue(desktop_entry.exists())
+                content = desktop_entry.read_text()
+                # Must reference the standalone binary directly without python script parameters
+                self.assertIn(f'Exec="{fake_bin}"', content)
+                self.assertNotIn("noSteam2Steam.py", content)
+                self.assertIn(f'Path={fake_bin.parent}', content)
 
     def test_get_desktop_dir_fallback_and_xdg(self):
         from unittest.mock import Mock
@@ -97,7 +131,5 @@ class TestDesktopIntegration(unittest.TestCase):
                 self.assertFalse(success_cancel)
 
 
-
 if __name__ == "__main__":
     unittest.main()
-

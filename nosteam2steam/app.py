@@ -163,7 +163,7 @@ def main(argv=None):
     while True:
         option = show_main_menu()
 
-        if not option or option == "9":
+        if not option or option == "10":
             break
 
         if option == "1":

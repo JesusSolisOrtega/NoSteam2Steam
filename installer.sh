@@ -5,9 +5,29 @@ PROJECT_NAME="noSteam2Steam"
 VENV_NAME="venv"
 LAUNCHER_SCRIPT="launch.sh"
 ICON_PATH="$INSTALL_DIR/assets/icon.png"
-DESKTOP_FILE="$HOME/Desktop/noSteam2Steam.desktop"
 APP_MENU_DIR="$HOME/.local/share/applications"
-APP_MENU_FILE="$APP_MENU_DIR/noSteam2Steam.desktop"
+APP_MENU_FILE="$APP_MENU_DIR/nosteam2steam.desktop"
+
+get_desktop_dir() {
+    if command -v xdg-user-dir &> /dev/null; then
+        local xdg_desktop
+        xdg_desktop="$(xdg-user-dir DESKTOP 2>/dev/null)"
+        if [ -n "$xdg_desktop" ] && [ -d "$xdg_desktop" ]; then
+            echo "$xdg_desktop"
+            return
+        fi
+    fi
+    for candidate in "Desktop" "Escritorio" "Schreibtisch" "Bureau"; do
+        if [ -d "$HOME/$candidate" ]; then
+            echo "$HOME/$candidate"
+            return
+        fi
+    done
+    echo "$HOME/Desktop"
+}
+
+DESKTOP_DIR="$(get_desktop_dir)"
+DESKTOP_FILE="$DESKTOP_DIR/nosteam2steam.desktop"
 
 detect_python() {
 
@@ -107,12 +127,14 @@ EOL
 
 chmod +x "$LAUNCHER_SCRIPT"
 
+mkdir -p "$DESKTOP_DIR"
 cat > "$DESKTOP_FILE" <<EOL
 [Desktop Entry]
-Name=noSteam2Steam
-Comment=Non-Steam game manager and save synchronizer
+Name=NoSteam2Steam
+Comment=Non-Steam game manager and save synchronizer for Linux & SteamOS
 Exec=$INSTALL_DIR/$LAUNCHER_SCRIPT
 Icon=$ICON_PATH
+Path=$INSTALL_DIR
 Terminal=false
 Type=Application
 Categories=Game;Utility;
@@ -120,6 +142,9 @@ StartupNotify=true
 EOL
 
 chmod +x "$DESKTOP_FILE"
+if command -v gio &>/dev/null; then
+    gio set "$DESKTOP_FILE" metadata::trusted true 2>/dev/null || true
+fi
 
 mkdir -p "$APP_MENU_DIR"
 cp "$DESKTOP_FILE" "$APP_MENU_FILE"
@@ -131,5 +156,5 @@ echo "2. Launcher: $INSTALL_DIR/$LAUNCHER_SCRIPT"
 echo "3. Desktop shortcut created: $DESKTOP_FILE"
 echo "4. Application menu launcher created: $APP_MENU_FILE"
 
-chmod +x ~/Games/noSteam2Steam/noSteam2Steam.py
-chmod +x ~/Games/noSteam2Steam/launch.sh
+chmod +x "$INSTALL_DIR/noSteam2Steam.py"
+chmod +x "$INSTALL_DIR/launch.sh"

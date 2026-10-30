@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nosteam2steam"
-version = "1.3.1"
+version = "1.3.2"
 description = "Non-Steam games manager and save game synchronization tool for Steam Deck and Linux"
 authors = [
     { name = "Jesús Solís Ortega" }

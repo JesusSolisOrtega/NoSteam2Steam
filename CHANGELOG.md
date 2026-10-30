@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.2] - 2026-10-30
+
+### Fixed
+- **Standalone Binary Desktop Launcher Execution:** Resolved desktop entry generation when running within a compiled PyInstaller executable (`sys.frozen`), ensuring the `Exec` key references solely the standalone binary without ephemeral temporary script paths that caused argument parsing failures. Added `Path` directive targeting the binary directory.
+- **Persistent Icon Extraction:** Added `get_persistent_icon_path()` in `nosteam2steam.desktop` to extract and preserve the application icon permanently in `~/.local/share/noSteam2Steam/assets/icon.png`, preventing missing icons when temporary extraction directories are purged.
+- **KDE Plasma & Freedesktop Trust Registration:** Applied automatic `metadata::trusted true` metadata via `gio` and executable permissions on generated desktop entries, permitting direct invocation in SteamOS Desktop Mode and KDE Plasma without security prompts.
+- **Main Menu Loop Termination:** Fixed option boundary condition in `nosteam2steam.app` to evaluate option 10 for loop exit, restoring accessibility to option 9 (language switcher).
+- **Installer Script Desktop Directory Alignment:** Updated `installer.sh` to dynamically resolve localized desktop directories via `xdg-user-dir DESKTOP` and register metadata trust.
+
+---
+
 ## [1.3.1] - 2026-10-30
 
 ### Added
