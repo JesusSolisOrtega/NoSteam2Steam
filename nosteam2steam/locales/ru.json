@@ -136,5 +136,14 @@
   "Successfully restored {name} to its previous snapshot.": "Успешно восстановлен {name} до предыдущего снимка.",
   "The following game folders were detected but not auto-identified. Select one to register:": "Обнаружены следующие папки игр без автоматической идентификации. Выберите одну для регистрации:",
   "Unidentified Games Detected": "Обнаружены неопознанные игры",
-  "Which file do you want to preserve?": "Какой файл вы хотите сохранить?"
+  "Which file do you want to preserve?": "Какой файл вы хотите сохранить?",
+  "Activate": "Активировать",
+  "Deactivate": "Деактивировать",
+  "Desktop Shortcut Control": "Управление ярлыком на рабочем столе",
+  "Desktop shortcut status: {status}\n\nDo you want to {action} the desktop shortcut?": "Статус ярлыка на рабочем столе: {status}\n\nВы хотите {action} ярлык на рабочем столе?",
+  "Desktop shortcut successfully activated.": "Ярлык на рабочем столе успешно создан.",
+  "Desktop shortcut successfully deactivated.": "Ярлык на рабочем столе успешно удален.",
+  "Enable/disable Desktop shortcut": "Включить/отключить ярлык на рабочем столе",
+  "Failed to create desktop shortcut.": "Не удалось создать ярлык на рабочем столе.",
+  "Failed to remove desktop shortcut.": "Не удалось удалить ярлык на рабочем столе."
 }

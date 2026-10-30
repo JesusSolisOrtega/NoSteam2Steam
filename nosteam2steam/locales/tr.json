@@ -139,5 +139,14 @@
   "Which file do you want to preserve?": "Hangi dosyayı korumak istiyorsunuz?",
   "{service} ({name}) {action}.\nRestart recommended.": "{service} ({name}) {action}.\nYeniden başlatma önerilir.",
   "'{game}' has been successfully registered in NoSteam2Steam.": "'{game}' NoSteam2Steam'e başarıyla kaydedildi.",
-  "Do you wish to add '{game}' to the Steam library now?": "'{game}' oyununu şimdi Steam kütüphanesine eklemek istiyor musunuz?"
+  "Do you wish to add '{game}' to the Steam library now?": "'{game}' oyununu şimdi Steam kütüphanesine eklemek istiyor musunuz?",
+  "Activate": "Etkinleştir",
+  "Deactivate": "Devre Dışı Bırak",
+  "Desktop Shortcut Control": "Masaüstü Kısayolu Denetimi",
+  "Desktop shortcut status: {status}\n\nDo you want to {action} the desktop shortcut?": "Masaüstü kısayolu durumu: {status}\n\nMasaüstü kısayolunu {action} istiyor musunuz?",
+  "Desktop shortcut successfully activated.": "Masaüstü kısayolu başarıyla etkinleştirildi.",
+  "Desktop shortcut successfully deactivated.": "Masaüstü kısayolu başarıyla devre dışı bırakıldı.",
+  "Enable/disable Desktop shortcut": "Masaüstü kısayolunu etkinleştir/devre dışı bırak",
+  "Failed to create desktop shortcut.": "Masaüstü kısayolu oluşturulamadı.",
+  "Failed to remove desktop shortcut.": "Masaüstü kısayolu kaldırılamadı."
 }

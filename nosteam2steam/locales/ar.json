@@ -138,5 +138,14 @@
   "Unidentified Games Detected": "تم اكتشاف ألعاب غير معروفة",
   "Which file do you want to preserve?": "أي ملف تريد الاحتفاظ به؟",
   "'{game}' has been successfully registered in NoSteam2Steam.": "تم تسجيل '{game}' بنجاح في NoSteam2Steam.",
-  "Do you wish to add '{game}' to the Steam library now?": "هل ترغب في إضافة '{game}' إلى مكتبة Steam الآن؟"
+  "Do you wish to add '{game}' to the Steam library now?": "هل ترغب في إضافة '{game}' إلى مكتبة Steam الآن؟",
+  "Activate": "تفعيل",
+  "Deactivate": "تعطيل",
+  "Desktop Shortcut Control": "التحكم في اختصار سطح المكتب",
+  "Desktop shortcut status: {status}\n\nDo you want to {action} the desktop shortcut?": "حالة اختصار سطح المكتب: {status}\n\nهل تريد {action} اختصار سطح المكتب؟",
+  "Desktop shortcut successfully activated.": "تم تفعيل اختصار سطح المكتب بنجاح.",
+  "Desktop shortcut successfully deactivated.": "تم تعطيل اختصار سطح المكتب بنجاح.",
+  "Enable/disable Desktop shortcut": "تفعيل/تعطيل اختصار سطح المكتب",
+  "Failed to create desktop shortcut.": "فشل في إنشاء اختصار سطح المكتب.",
+  "Failed to remove desktop shortcut.": "فشل في إزالة اختصار سطح المكتب."
 }

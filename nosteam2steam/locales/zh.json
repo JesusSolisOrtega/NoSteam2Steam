@@ -136,5 +136,14 @@
   "Successfully restored {name} to its previous snapshot.": "已成功将 {name} 恢复至上一快照。",
   "The following game folders were detected but not auto-identified. Select one to register:": "检测到以下游戏文件夹但未能自动识别。请选择一个进行注册：",
   "Unidentified Games Detected": "检测到未识别的游戏",
-  "Which file do you want to preserve?": "您希望保留哪个文件？"
+  "Which file do you want to preserve?": "您希望保留哪个文件？",
+  "Activate": "启用",
+  "Deactivate": "禁用",
+  "Desktop Shortcut Control": "桌面快捷方式管理",
+  "Desktop shortcut status: {status}\n\nDo you want to {action} the desktop shortcut?": "桌面快捷方式状态：{status}\n\n是否希望{action}桌面快捷方式？",
+  "Desktop shortcut successfully activated.": "桌面快捷方式已成功创建。",
+  "Desktop shortcut successfully deactivated.": "桌面快捷方式已成功移除。",
+  "Enable/disable Desktop shortcut": "启用/禁用桌面快捷方式",
+  "Failed to create desktop shortcut.": "创建桌面快捷方式失败。",
+  "Failed to remove desktop shortcut.": "移除桌面快捷方式失败。"
 }

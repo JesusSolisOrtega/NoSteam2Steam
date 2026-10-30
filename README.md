@@ -106,9 +106,10 @@ When executed, NoSteam2Steam displays the main graphical menu with the following
 | **4** | **Manually Add a Game to Steam** | Prompts you to browse for an executable, search metadata, and register a custom game entry. |
 | **5** | **Clean NoSteam2Steam Configuration** | Selective maintenance utility to clear configuration mappings, cached inventories, or downloaded artwork. |
 | **6** | **Enable / Disable Syncthing** | Toggles the background synchronization service for multi-device save replication. |
-| **7** | **Change Synchronized Game Folders** | Adds or removes monitored directories where games and saves are discovered (defaults: `~/Games`, `~/Games/Heroic`). |
-| **8** | **Change Interface Language** | Selects and persists the interface language across 19 languages (English, Spanish, Galician, Basque, Valencian, German, French, Italian, Portuguese, Russian, Turkish, Korean, Arabic, Indonesian, Swahili, Hindi, Urdu, Simplified Chinese, and Japanese). |
-| **9** | **Exit** | Closes the application. |
+| **7** | **Enable / Disable Desktop Shortcut** | Creates or removes the desktop and application menu `.desktop` launcher. |
+| **8** | **Change Synchronized Game Folders** | Adds or removes monitored directories where games and saves are discovered (defaults: `~/Games`, `~/Games/Heroic`). |
+| **9** | **Change Interface Language** | Selects and persists the interface language across 20 languages (English, Spanish, Galician, Basque, Valencian, German, French, Italian, Portuguese, Russian, Turkish, Korean, Arabic, Indonesian, Swahili, Hindi, Urdu, Simplified Chinese, and Japanese). |
+| **10** | **Exit** | Closes the application. |
 
 ### Command-Line Interface (CLI / Headless Mode)
 

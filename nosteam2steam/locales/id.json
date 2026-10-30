@@ -138,5 +138,14 @@
   "Unidentified Games Detected": "Game Tak Teridentifikasi Terdeteksi",
   "Which file do you want to preserve?": "Berkas mana yang ingin Anda pertahankan?",
   "'{game}' has been successfully registered in NoSteam2Steam.": "'{game}' telah berhasil didaftarkan di NoSteam2Steam.",
-  "Do you wish to add '{game}' to the Steam library now?": "Apakah Anda ingin menambahkan '{game}' ke perpustakaan Steam sekarang?"
+  "Do you wish to add '{game}' to the Steam library now?": "Apakah Anda ingin menambahkan '{game}' ke perpustakaan Steam sekarang?",
+  "Activate": "Aktifkan",
+  "Deactivate": "Nonaktifkan",
+  "Desktop Shortcut Control": "Kontrol Pintasan Desktop",
+  "Desktop shortcut status: {status}\n\nDo you want to {action} the desktop shortcut?": "Status pintasan desktop: {status}\n\nApakah Anda ingin {action} pintasan desktop?",
+  "Desktop shortcut successfully activated.": "Pintasan desktop berhasil diaktifkan.",
+  "Desktop shortcut successfully deactivated.": "Pintasan desktop berhasil dinonaktifkan.",
+  "Enable/disable Desktop shortcut": "Aktifkan/nonaktifkan pintasan desktop",
+  "Failed to create desktop shortcut.": "Gagal membuat pintasan desktop.",
+  "Failed to remove desktop shortcut.": "Gagal menghapus pintasan desktop."
 }

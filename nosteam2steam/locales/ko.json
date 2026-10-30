@@ -138,5 +138,14 @@
   "Unidentified Games Detected": "식별되지 않은 게임 감지됨",
   "Which file do you want to preserve?": "어느 파일을 보존하시겠습니까?",
   "'{game}' has been successfully registered in NoSteam2Steam.": "'{game}'이(가) NoSteam2Steam에 성공적으로 등록되었습니다.",
-  "Do you wish to add '{game}' to the Steam library now?": "지금 Steam 라이브러리에 '{game}'을(를) 추가하시겠습니까?"
+  "Do you wish to add '{game}' to the Steam library now?": "지금 Steam 라이브러리에 '{game}'을(를) 추가하시겠습니까?",
+  "Activate": "활성화",
+  "Deactivate": "비활성화",
+  "Desktop Shortcut Control": "바탕화면 바로가기 제어",
+  "Desktop shortcut status: {status}\n\nDo you want to {action} the desktop shortcut?": "바탕화면 바로가기 상태: {status}\n\n바탕화면 바로가기를 {action}하시겠습니까?",
+  "Desktop shortcut successfully activated.": "바탕화면 바로가기가 성공적으로 활성화되었습니다.",
+  "Desktop shortcut successfully deactivated.": "바탕화면 바로가기가 성공적으로 비활성화되었습니다.",
+  "Enable/disable Desktop shortcut": "바탕화면 바로가기 활성화/비활성화",
+  "Failed to create desktop shortcut.": "바탕화면 바로가기를 생성하지 못했습니다.",
+  "Failed to remove desktop shortcut.": "바탕화면 바로가기를 제거하지 못했습니다."
 }

@@ -139,5 +139,14 @@
   "Which file do you want to preserve?": "Zein fitxategi mantendu nahi duzu?",
   "{service} ({name}) {action}.\nRestart recommended.": "{service} ({name}) {action}.\nBerrabiaraztea gomendatzen da.",
   "'{game}' has been successfully registered in NoSteam2Steam.": "'{game}' ondo erregistratu da NoSteam2Steam-en.",
-  "Do you wish to add '{game}' to the Steam library now?": "'{game}' Steam liburutegira gehitu nahi duzu orain?"
+  "Do you wish to add '{game}' to the Steam library now?": "'{game}' Steam liburutegira gehitu nahi duzu orain?",
+  "Activate": "Aktibatu",
+  "Deactivate": "Desaktibatu",
+  "Desktop Shortcut Control": "Mahaigaineko Lasterbidearen Kontrola",
+  "Desktop shortcut status: {status}\n\nDo you want to {action} the desktop shortcut?": "Mahaigaineko lasterbidearen egoera: {status}\n\nMahaigaineko lasterbidea {action} nahi duzu?",
+  "Desktop shortcut successfully activated.": "Mahaigaineko lasterbidea ondo aktibatu da.",
+  "Desktop shortcut successfully deactivated.": "Mahaigaineko lasterbidea ondo desaktibatu da.",
+  "Enable/disable Desktop shortcut": "Aktibatu/desaktibatu mahaigaineko lasterbidea",
+  "Failed to create desktop shortcut.": "Ezin izan da mahaigaineko lasterbidea sortu.",
+  "Failed to remove desktop shortcut.": "Ezin izan da mahaigaineko lasterbidea ezabatu."
 }

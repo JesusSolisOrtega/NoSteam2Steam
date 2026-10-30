@@ -136,5 +136,14 @@
   "Successfully restored {name} to its previous snapshot.": "Se ha restaurado con éxito {name} a su copia instantánea previa.",
   "The following game folders were detected but not auto-identified. Select one to register:": "Se detectaron las siguientes carpetas de juegos sin identificación automática. Seleccione una para registrarla:",
   "Unidentified Games Detected": "Juegos No Identificados Detectados",
-  "Which file do you want to preserve?": "¿Qué archivo desea conservar?"
+  "Which file do you want to preserve?": "¿Qué archivo desea conservar?",
+  "Activate": "Activar",
+  "Deactivate": "Desactivar",
+  "Desktop Shortcut Control": "Control del Acceso Directo de Escritorio",
+  "Desktop shortcut status: {status}\n\nDo you want to {action} the desktop shortcut?": "Estado del acceso directo: {status}\n\n¿Desea {action} el acceso directo en el escritorio?",
+  "Desktop shortcut successfully activated.": "Acceso directo de escritorio activado con éxito.",
+  "Desktop shortcut successfully deactivated.": "Acceso directo de escritorio desactivado con éxito.",
+  "Enable/disable Desktop shortcut": "Activar/desactivar acceso directo de escritorio",
+  "Failed to create desktop shortcut.": "Error al crear el acceso directo de escritorio.",
+  "Failed to remove desktop shortcut.": "Error al eliminar el acceso directo de escritorio."
 }

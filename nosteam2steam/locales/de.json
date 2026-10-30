@@ -136,5 +136,14 @@
   "Successfully restored {name} to its previous snapshot.": "{name} wurde erfolgreich auf den vorherigen Snapshot wiederhergestellt.",
   "The following game folders were detected but not auto-identified. Select one to register:": "Die folgenden Spielordner wurden erkannt, aber nicht automatisch identifiziert. Wählen Sie einen zur Registrierung aus:",
   "Unidentified Games Detected": "Nicht identifizierte Spiele erkannt",
-  "Which file do you want to preserve?": "Welche Datei möchten Sie behalten?"
+  "Which file do you want to preserve?": "Welche Datei möchten Sie behalten?",
+  "Activate": "Aktivieren",
+  "Deactivate": "Deaktivieren",
+  "Desktop Shortcut Control": "Desktop-Verknüpfungsverwaltung",
+  "Desktop shortcut status: {status}\n\nDo you want to {action} the desktop shortcut?": "Status der Desktop-Verknüpfung: {status}\n\nMöchten Sie die Desktop-Verknüpfung {action}?",
+  "Desktop shortcut successfully activated.": "Desktop-Verknüpfung erfolgreich aktiviert.",
+  "Desktop shortcut successfully deactivated.": "Desktop-Verknüpfung erfolgreich deaktiviert.",
+  "Enable/disable Desktop shortcut": "Desktop-Verknüpfung aktivieren/deaktivieren",
+  "Failed to create desktop shortcut.": "Fehler beim Erstellen der Desktop-Verknüpfung.",
+  "Failed to remove desktop shortcut.": "Fehler beim Entfernen der Desktop-Verknüpfung."
 }

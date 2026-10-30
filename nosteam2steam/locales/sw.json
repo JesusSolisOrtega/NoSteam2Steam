@@ -139,5 +139,14 @@
   "Which file do you want to preserve?": "Ungependa kuhifadhi faili gani?",
   "{service} ({name}) {action}.\nRestart recommended.": "{service} ({name}) {action}.\nInapendekezwa kuanzisha upya mfumo.",
   "'{game}' has been successfully registered in NoSteam2Steam.": "'{game}' imesajiliwa kwa ufanisi katika NoSteam2Steam.",
-  "Do you wish to add '{game}' to the Steam library now?": "Je, ungependa kuongeza '{game}' kwenye maktaba ya Steam sasa?"
+  "Do you wish to add '{game}' to the Steam library now?": "Je, ungependa kuongeza '{game}' kwenye maktaba ya Steam sasa?",
+  "Activate": "Washa",
+  "Deactivate": "Zima",
+  "Desktop Shortcut Control": "Udhibiti wa Njia ya Mkato ya Eneo-kazi",
+  "Desktop shortcut status: {status}\n\nDo you want to {action} the desktop shortcut?": "Hali ya njia ya mkato ya eneo-kazi: {status}\n\nJe, ungependa {action} njia ya mkato ya eneo-kazi?",
+  "Desktop shortcut successfully activated.": "Njia ya mkato ya eneo-kazi imewashwa kwa mafanikio.",
+  "Desktop shortcut successfully deactivated.": "Njia ya mkato ya eneo-kazi imezimwa kwa mafanikio.",
+  "Enable/disable Desktop shortcut": "Washa/zima njia ya mkato ya eneo-kazi",
+  "Failed to create desktop shortcut.": "Imeshindwa kuunda njia ya mkato ya eneo-kazi.",
+  "Failed to remove desktop shortcut.": "Imeshindwa kuondoa njia ya mkato ya eneo-kazi."
 }

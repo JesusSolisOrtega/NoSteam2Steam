@@ -138,5 +138,14 @@
   "Unidentified Games Detected": "Jocs No Identificats Detectats",
   "Which file do you want to preserve?": "Quin fitxer voleu conservar?",
   "'{game}' has been successfully registered in NoSteam2Steam.": "'{game}' s'ha registrat amb èxit en NoSteam2Steam.",
-  "Do you wish to add '{game}' to the Steam library now?": "Voleu afegir '{game}' a la biblioteca d'Steam ara?"
+  "Do you wish to add '{game}' to the Steam library now?": "Voleu afegir '{game}' a la biblioteca d'Steam ara?",
+  "Activate": "Activar",
+  "Deactivate": "Desactivar",
+  "Desktop Shortcut Control": "Control de l'Accés Directe d'Escriptori",
+  "Desktop shortcut status: {status}\n\nDo you want to {action} the desktop shortcut?": "Estat de l'accés directe: {status}\n\nVoleu {action} l'accés directe a l'escriptori?",
+  "Desktop shortcut successfully activated.": "Accés directe d'escriptori activat amb èxit.",
+  "Desktop shortcut successfully deactivated.": "Accés directe d'escriptori desactivat amb èxit.",
+  "Enable/disable Desktop shortcut": "Activar/desactivar accés directe d'escriptori",
+  "Failed to create desktop shortcut.": "Error en crear l'accés directe d'escriptori.",
+  "Failed to remove desktop shortcut.": "Error en eliminar l'accés directe d'escriptori."
 }

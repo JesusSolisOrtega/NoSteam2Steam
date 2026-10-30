@@ -24,6 +24,7 @@ from nosteam2steam import ui
 from nosteam2steam.i18n import _, select_language_dialog, set_language
 from nosteam2steam.steam import shortcuts
 from nosteam2steam.backup import manager as backup_manager, run_sync
+from nosteam2steam.desktop import install_desktop_entry, manage_desktop_shortcut, uninstall_desktop_entry
 from nosteam2steam.identification import manual_adder
 from nosteam2steam.identification import data_manager
 from nosteam2steam.utils import manage_sync_folders, show_cleanup_dialog, manage_syncthingy_service
@@ -91,16 +92,17 @@ def show_main_menu():
         ("4", _("Manually add a game to Steam")),
         ("5", _("Clean NoSteam2Steam configuration")),
         ("6", _("Enable/disable Syncthing")),
-        ("7", _("Change synchronized game folders")),
-        ("8", _("Change interface language")),
-        ("9", _("Exit")),
+        ("7", _("Enable/disable Desktop shortcut")),
+        ("8", _("Change synchronized game folders")),
+        ("9", _("Change interface language")),
+        ("10", _("Exit")),
     ]
     return ui.show_menu(
         title=_("NoSteam2Steam - Non-Steam Games Management"),
         text=_('Select an option:\n<span foreground="red">Note: Steam needs restart after adding games</span>'),
         menu_items=menu_items,
         width=650,
-        height=430,
+        height=460,
     )
 
 
@@ -140,15 +142,11 @@ def main(argv=None):
         return
 
     if args.install_desktop:
-        from nosteam2steam.desktop import install_desktop_entry
-
         success = install_desktop_entry()
         print("Desktop entry installation " + ("succeeded." if success else "failed."))
         return
 
     if args.uninstall_desktop:
-        from nosteam2steam.desktop import uninstall_desktop_entry
-
         success = uninstall_desktop_entry()
         print("Desktop entry uninstallation " + ("succeeded." if success else "failed."))
         return
@@ -239,12 +237,19 @@ def main(argv=None):
 
         elif option == "7":
             try:
+                manage_desktop_shortcut()
+            except Exception as e:
+                logger.error(f"Error managing desktop shortcut: {e}")
+                continue
+
+        elif option == "8":
+            try:
                 manage_sync_folders()
             except Exception as e:
                 logger.error(f"Error: {e}")
                 continue
 
-        elif option == "8":
+        elif option == "9":
             select_language_dialog()
 
 

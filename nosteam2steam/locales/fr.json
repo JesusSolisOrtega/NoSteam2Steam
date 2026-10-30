@@ -136,5 +136,14 @@
   "Successfully restored {name} to its previous snapshot.": "{name} a été restauré avec succès à son instantané précédent.",
   "The following game folders were detected but not auto-identified. Select one to register:": "Les dossiers de jeu suivants ont été détectés mais non identifiés automatiquement. Choisissez-en un à enregistrer :",
   "Unidentified Games Detected": "Jeux non identifiés détectés",
-  "Which file do you want to preserve?": "Quel fichier souhaitez-vous conserver ?"
+  "Which file do you want to preserve?": "Quel fichier souhaitez-vous conserver ?",
+  "Activate": "Activer",
+  "Deactivate": "Désactiver",
+  "Desktop Shortcut Control": "Contrôle du Raccourci de Bureau",
+  "Desktop shortcut status: {status}\n\nDo you want to {action} the desktop shortcut?": "État du raccourci de bureau : {status}\n\nSouhaitez-vous {action} le raccourci sur le bureau ?",
+  "Desktop shortcut successfully activated.": "Raccourci de bureau activé avec succès.",
+  "Desktop shortcut successfully deactivated.": "Raccourci de bureau désactivé avec succès.",
+  "Enable/disable Desktop shortcut": "Activer/désactiver le raccourci de bureau",
+  "Failed to create desktop shortcut.": "Échec de création du raccourci de bureau.",
+  "Failed to remove desktop shortcut.": "Échec de suppression du raccourci de bureau."
 }

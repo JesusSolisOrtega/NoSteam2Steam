@@ -136,5 +136,14 @@
   "Successfully restored {name} to its previous snapshot.": "{name} ripristinato con successo allo snapshot precedente.",
   "The following game folders were detected but not auto-identified. Select one to register:": "Le seguenti cartelle di gioco sono state rilevate ma non identificate automaticamente. Selezionane una da registrare:",
   "Unidentified Games Detected": "Rilevati Giochi Non Identificati",
-  "Which file do you want to preserve?": "Quale file desideri conservare?"
+  "Which file do you want to preserve?": "Quale file desideri conservare?",
+  "Activate": "Attiva",
+  "Deactivate": "Disattiva",
+  "Desktop Shortcut Control": "Controllo Collegamento sul Desktop",
+  "Desktop shortcut status: {status}\n\nDo you want to {action} the desktop shortcut?": "Stato del collegamento sul desktop: {status}\n\nVuoi {action} il collegamento sul desktop?",
+  "Desktop shortcut successfully activated.": "Collegamento sul desktop attivato con successo.",
+  "Desktop shortcut successfully deactivated.": "Collegamento sul desktop disattivato con successo.",
+  "Enable/disable Desktop shortcut": "Attiva/disattiva collegamento sul desktop",
+  "Failed to create desktop shortcut.": "Errore durante la creazione del collegamento sul desktop.",
+  "Failed to remove desktop shortcut.": "Errore durante la rimozione del collegamento sul desktop."
 }

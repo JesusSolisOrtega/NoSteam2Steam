@@ -136,5 +136,14 @@
   "Successfully restored {name} to its previous snapshot.": "{name} restaurado com sucesso para o instantâneo anterior.",
   "The following game folders were detected but not auto-identified. Select one to register:": "As seguintes pastas de jogos foram detetadas sem identificação automática. Selecione uma para registar:",
   "Unidentified Games Detected": "Jogos Não Identificados Detetados",
-  "Which file do you want to preserve?": "Que ficheiro deseja preservar?"
+  "Which file do you want to preserve?": "Que ficheiro deseja preservar?",
+  "Activate": "Ativar",
+  "Deactivate": "Desativar",
+  "Desktop Shortcut Control": "Controlo do Atalho de Ambiente de Trabalho",
+  "Desktop shortcut status: {status}\n\nDo you want to {action} the desktop shortcut?": "Estado do atalho: {status}\n\nDeseja {action} o atalho de ambiente de trabalho?",
+  "Desktop shortcut successfully activated.": "Atalho de ambiente de trabalho ativado com sucesso.",
+  "Desktop shortcut successfully deactivated.": "Atalho de ambiente de trabalho desativado com sucesso.",
+  "Enable/disable Desktop shortcut": "Ativar/desativar atalho de ambiente de trabalho",
+  "Failed to create desktop shortcut.": "Erro ao criar atalho de ambiente de trabalho.",
+  "Failed to remove desktop shortcut.": "Erro ao remover atalho de ambiente de trabalho."
 }

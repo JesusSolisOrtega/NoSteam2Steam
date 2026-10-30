@@ -138,5 +138,14 @@
   "Unidentified Games Detected": "غیر شناخت شدہ گیمز کی نشاندہی ہوئی",
   "Which file do you want to preserve?": "آپ کون سی فائل محفوظ رکھنا چاہتے ہیں؟",
   "'{game}' has been successfully registered in NoSteam2Steam.": "'{game}' کامیابی کے ساتھ NoSteam2Steam میں رجسٹر ہو گیا ہے۔",
-  "Do you wish to add '{game}' to the Steam library now?": "کیا آپ '{game}' کو ابھی Steam لائبریری میں شامل کرنا چاہتے ہیں؟"
+  "Do you wish to add '{game}' to the Steam library now?": "کیا آپ '{game}' کو ابھی Steam لائبریری میں شامل کرنا چاہتے ہیں؟",
+  "Activate": "فعال کریں",
+  "Deactivate": "غیر فعال کریں",
+  "Desktop Shortcut Control": "ڈیسک ٹاپ شارٹ کٹ کنٹرول",
+  "Desktop shortcut status: {status}\n\nDo you want to {action} the desktop shortcut?": "ڈیسک ٹاپ شارٹ کٹ کی حیثیت: {status}\n\nکیا آپ ڈیسک ٹاپ شارٹ کٹ کو {action} چاہتے ہیں؟",
+  "Desktop shortcut successfully activated.": "ڈیسک ٹاپ شارٹ کٹ کامیابی سے فعال ہو گیا۔",
+  "Desktop shortcut successfully deactivated.": "ڈیسک ٹاپ شارٹ کٹ کامیابی سے غیر فعال ہو گیا۔",
+  "Enable/disable Desktop shortcut": "ڈیسک ٹاپ شارٹ کٹ فعال/غیر فعال کریں",
+  "Failed to create desktop shortcut.": "ڈیسک ٹاپ شارٹ کٹ بنانے میں ناکام۔",
+  "Failed to remove desktop shortcut.": "ڈیسک ٹاپ شارٹ کٹ ہٹانے میں ناکام۔"
 }

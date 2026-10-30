@@ -136,5 +136,14 @@
   "Successfully restored {name} to its previous snapshot.": "{name} を以前のスナップショットに正常に復元しました。",
   "The following game folders were detected but not auto-identified. Select one to register:": "次のゲームフォルダが検出されましたが、自動識別されませんでした。登録するものを選択してください:",
   "Unidentified Games Detected": "未識別のゲームが検出されました",
-  "Which file do you want to preserve?": "どちらのファイルを保持しますか？"
+  "Which file do you want to preserve?": "どちらのファイルを保持しますか？",
+  "Activate": "有効化",
+  "Deactivate": "無効化",
+  "Desktop Shortcut Control": "デスクトップショートカット管理",
+  "Desktop shortcut status: {status}\n\nDo you want to {action} the desktop shortcut?": "デスクトップショートカットの状態: {status}\n\nデスクトップショートカットを{action}しますか？",
+  "Desktop shortcut successfully activated.": "デスクトップショートカットが正常に作成されました。",
+  "Desktop shortcut successfully deactivated.": "デスクトップショートカットが正常に削除されました。",
+  "Enable/disable Desktop shortcut": "デスクトップショートカットの有効化/無効化",
+  "Failed to create desktop shortcut.": "デスクトップショートカットの作成に失敗しました。",
+  "Failed to remove desktop shortcut.": "デスクトップショートカットの削除に失敗しました。"
 }

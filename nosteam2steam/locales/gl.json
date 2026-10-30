@@ -138,5 +138,14 @@
   "Unidentified Games Detected": "Xogos Non Identificados Detectados",
   "Which file do you want to preserve?": "Que ficheiro desexa conservar?",
   "'{game}' has been successfully registered in NoSteam2Steam.": "'{game}' rexistrouse con éxito en NoSteam2Steam.",
-  "Do you wish to add '{game}' to the Steam library now?": "Desexa engadir '{game}' á biblioteca de Steam agora?"
+  "Do you wish to add '{game}' to the Steam library now?": "Desexa engadir '{game}' á biblioteca de Steam agora?",
+  "Activate": "Activar",
+  "Deactivate": "Desactivar",
+  "Desktop Shortcut Control": "Control do Acceso Directo de Escritorio",
+  "Desktop shortcut status: {status}\n\nDo you want to {action} the desktop shortcut?": "Estado do acceso directo: {status}\n\nDesexa {action} o acceso directo no escritorio?",
+  "Desktop shortcut successfully activated.": "Acceso directo de escritorio activado con éxito.",
+  "Desktop shortcut successfully deactivated.": "Acceso directo de escritorio desactivado con éxito.",
+  "Enable/disable Desktop shortcut": "Activar/desactivar acceso directo de escritorio",
+  "Failed to create desktop shortcut.": "Erro ao crear o acceso directo de escritorio.",
+  "Failed to remove desktop shortcut.": "Erro ao eliminar o acceso directo de escritorio."
 }

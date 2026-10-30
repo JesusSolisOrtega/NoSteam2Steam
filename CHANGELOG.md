@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.1] - 2026-10-30
+
+### Added
+- **Localized XDG Desktop Resolution:** Added `get_desktop_dir()` in `nosteam2steam.desktop` using `xdg-user-dir DESKTOP` to accurately resolve localized Desktop directories (`~/Escritorio`, `~/Schreibtisch`, `~/Bureau`, etc.) across non-English Linux distributions.
+- **Interactive Desktop Shortcut Management in UI:** Implemented `manage_desktop_shortcut()` and integrated Option 7 ("Enable/disable Desktop shortcut") directly into the main application menu, allowing one-click toggling with status feedback.
+- **Full Multilingual Localization:** Added translations for desktop shortcut management dialogs and actions across all 20 language catalogs.
+
+---
+
 ## [1.3.0] - 2026-10-30
 
 ### Added
